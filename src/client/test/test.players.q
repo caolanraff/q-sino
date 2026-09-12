@@ -3,32 +3,32 @@
 system "l src/client/playerCore.q";
 
 .tst.desc["avgPlayer strategies ace handling"]{
-  should["confirms review finding: avgPlayer1 never treats aces as soft - A,9,5 is a hittable soft 15 but is scored/played as a 25"]{
+  should["avgPlayer1: A,9,5 is a hittable soft 15, not a bust"]{
     system "l src/client/players/avgPlayer1.q";
-    Help[`A`9`5`2] musteq `S;
+    Help[`A`9`5`2] musteq `H;
     };
-  should["confirms review finding: avgPlayer2 has the same ace bug"]{
+  should["avgPlayer2: A,9,5 is a hittable soft 15, not a bust"]{
     system "l src/client/players/avgPlayer2.q";
-    Help[`A`9`5`2] musteq `S;
+    Help[`A`9`5`2] musteq `H;
     };
-  should["confirms review finding: avgPlayer3 has the same ace bug"]{
+  should["avgPlayer3: A,9,5 is a hittable soft 15, not a bust"]{
     system "l src/client/players/avgPlayer3.q";
-    Help[`A`9`5`2] musteq `S;
+    Help[`A`9`5`2] musteq `H;
     };
-  should["sanity: avgPlayer1 still correctly hits a plain hard 12"]{
+  should["avgPlayer1 still correctly hits a plain hard 12"]{
     system "l src/client/players/avgPlayer1.q";
     Help[`10`2`10] musteq `H;
     };
  };
 
 .tst.desc["masterClient allow-list matches the players directory"]{
-  should["confirms review finding: pt typo blocks a real strategy - masterClient.q's pt does not match the players/ directory on disk"]{
+  should["every players/*.q strategy is listed, spelled correctly, in masterClient.q's pt"]{
     / masterClient.q can't be safely `system "l"`ed (it hopen's a live
     / server); extract just the pt:... line instead.
     lines:read0 `:src/client/masterClient.q;
     ptLine:first lines where lines like "pt:*";
     value ptLine;  / an assignment statement evaluates to (::); re-read the real global `pt` afterwards
     onDisk:asc `$-2 _/: string key `:src/client/players;  / strip ".q"
-    (asc pt) mustnmatch onDisk;
+    (asc pt) mustmatch onDisk;
     };
  };
