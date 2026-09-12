@@ -81,7 +81,8 @@ Help:{
   pc:"I"$string cardDict[-1_x];
   csum:sum pc;
   if[all 11=distinct pc;:`SP];
-  while[(csum>21)&any pc=11;pc[first where pc=11]:1;csum:sum pc];
+  pc[(0|(sum pc=11)&ceiling (csum-21)%10)#where pc=11]:1;
+  csum:sum pc;
   r:first $[any 11 in pc;
       ?[soft;enlist(=;`h;csum);();first dealerDict[dc]];
     (pc[0]~pc[1])&(3>count pc);  //lost chance to split if count x>3 as we must have already hit
