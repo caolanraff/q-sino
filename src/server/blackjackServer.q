@@ -32,7 +32,7 @@ sendMsg:{neg[first y]($[10h=type x;lg;show];x)};
 pubMsg:{lg x;sendMsg[x]each y};
 excFunc:{neg[first z](x;y)};
 user:{`$string[.z.u],"_",string[.z.w]};
-regConn:{$[`detectionAlgo=x`p;DA::x;cp[x]:user[]]};
+regConn:{pv:@[x;`p;`];$[`detectionAlgo=pv;DA::x;cp[x]:user[]];pv};
 
 intro:{
   show "Welcome to Qsino Blackjack!";
@@ -56,22 +56,22 @@ intro:{
     lg"New users have joined the table"];
   .bs.tab:0#.bs.tab;
   .bs.stake:0#.bs.stake;
-  upsert[`.bs.tab;![1#0#.bs.tab;();0b;`player`name`handle!(1+til count cp;value cp;key cp)]];
+  `.bs.tab upsert ([]player:1+til count cp;name:value cp;handle:key cp);
   sendMsg["Please place your bets via the stake[] function"]each key cp;
   if[gp=`auto;excFunc[`stake;`]each key cp];
   };
 
 leave:{[h]
-  h"Your total winnings are - $",(string (exec sum return from .bs.res where handle=h));
-  h"Thanks for playing Qasino Blackjack";
+  .[sendMsg;("Your total winnings are - $",(string (exec sum return from .bs.res where handle=h));h);{}];
+  .[sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
   p:exec first player from .bs.tab where handle=h;
   lg string[p]," has left the table";
-  cp::x _cp;
+  cp::h _cp;
   delete from `.bs.tab where handle=h;
   };
 
-.z.po:{regConn[.z.w];if[not `detectionAlgo=.z.w`p;neg[.z.w](intro;`)]};
-.z.pc:leave;
+.z.po:{@[{pv:regConn[.z.w];if[not `detectionAlgo=pv;neg[.z.w](intro;`)]};();{}]};
+.z.pc:{if[x in key cp;leave[x]]};
 
 /// Deck functions ///
 buildDeck:{
@@ -88,7 +88,7 @@ shuffle:{
   .bs.res:0#.bs.res;
   shufflecnt+:1;
   .bs.count:0f;
-  if[(shufflecnt>1)$not null DA;excFunc[`shuffle;`;DA]];
+  if[(shufflecnt>1)&not null DA;excFunc[`shuffle;`;DA]];
   if[gp=`auto;excFunc[`shuffle;`]each key cp];
   };
 
@@ -214,7 +214,7 @@ stake:{
 			[pubMsg["Dealer busts! Player wins!";h];
 			 update return:`float$(bet*2) from `.bs.tab where player=p];
 			[pubMsg["Dealer busts also, no winner!";h];
-			  update return:0f from .bs.tab]]];
+			  update return:0f from `.bs.tab where player=p]]];
 
 	if[(DCount=ucnt)&ucnt<=21;
 			pubMsg["Push! ",(string nam)," gets their money back!";h];
