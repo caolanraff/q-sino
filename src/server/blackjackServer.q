@@ -71,8 +71,8 @@ leave:{[h]
   delete from `.bs.tab where handle=h;
   };
 
-.z.po:{@[{regConn[.z.w];if[not isDA[];.bs.start[];neg[.z.w](intro;`)]};();{}]};
-.z.pc:{$[x=DA;DA::0Ni;if[x in key cp;leave[x]]]};
+.z.po:{regConn[.z.w];if[not isDA[];.bs.start[];neg[.z.w](intro;`)]};
+.z.pc:{$[x=DA;DA::0Ni;leave x]};
 
 /// Deck functions ///
 buildDeck:{
