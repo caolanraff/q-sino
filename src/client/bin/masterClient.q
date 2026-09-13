@@ -5,6 +5,8 @@ if[not `player in key args;show"[ERROR] Missing player in command line, options 
 p:$[count py:`$raze args[`player];py;`];
 if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
 
+port:$[`port in key args;"I"$raze args[`port];5555i];
+
 cli:first system "dirname $(dirname $(realpath ",(1_string hsym .z.f),"))";
 ld:{
   system"l ",cli,"/lib/playerCore.q";
@@ -35,5 +37,5 @@ play:{
 /// start ///
 
 ld[p];
-h:@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
+h:@[hopen;port;{show"Sorry, no tables currently available";exit 1}];
 mh:h`.z.w;

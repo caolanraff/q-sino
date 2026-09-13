@@ -1,7 +1,11 @@
 show "Loading detection algorithm"
 
-\p 5556
 \c 20 200
+args:.Q.opt .z.x;
+port:$[`port in key args;"I"$raze args[`port];5556i];
+system "p ",string port;
+serverPort:$[`serverPort in key args;"I"$raze args[`serverPort];5555i];
+
 .bs.count:0f;
 .da.hist:();
 .da.betTrend:flip `Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
@@ -73,5 +77,5 @@ gameover:{
   getDetect[];
   };
 
-h:@[hopen;`$":localhost:5555:detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
+h:@[hopen;`$":localhost:",string[serverPort],":detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
 startCards:h"count .bs.deck";

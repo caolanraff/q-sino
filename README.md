@@ -19,12 +19,16 @@ q src/server/bin/blackjackServer.q -gameplay manual -hands 1000
 - `-gameplay` - `manual` (players call `stake`/`hit`/`stick`/etc. themselves) or `auto` (the server drives bot clients automatically). Required.
 - `-hands` - number of hands to play before stopping. Optional, default `1000`.
 - `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
+- `-port` - port to listen on. Optional, default `5555`.
 
 Optionally start the detection process (after the server is up):
 
 ```bash
 q src/server/bin/detectionAlgo.q
 ```
+
+- `-port` - port to listen on. Optional, default `5556`.
+- `-serverPort` - port of the blackjackServer.q instance to connect to. Optional, default `5555`.
 
 ### Running a player
 
@@ -33,6 +37,9 @@ Each player connects with `masterClient.q`, from the repo root (it resolves and 
 ```bash
 q src/client/bin/masterClient.q -player <name>
 ```
+
+- `-player` - which strategy to play (see table below). Required.
+- `-port` - port of the blackjackServer.q instance to connect to. Optional, default `5555`.
 
 Run one `masterClient.q` per player you want at the table - `-player` selects which `src/client/lib/*.q` strategy that client plays:
 

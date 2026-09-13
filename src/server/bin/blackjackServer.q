@@ -1,5 +1,4 @@
 /// Init ///
-\p 5555
 \c 100 200
 
 args:.Q.opt .z.x;
@@ -11,6 +10,9 @@ seed:$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i
 system "S ",string seed;
 
 toth:$[`hands in key args;"I"$raze args[`hands];1000i];
+
+port:$[`port in key args;"I"$raze args[`port];5555i];
+system "p ",string port;
 
 .bs.hd:1b;
 .bs.bd:.bs.double:0b;
