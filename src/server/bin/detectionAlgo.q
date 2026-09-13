@@ -1,10 +1,4 @@
-show "Loading detection algorithm"
-
 \c 20 200
-args:.Q.opt .z.x;
-port:$[`port in key args;"I"$raze args[`port];5556i];
-system "p ",string port;
-serverPort:$[`serverPort in key args;"I"$raze args[`serverPort];5555i];
 
 .bs.count:0f;
 .da.hist:();
@@ -77,5 +71,12 @@ gameover:{
   getDetect[];
   };
 
-h:@[hopen;`$":localhost:",string[serverPort],":detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
-startCards:h"count .bs.deck";
+/// Start ///
+init:{
+  show "Loading detection algorithm";
+  system "p 5556";
+  h::@[hopen;`$":localhost:5555:detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
+  startCards::h"count .bs.deck";
+  };
+
+if[(not null .z.f) and "detectionAlgo.q"~last "/" vs string .z.f;init[]];

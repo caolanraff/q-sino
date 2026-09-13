@@ -1,19 +1,6 @@
 /// Init ///
 \c 100 200
 
-args:.Q.opt .z.x;
-if[not `gameplay in key args;show"[ERROR] Missing gameplay in command line";exit 1];
-gp:`$raze args[`gameplay];
-if[not gp in `auto`manual;show"[ERROR] Unknown gameplay";exit 1];
-
-seed:$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
-system "S ",string seed;
-
-toth:$[`hands in key args;"I"$raze args[`hands];1000i];
-
-port:$[`port in key args;"I"$raze args[`port];5555i];
-system "p ",string port;
-
 .bs.hd:1b;
 .bs.bd:.bs.double:0b;
 .bs.rnd:0;
@@ -29,8 +16,7 @@ cp:()!();
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
-srv:first system "dirname $(dirname $(realpath ",(1_string hsym .z.f),"))";
-system "l ",srv,"/lib/messaging.q";
+system "l src/server/lib/messaging.q";
 
 intro:{
   show "Welcome to Qsino Blackjack!";
@@ -72,7 +58,7 @@ leave:{[h]
 .z.pc:{$[x=DA;DA::0Ni;leave x]};
 
 /// Deck functions ///
-system "l ",srv,"/lib/deck.q";
+system "l src/server/lib/deck.q";
 
 /// Stake function ///
 stake:{
@@ -375,6 +361,22 @@ split:{
   };
 
 /// Start ///
-show "Welcome to Qsino Blackjack!";
-buildDeck[];
-shuffle[];
+init:{
+  args:.Q.opt .z.x;
+  if[not `gameplay in key args;show"[ERROR] Missing gameplay in command line";exit 1];
+  gp::`$raze args[`gameplay];
+  if[not gp in `auto`manual;show"[ERROR] Unknown gameplay";exit 1];
+
+  seed::$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
+  system "S ",string seed;
+
+  toth::$[`hands in key args;"I"$raze args[`hands];1000i];
+
+  system "p 5555";
+
+  show "Welcome to Qsino Blackjack!";
+  buildDeck[];
+  shuffle[];
+  };
+
+if[(not null .z.f) and "blackjackServer.q"~last "/" vs string .z.f;init[]];
