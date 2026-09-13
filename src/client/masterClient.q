@@ -1,6 +1,6 @@
 \c 20 200
 args:.Q.opt .z.x;
-pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCountert`omegaCardCounter`perfectCardCounter;
+pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;
 if[not `player in key args;show"[ERROR] Missing player in command line, options - ",","sv string pt;exit 1];
 p:$[count py:`$raze args[`player];py;`];
 if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
