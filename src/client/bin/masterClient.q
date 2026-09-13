@@ -5,9 +5,12 @@ if[not `player in key args;show"[ERROR] Missing player in command line, options 
 p:$[count py:`$raze args[`player];py;`];
 if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
 
+/ playerCore.q and the player strategy scripts now live in lib/. Resolved
+/ via .z.f (not cwd) so this script still runs from any directory.
+cli:first system "dirname $(dirname $(realpath ",(1_string hsym .z.f),"))";
 ld:{
-  system"l playerCore.q";
-  system"l players/",string[x],".q";
+  system"l ",cli,"/lib/playerCore.q";
+  system"l ",cli,"/lib/",string[x],".q";
   };
 
 /// Play functions ///
