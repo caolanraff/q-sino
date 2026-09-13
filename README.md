@@ -2,18 +2,18 @@
 KDB+ blackjack game
 
 ## Scripts
-- `src/server/blackjackServer.q` - the dealer/game engine. Listens on port `5555`.
-- `src/server/detectionAlgo.q` - watches for card-counting behavior. Connects to the server; listens on port `5556`.
-- `src/client/masterClient.q` - generic player client. Loads `playerCore.q` and one `players/*.q` strategy, then connects to the server.
-- `src/client/playerCore.q` - shared basic-strategy tables and card-counting helpers used by the strategy scripts.
-- `src/client/players/*.q` - pluggable per-player strategies (see below).
+- `src/server/bin/blackjackServer.q` - the dealer/game engine. Listens on port `5555`. Loads shared code from `src/server/lib/`.
+- `src/server/bin/detectionAlgo.q` - watches for card-counting behavior. Connects to the server; listens on port `5556`.
+- `src/client/bin/masterClient.q` - generic player client. Loads `playerCore.q` and one strategy script from `src/client/lib/`, then connects to the server.
+- `src/client/lib/playerCore.q` - shared basic-strategy tables and card-counting helpers used by the strategy scripts.
+- `src/client/lib/*.q` (all except `playerCore.q`) - pluggable per-player strategies (see below).
 
 ## Usage
 
 Start the server first, from the repo root:
 
 ```bash
-q src/server/blackjackServer.q -gameplay manual -hands 1000
+q src/server/bin/blackjackServer.q -gameplay manual -hands 1000
 ```
 
 - `-gameplay` - `manual` (players call `stake`/`hit`/`stick`/etc. themselves) or `auto` (the server drives bot clients automatically). Required.
@@ -23,19 +23,18 @@ q src/server/blackjackServer.q -gameplay manual -hands 1000
 Optionally start the detection process (after the server is up):
 
 ```bash
-q src/server/detectionAlgo.q
+q src/server/bin/detectionAlgo.q
 ```
 
 ### Running a player
 
-Each player connects with `masterClient.q`, from `src/client/` (it loads `playerCore.q` and the chosen strategy via a relative path):
+Each player connects with `masterClient.q`, from the repo root (it loads `playerCore.q` and the chosen strategy from `src/client/lib/`):
 
 ```bash
-cd src/client
-q masterClient.q -player <name>
+q src/client/bin/masterClient.q -player <name>
 ```
 
-Run one `masterClient.q` per player you want at the table - `-player` selects which `players/*.q` strategy that client plays:
+Run one `masterClient.q` per player you want at the table - `-player` selects which `src/client/lib/*.q` strategy that client plays:
 
 | `-player` value | Strategy |
 |---|---|
@@ -50,9 +49,9 @@ Run one `masterClient.q` per player you want at the table - `-player` selects wh
 For example, a manual 2-player game:
 
 ```bash
-q src/server/blackjackServer.q -gameplay manual -hands 100    # terminal 1
-cd src/client && q masterClient.q -player basicCardCounter    # terminal 2
-cd src/client && q masterClient.q -player avgPlayer1          # terminal 3
+q src/server/bin/blackjackServer.q -gameplay manual -hands 100    # terminal 1
+q src/client/bin/masterClient.q -player basicCardCounter          # terminal 2
+q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3
 ```
 
 A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist` on the handle.

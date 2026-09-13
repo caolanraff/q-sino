@@ -1,16 +1,5 @@
 /// Init ///
-\p 5555
 \c 100 200
-
-args:.Q.opt .z.x;
-if[not `gameplay in key args;show"[ERROR] Missing gameplay in command line";exit 1];
-gp:`$raze args[`gameplay];
-if[not gp in `auto`manual;show"[ERROR] Unknown gameplay";exit 1];
-
-seed:$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
-system "S ",string seed;
-
-toth:$[`hands in key args;"I"$raze args[`hands];1000i];
 
 .bs.hd:1b;
 .bs.bd:.bs.double:0b;
@@ -27,13 +16,7 @@ cp:()!();
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
-lg:{-1 ssr[string[.z.p];"D";" "]," ",raze x};
-sendMsg:{neg[first y]($[10h=type x;lg;show];x)};
-pubMsg:{lg x;sendMsg[x]each y};
-excFunc:{neg[first z](x;y)};
-user:{`$string[.z.u],"_",string[.z.w]};
-isDA:{.z.u~`detectionAlgo};
-regConn:{$[isDA[];DA::x;cp[x]:user[]]};
+system "l src/server/lib/messaging.q";
 
 intro:{
   show "Welcome to Qsino Blackjack!";
@@ -75,37 +58,7 @@ leave:{[h]
 .z.pc:{$[x=DA;DA::0Ni;leave x]};
 
 /// Deck functions ///
-buildDeck:{
-  dc:$[null x;deckCnt;x];
-  d:value ssr[{((x*2)-1)#"x,"}[dc];"x";"deck"];
-  .bs.deck:(-52*dc)?d;
-  };
-
-shuffle:{
-  if[not .bs.hd;lg"Please wait unil the hand is over before requesting a reshuffle";:()];
-  lg"Shuffling the deck";
-  .bs.deck:(neg count .bs.deck)?.bs.deck;
-  .bs.hist,:.bs.res;
-  .bs.res:0#.bs.res;
-  shufflecnt+:1;
-  .bs.count:0f;
-  if[(shufflecnt>1)&not null DA;excFunc[`shuffle;`;DA]];
-  if[gp=`auto;excFunc[`shuffle;`]each key cp];
-  };
-
-getCard:{
-  c:rand .bs.deck;
-  .bs.deck:.bs.deck except[til count .bs.deck;first where .bs.deck=c];
-  c
-  };
-
-dealCard:{
-  p:first[x]`player;
-  h:first[x]`handle;
-  c:getCard[];
-  sendMsg["Your card is ",(string c);h];
-  update cards:(cards,'c) from `.bs.tab where player=p;
-  };
+system "l src/server/lib/deck.q";
 
 /// Stake function ///
 stake:{
@@ -408,6 +361,22 @@ split:{
   };
 
 /// Start ///
-show "Welcome to Qsino Blackjack!";
-buildDeck[];
-shuffle[];
+init:{
+  args:.Q.opt .z.x;
+  if[not `gameplay in key args;show"[ERROR] Missing gameplay in command line";exit 1];
+  gp::`$raze args[`gameplay];
+  if[not gp in `auto`manual;show"[ERROR] Unknown gameplay";exit 1];
+
+  seed::$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
+  system "S ",string seed;
+
+  toth::$[`hands in key args;"I"$raze args[`hands];1000i];
+
+  system "p 5555";
+
+  show "Welcome to Qsino Blackjack!";
+  buildDeck[];
+  shuffle[];
+  };
+
+if[(not null .z.f) and "blackjackServer.q"~last "/" vs string .z.f;init[]];

@@ -1,13 +1,10 @@
 \c 20 200
-args:.Q.opt .z.x;
+
 pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;
-if[not `player in key args;show"[ERROR] Missing player in command line, options - ",","sv string pt;exit 1];
-p:$[count py:`$raze args[`player];py;`];
-if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
 
 ld:{
-  system"l playerCore.q";
-  system"l players/",string[x],".q";
+  system"l src/client/lib/playerCore.q";
+  system"l src/client/lib/",string[x],".q";
   };
 
 /// Play functions ///
@@ -33,6 +30,14 @@ play:{
 
 /// start ///
 
-ld[p];
-h:@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
-mh:h`.z.w;
+init:{
+  args:.Q.opt .z.x;
+  if[not `player in key args;show"[ERROR] Missing player in command line, options - ",","sv string pt;exit 1];
+  p:$[count py:`$raze args[`player];py;`];
+  if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
+  ld[p];
+  h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
+  mh::h`.z.w;
+  };
+
+if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;init[]];

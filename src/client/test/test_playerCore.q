@@ -1,8 +1,5 @@
-/ playerCore.q has no network/side effects at load time, so it's safe to
-/ `system "l"` directly and exercise the real Help[] function.
-system "l src/client/playerCore.q";
-
 .tst.desc["playerCore.Help"]{
+  before{system "l src/client/lib/playerCore.q"};
   should["A,A,9 vs dealer 6 is a made soft 21 and should Stand"]{
     Help[`A`A`9`6] musteq `S;
     };
