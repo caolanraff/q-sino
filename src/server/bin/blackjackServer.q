@@ -27,8 +27,6 @@ cp:()!();
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
-/ lg, sendMsg, pubMsg, excFunc, user, isDA, regConn now live in lib/messaging.q.
-/ Resolved via .z.f (not cwd) so this script still runs from any directory.
 srv:first system "dirname $(dirname $(realpath ",(1_string hsym .z.f),"))";
 system "l ",srv,"/lib/messaging.q";
 
@@ -72,7 +70,6 @@ leave:{[h]
 .z.pc:{$[x=DA;DA::0Ni;leave x]};
 
 /// Deck functions ///
-/ buildDeck, shuffle, getCard, dealCard now live in lib/deck.q.
 system "l ",srv,"/lib/deck.q";
 
 /// Stake function ///

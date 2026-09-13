@@ -1,5 +1,4 @@
 /// Deck functions ///
-/ loaded into bin/blackjackServer.q; moved here verbatim, no behavior change.
 buildDeck:{
   dc:$[null x;deckCnt;x];
   d:value ssr[{((x*2)-1)#"x,"}[dc];"x";"deck"];

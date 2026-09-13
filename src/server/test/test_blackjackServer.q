@@ -69,15 +69,6 @@
     };
  };
 
-/ user/isDA/regConn (lib/messaging.q:7,8,9) and .z.po/.z.pc (this file,
-/ lines 71,72) work together to resolve connection identity; that
-/ combination is spun up here as a small standalone server subprocess
-/ (copied verbatim, minus the .bs.start/intro/leave calls which need the
-/ rest of the server), connected to with real handles carrying different
-/ usernames, and queried from this same process. Identity is resolved
-/ entirely during the handshake (.z.u is set before .z.po ever runs) - there
-/ is no synchronous round-trip back to the connecting client and so no race
-/ to guard against.
 .tst.desc["regConn / .z.po / .z.pc connection-identity handling (lib/messaging.q:7,8,9; bin/blackjackServer.q:71,72)"]{
   should["a plain client is registered into cp right away"]{
     port:string 16101 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
@@ -101,7 +92,6 @@
     if[count pids; system "kill ",(" " sv pids)];
     cpCount musteq 2;
     };
-
   should["a client connecting as detectionAlgo becomes DA and is never added to cp"]{
     port:string 16201 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
     tag:"qsino_test_regconn_da_",port;
@@ -126,7 +116,6 @@
     daIsSet musteq 1b;
     cpCount musteq 1;  / only qh (the plain query connection); the DA handle never joins cp
     };
-
   should["DA resets to null when the detectionAlgo connection closes, without touching cp"]{
     port:string 16301 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
     tag:"qsino_test_regconn_pc_",port;
