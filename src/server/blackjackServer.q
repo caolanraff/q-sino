@@ -16,6 +16,7 @@ toth:$[`hands in key args;"I"$raze args[`hands];1000i];
 .bs.bd:.bs.double:0b;
 .bs.rnd:0;
 DA:0Ni;	    //detection algo handle
+daPass:"q-sino-da";	//shared secret detectionAlgo.q authenticates with; keep in sync with detectionAlgo.q
 
 cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 deck:raze 4#enlist key cardDict;
@@ -33,11 +34,11 @@ pubMsg:{lg x;sendMsg[x]each y};
 excFunc:{neg[first z](x;y)};
 user:{`$string[.z.u],"_",string[.z.w]};
 regConn:{cp[x]:user[];x};
-unregDA:{[x]
-  pv:@[x;`p;`];
-  if[`detectionAlgo=pv;DA::x;cp::x _cp;delete from `.bs.tab where handle=x];
-  pv
-  };
+/ identity is decided from the connection handshake (.z.u/.z.pw), not by
+/ querying anything on the connecting client - that would require a
+/ synchronous round-trip, and would let any client just claim to be
+/ detectionAlgo (and so receive .bs.res via DA below) by setting a global.
+.z.pw:{[u;p] $[u~`detectionAlgo;p~daPass;1b]};
 
 intro:{
   show "Welcome to Qsino Blackjack!";
@@ -75,7 +76,7 @@ leave:{[h]
   delete from `.bs.tab where handle=h;
   };
 
-.z.po:{@[{h:regConn[.z.w];.bs.start[];pv:unregDA[h];if[not `detectionAlgo=pv;neg[h](intro;`)]};();{}]};
+.z.po:{@[{$[`detectionAlgo=.z.u;DA::.z.w;[h:regConn[.z.w];.bs.start[];neg[h](intro;`)]]};();{}]};
 .z.pc:{if[x in key cp;leave[x]]};
 
 /// Deck functions ///
