@@ -32,9 +32,6 @@ sendMsg:{neg[first y]($[10h=type x;lg;show];x)};
 pubMsg:{lg x;sendMsg[x]each y};
 excFunc:{neg[first z](x;y)};
 user:{`$string[.z.u],"_",string[.z.w]};
-/ identity is decided from .z.u (set during the connection handshake), not
-/ by querying anything on the connecting client - that would require a
-/ synchronous round-trip.
 isDA:{.z.u~`detectionAlgo};
 regConn:{$[isDA[];DA::x;cp[x]:user[]]};
 
