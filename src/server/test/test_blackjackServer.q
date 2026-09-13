@@ -16,9 +16,10 @@
 / locals, only true globals. qspec's `mock` (see the regConn suite) is
 / automatically restored to the real definition after each `should`.
 
+system "l src/server/bin/blackjackServer.q";
+
 .tst.desc["blackjackServer entry-script guard (bin/blackjackServer.q:382)"]{
   should["only fires for its own script, not when loaded as a dependency"]{
-    / bin/blackjackServer.q:382, copied verbatim.
     guard::{[zf] (not null zf) and "blackjackServer.q"~last "/" vs string zf};
     (guard[`]) musteq 0b;
     (guard[`$"src/server/bin/blackjackServer.q"]) musteq 1b;
@@ -29,7 +30,6 @@
 
 .tst.desc["blackjackServer.shuffle DA-notify guard (lib/deck.q:16)"]{
   should["behaves as intended AND semantics"]{
-    / lib/deck.q:16: if[(shufflecnt>1)&not null DA;excFunc[`shuffle;`;DA]];
     guard::{[shufflecnt;DA] (shufflecnt>1)&not null DA};
     threw:@[{guard[1;0Ni];0b};();{1b}];
     threw musteq 0b;
@@ -60,7 +60,6 @@
 
 .tst.desc[".bs.dealer1 dealer-and-player-both-bust branch (bin/blackjackServer.q:170-171)"]{
   should["zeroes only the current player's return, leaving other players untouched"]{
-    / bin/blackjackServer.q:171, copied verbatim.
     .bs.tab:([]player:1 2f;name:`p1`p2;handle:10 11i;cnt:25 24i;return:250f,0n);
     DCount:24;  / dealer also busted (>21) in this scenario
     p:2f;
@@ -73,8 +72,6 @@
     (exec first return from .bs.tab where player=1) musteq 250f;
     };
  };
-
-system "l src/server/bin/blackjackServer.q";
 
 .tst.desc["regConn"]{
   should["adds a plain connection to cp when isDA is false"]{
