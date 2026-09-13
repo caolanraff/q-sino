@@ -1,21 +1,3 @@
-/ blackjackServer.q guards its "run for real" behavior (arg parsing, \p,
-/ initial buildDeck/shuffle) behind init[], only called when .z.f shows this
-/ file is the process's own entry script (see the .z.f check at the very
-/ bottom of blackjackServer.q) - so `system "l"`ing it here is side-effect
-/ free: no socket opens, nothing exits. Most specs below still reproduce a
-/ specific expression/branch verbatim (file:line noted per spec) against a
-/ minimal stub of the surrounding state, rather than loading the real file,
-/ since they're only exercising one small piece of logic in isolation.
-/ Setup is inlined into each `should` body rather than shared via `before{}`,
-/ since these specs run alongside other test files in one shared q
-/ process/namespace. Any variable read from *inside* a nested `{...}`
-/ closure (e.g. the `@[{...};();{...}]` traps below, or a `mock`ed
-/ replacement function) is assigned with `::` rather than `:` - a plain `:`
-/ inside a `should{}` body (or a mock lambda) is local to that body's own
-/ lambda, and a nested lambda literal can't see an enclosing lambda's
-/ locals, only true globals. qspec's `mock` (see the regConn suite) is
-/ automatically restored to the real definition after each `should`.
-
 system "l src/server/bin/blackjackServer.q";
 
 .tst.desc["blackjackServer entry-script guard (bin/blackjackServer.q:382)"]{
