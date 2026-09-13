@@ -1,24 +1,28 @@
-/ blackjackServer.q can't be `system "l"`ed directly in a unit test: it
-/ opens a real listening socket. Most specs instead reproduce the exact
-/ expression/branch under test, copied verbatim from the real source
-/ (file:line noted per spec), against a minimal stub of the surrounding
-/ state. Setup is inlined into each `should` body rather than shared via
-/ `before{}`, since these specs run alongside other test files in one
-/ shared q process/namespace. Any variable read from *inside* a nested
+/ blackjackServer.q opens a real listening socket, so it can't be
+/ `system "l"`ed directly in a unit test. Its `-port` flag lets specs below
+/ spawn the real file as a subprocess on an ephemeral port instead and talk
+/ to it over real IPC (the startup and regConn specs). Where a spec only
+/ needs one specific expression/branch, it instead reproduces that snippet
+/ verbatim (file:line noted per spec), against a minimal stub of the
+/ surrounding state. Setup is inlined into each `should` body rather than
+/ shared via `before{}`, since these specs run alongside other test files in
+/ one shared q process/namespace. Any variable read from *inside* a nested
 / `{...}` closure (e.g. the `@[{...};();{...}]` traps below) is assigned
 / with `::` rather than `:` - a plain `:` inside a `should{}` body is local
 / to that body's own lambda, and a nested lambda literal can't see an
 / enclosing lambda's locals, only true globals.
 
 .tst.desc["blackjackServer startup"]{
-  should["the real server process is reachable a moment after launch"]{
-    / blackjackServer.q hardcodes \p 5555, so this needs port 5555 free.
-    system "pkill -f blackjackServer.q 2>/dev/null; sleep 1";
-    system "q src/server/bin/blackjackServer.q -gameplay manual -hands 1 -q < /dev/null > /tmp/qsino_test_bjs.log 2>&1 &";
+  should["the real server process is reachable a moment after launch, on the port it was given"]{
+    port:string 16001 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
+    system "q src/server/bin/blackjackServer.q -gameplay manual -port ",port," -q < /dev/null > /tmp/qsino_test_startup_",port,".log 2>&1 &";
     system "sleep 2";
-    pids:system "ps aux | grep blackjackServer.q | grep -v grep | awk '{print $2}'";
-    (count pids) mustgt 0;
-    system "pkill -f blackjackServer.q 2>/dev/null";
+    h:@[hopen;`$":localhost:",port;{0Ni}];
+    reachable:not null h;
+    if[reachable;hclose h];
+    pids:system "ps aux | grep 'blackjackServer.q.*-port ",port,"' | grep -v grep | awk '{print $2}'";
+    if[count pids; system "kill ",(" " sv pids)];
+    reachable musteq 1b;
     };
  };
 
@@ -69,67 +73,36 @@
     };
  };
 
-.tst.desc["regConn / .z.po / .z.pc connection-identity handling (lib/messaging.q:7,8,9; bin/blackjackServer.q:71,72)"]{
+.tst.desc["regConn / .z.po / .z.pc connection-identity handling (spawns the real bin/blackjackServer.q)"]{
   should["a plain client is registered into cp right away"]{
     port:string 16101 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
-    tag:"qsino_test_regconn_plain_",port;
-    srvLines:(
-      "\\p ",port;
-      "cp:()!()";
-      "DA:0Ni";
-      "user:{`$string[.z.u],\"_\",string[.z.w]}";               / lib/messaging.q:7, verbatim
-      "isDA:{.z.u~`detectionAlgo}";                              / lib/messaging.q:8, verbatim
-      "regConn:{$[isDA[];DA::x;cp[x]:user[]]}";                  / lib/messaging.q:9, verbatim
-      ".z.po:{@[{regConn[.z.w]};();{}]}");                       / bin/blackjackServer.q:71, minus .bs.start/intro
-    (hsym `$"/tmp/",tag,"_srv.q") 0: srvLines;
-    system "q /tmp/",tag,"_srv.q -q < /dev/null > /tmp/",tag,"_srv.log 2>&1 &";
+    system "q src/server/bin/blackjackServer.q -gameplay manual -port ",port," -q < /dev/null > /tmp/qsino_test_regconn_plain_",port,".log 2>&1 &";
     system "sleep 2";
     h:hopen `$":localhost:",port;
     qh:hopen `$":localhost:",port;
     cpCount:qh"count cp";
     hclose h; hclose qh;
-    pids:system "ps aux | grep ",tag,"_srv.q | grep -v grep | awk '{print $2}'";
+    pids:system "ps aux | grep 'blackjackServer.q.*-port ",port,"' | grep -v grep | awk '{print $2}'";
     if[count pids; system "kill ",(" " sv pids)];
     cpCount musteq 2;
     };
   should["a client connecting as detectionAlgo becomes DA and is never added to cp"]{
     port:string 16201 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
-    tag:"qsino_test_regconn_da_",port;
-    srvLines:(
-      "\\p ",port;
-      "cp:()!()";
-      "DA:0Ni";
-      "user:{`$string[.z.u],\"_\",string[.z.w]}";
-      "isDA:{.z.u~`detectionAlgo}";
-      "regConn:{$[isDA[];DA::x;cp[x]:user[]]}";
-      ".z.po:{@[{regConn[.z.w]};();{}]}");
-    (hsym `$"/tmp/",tag,"_srv.q") 0: srvLines;
-    system "q /tmp/",tag,"_srv.q -q < /dev/null > /tmp/",tag,"_srv.log 2>&1 &";
+    system "q src/server/bin/blackjackServer.q -gameplay manual -port ",port," -q < /dev/null > /tmp/qsino_test_regconn_da_",port,".log 2>&1 &";
     system "sleep 2";
     h:hopen `$":localhost:",port,":detectionAlgo";
     qh:hopen `$":localhost:",port;
     daIsSet:not null qh"DA";
     cpCount:qh"count cp";
     hclose h; hclose qh;
-    pids:system "ps aux | grep ",tag,"_srv.q | grep -v grep | awk '{print $2}'";
+    pids:system "ps aux | grep 'blackjackServer.q.*-port ",port,"' | grep -v grep | awk '{print $2}'";
     if[count pids; system "kill ",(" " sv pids)];
     daIsSet musteq 1b;
     cpCount musteq 1;  / only qh (the plain query connection); the DA handle never joins cp
     };
   should["DA resets to null when the detectionAlgo connection closes, without touching cp"]{
     port:string 16301 + ((`int$(`long$.z.p) mod 1000) + (("I"$first system "echo $$") mod 1000));
-    tag:"qsino_test_regconn_pc_",port;
-    srvLines:(
-      "\\p ",port;
-      "cp:()!()";
-      "DA:0Ni";
-      "user:{`$string[.z.u],\"_\",string[.z.w]}";
-      "isDA:{.z.u~`detectionAlgo}";
-      "regConn:{$[isDA[];DA::x;cp[x]:user[]]}";
-      ".z.po:{@[{regConn[.z.w]};();{}]}";
-      ".z.pc:{$[x=DA;DA::0Ni;cp::x _cp]}");                      / bin/blackjackServer.q:72, minus leave's server-state cleanup
-    (hsym `$"/tmp/",tag,"_srv.q") 0: srvLines;
-    system "q /tmp/",tag,"_srv.q -q < /dev/null > /tmp/",tag,"_srv.log 2>&1 &";
+    system "q src/server/bin/blackjackServer.q -gameplay manual -port ",port," -q < /dev/null > /tmp/qsino_test_regconn_pc_",port,".log 2>&1 &";
     system "sleep 2";
     qh:hopen `$":localhost:",port;
     hDA:hopen `$":localhost:",port,":detectionAlgo";
@@ -139,7 +112,7 @@
     daAfterClose:qh"DA";
     cpCountAfterClose:qh"count cp";
     hclose qh;
-    pids:system "ps aux | grep ",tag,"_srv.q | grep -v grep | awk '{print $2}'";
+    pids:system "ps aux | grep 'blackjackServer.q.*-port ",port,"' | grep -v grep | awk '{print $2}'";
     if[count pids; system "kill ",(" " sv pids)];
     cpCountBeforeClose musteq 1;  / just qh; the DA handle never joined cp
     daAfterClose musteq 0Ni;
