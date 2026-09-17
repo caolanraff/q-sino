@@ -13,10 +13,16 @@ KDB+ blackjack game
 Start the server first, from the repo root:
 
 ```bash
-q src/server/bin/blackjackServer.q -gameplay manual -hands 1000
+q src/server/bin/blackjackServer.q -hands 1000
 ```
 
-- `-gameplay` - `manual` (players call `stake`/`hit`/`stick`/etc. themselves) or `auto` (the server drives bot clients automatically). Required.
+The server has no notion of "gameplay mode" - it just deals the game and
+exposes `stake`/`hit`/`stick`/`double`/`split`/`shuffle` to whoever is
+connected. `masterClient.q` bots self-register for auto-play triggers on
+connect (via `regAuto[]`); a manual/human client that never calls `regAuto[]`
+just calls those functions itself, whenever it wants. Both can be seated at
+the same table.
+
 - `-hands` - number of hands to play before stopping. Optional, default `1000`.
 - `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
 
@@ -49,7 +55,7 @@ Run one `masterClient.q` per player you want at the table - `-player` selects wh
 For example, a manual 2-player game:
 
 ```bash
-q src/server/bin/blackjackServer.q -gameplay manual -hands 100    # terminal 1
+q src/server/bin/blackjackServer.q -hands 100                     # terminal 1
 q src/client/bin/masterClient.q -player basicCardCounter          # terminal 2
 q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3
 ```

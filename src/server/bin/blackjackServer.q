@@ -12,6 +12,7 @@ deckCnt:6;
 shufflecnt:0;
 
 cp:()!();
+autoH:`long$();	    //handles registered (via regAuto) to receive auto-play triggers
 .bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
 .bs.stake:([name:();handle:()]bet:());
 
@@ -44,7 +45,7 @@ hist:{.bs.hist,.bs.res};
   .bs.stake:0#.bs.stake;
   `.bs.tab upsert ([]player:1+til count cp;name:value cp;handle:key cp);
   sendMsg["Please place your bets via the stake[] function"]each key cp;
-  if[gp=`auto;excFunc[`stake;`]each key cp];
+  excFunc[`stake;`]each autoH;
   };
 
 leave:{[h]
@@ -52,7 +53,8 @@ leave:{[h]
   .[sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
   p:exec first player from .bs.tab where handle=h;
   lg string[p]," has left the table";
-  cp::h _cp;
+  cp::cp _ h;
+  autoH::autoH except h;
   delete from `.bs.tab where handle=h;
   };
 
@@ -71,10 +73,6 @@ system "l src/server/lib/actions.q";
 /// Start ///
 init:{
   args:.Q.opt .z.x;
-  if[not `gameplay in key args;show"[ERROR] Missing gameplay in command line";exit 1];
-  gp::`$raze args[`gameplay];
-  if[not gp in `auto`manual;show"[ERROR] Unknown gameplay";exit 1];
-
   seed::$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
   system "S ",string seed;
 

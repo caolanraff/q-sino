@@ -14,7 +14,7 @@ shuffle:{
   shufflecnt+:1;
   .bs.count:0f;
   if[(shufflecnt>1)&not null DA;excFunc[`shuffle;`;DA]];
-  if[gp=`auto;excFunc[`shuffle;`]each key cp];
+  excFunc[`shuffle;`]each autoH;
   };
 
 getCard:{
