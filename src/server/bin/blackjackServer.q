@@ -12,7 +12,7 @@ deckCnt:6;
 shufflecnt:0;
 
 cp:()!();
-.bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+.bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
@@ -30,6 +30,8 @@ intro:{
   show " shuffle   - Shuffle the cards";
   show " buildDeck - Builds the deck. Can input required amount, default is 6";
   };
+
+hist:{.bs.hist,.bs.res};
 
 .bs.start:{
   if[not .bs.hd;sendMsg"Please wait until the hand is over";:()];

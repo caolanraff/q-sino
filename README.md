@@ -54,7 +54,7 @@ q src/client/bin/masterClient.q -player basicCardCounter          # terminal 2
 q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3
 ```
 
-A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist` on the handle.
+A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on the handle.
 
 ## Enhancements
 - change globals to use namespace
