@@ -40,6 +40,24 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
+.tst.desc[".bs.tab keeps a typed bet column (bin/blackjackServer.q:15)"]{
+  should["select ... where null bet doesn't throw before anyone has staked this round"]{
+    .bs.tab::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    `.bs.tab upsert ([]player:1 2f;name:`alice`bob;handle:10 11i);
+    threw:@[{select from .bs.tab where null bet;0b};();{1b}];
+    threw musteq 0b;
+    (count select from .bs.tab where null bet) musteq 2;
+    };
+ };
+
+.tst.desc["hist[] (bin/blackjackServer.q:34)"]{
+  should["returns .bs.hist and .bs.res concatenated"]{
+    .bs.hist::([]round:1 2);
+    .bs.res::([]round:enlist 3);
+    (exec round from hist[]) musteq 1 2 3;
+    };
+ };
+
 .tst.desc[".bs.dealer1 dealer-and-player-both-bust branch (bin/blackjackServer.q:170-171)"]{
   should["zeroes only the current player's return, leaving other players untouched"]{
     .bs.tab:([]player:1 2f;name:`p1`p2;handle:10 11i;cnt:25 24i;return:250f,0n);
