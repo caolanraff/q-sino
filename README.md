@@ -4,8 +4,8 @@ KDB+ blackjack game
 ## Scripts
 - `src/server/bin/blackjackServer.q` - the dealer/game engine. Listens on port `5555`. Loads shared code from `src/server/lib/`.
 - `src/server/bin/detectionAlgo.q` - watches for card-counting behavior. Connects to the server; listens on port `5556`.
-- `src/client/bin/masterClient.q` - generic player client, one script for both modes. Always loads `playerCore.q`, then connects to the server; with `-player <name>` it additionally loads that strategy and plays automatically, without it you play manually (see below).
-- `src/client/lib/playerCore.q` - shared basic-strategy tables and card-counting helpers used by the strategy scripts.
+- `src/client/bin/masterClient.q` - generic player client, one script for both modes. With `-player <name>` it loads `playerCore.q` and that strategy and plays automatically; without it, it connects with just its own log-only prompts and you play manually (see below).
+- `src/client/lib/playerCore.q` - shared basic-strategy tables, card-counting helpers, and the real auto-play logic used by the strategy scripts; only loaded when `-player` is given.
 - `src/client/lib/*.q` (all except `playerCore.q`) - pluggable per-player strategies (see below).
 
 ## Usage
@@ -20,11 +20,11 @@ The server has no notion of "gameplay mode" - it just deals the game and
 exposes `stake`/`hit`/`stick`/`double`/`split`/`shuffle` to every connection
 the same way. It also unconditionally pushes `.mc.stake`/`.mc.play`/
 `.mc.shuffle` to every connected handle at the relevant point in play.
-`playerCore.q` gives every client a default `.mc.stake`/`.mc.play` that
-just prints "it's your turn" and waits - a client that loads only
-`playerCore.q` plays manually with friendly prompts. `masterClient.q`
-overrides those same names with real auto-play logic once a strategy is
-loaded, so a bot reacts to the pushes automatically instead.
+`masterClient.q` defines those three names itself, as simple log-only
+prompts ("it's your turn - run ... when ready"); loading a strategy via
+`-player <name>` pulls in `playerCore.q`, which redefines the same three
+names with the real auto-play logic, so a bot reacts to the pushes
+automatically instead.
 
 - `-hands` - number of hands to play before stopping. Optional, default `1000`.
 - `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
@@ -44,11 +44,12 @@ q src/client/bin/masterClient.q               # manual - play by hand, prompted 
 q src/client/bin/masterClient.q -player <name> # auto - <name> plays every hand for you
 ```
 
-**Manual mode** (no `-player`): connects and loads `playerCore.q`, which gives
-you a friendly prompt each time it's your turn (`It's your turn to stake -
-run stake[bet] when ready`, etc.) instead of auto-playing. You then call
-`stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`,
-`buildDeck[]`, `hist[]` on the handle yourself, whenever you're ready.
+**Manual mode** (no `-player`): connects without touching `playerCore.q` or
+any strategy file, so you get `masterClient.q`'s own log-only prompt each
+time it's your turn (`It's your turn to stake - run stake[bet] when ready`,
+etc.) instead of auto-playing. You then call `stake[bet]`, `hit[]`,
+`stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on
+the handle yourself, whenever you're ready.
 
 **Auto mode** (`-player <name>`): additionally loads that strategy from
 `src/client/lib/` and plays every hand automatically:

@@ -3,8 +3,9 @@
 pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;
 
 ld:{
-  system"l src/client/lib/playerCore.q";
-  if[not null x;system"l src/client/lib/",string[x],".q"];
+  if[not null x;
+    system"l src/client/lib/playerCore.q";
+    system"l src/client/lib/",string[x],".q"];
   };
 
 /// Play functions ///
@@ -14,22 +15,11 @@ getRes:{set[`.mc.res;h`.bs.res]};
 
 handDict:`H`S`D`SP!`hit`stick`double`split;
 
-// overrides playerCore.q's prompt-only .mc.stake/.mc.play defaults with real auto-play decisions;
-// called once the strategy is loaded, so it runs after (and replaces) those defaults
-setAuto:{
-  .mc.stake:{
-    Count[];
-    bet:getBet[];
-    neg[h](`stake;bet);
-    };
-  .mc.play:{
-    getTab[];
-    .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
-    dec:handDict Help[.mc.c];
-    .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=mh;
-    neg[h](dec;`);
-    };
-  };
+// log-only defaults for a manual player; -player loads playerCore.q, which overrides these
+// with the real auto-play logic (see ld[] and its use in init[] below)
+.mc.stake:{-1"It's your turn to stake - run stake[bet] when ready"};
+.mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
+.mc.shuffle:{-1"Deck reshuffled"};
 
 /// start ///
 
@@ -40,7 +30,6 @@ init:{
     p:$[count py:`$raze args[`player];py;`];
     if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1]];
   ld[p];
-  if[not null p;setAuto[]];
   h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
   mh::h`.z.w;
   };

@@ -72,10 +72,20 @@ Count:{
 
 .mc.shuffle:{theCount::0f};
 
-// default hooks the server pushes to every connected handle; a manual player just gets the prompt
-// and runs the command by hand, an auto strategy overrides these (see masterClient.q's setAuto)
-.mc.stake:{-1"It's your turn to stake - run stake[bet] when ready"};
-.mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
+// real auto-play hooks the server pushes to every connected handle; only loaded (via
+// masterClient.q's ld[]) when -player was given, overriding masterClient.q's log-only defaults
+.mc.stake:{
+  Count[];
+  bet:getBet[];
+  neg[h](`stake;bet);
+  };
+.mc.play:{
+  getTab[];
+  .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
+  dec:handDict Help[.mc.c];
+  .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=mh;
+  neg[h](dec;`);
+  };
 
 // links www.blackjackinfo.com - lesson 14 part 2
 // tells the player whether to hit or stick
