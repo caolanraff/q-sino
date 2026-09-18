@@ -40,12 +40,12 @@ system "l src/server/bin/blackjackServer.q";
   should["passes the turn to the next eligible player and doesn't call .bs.dealer[]"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
+    `excFunc mock {[x;y;z]};
     dealerCalls::0;
     `.bs.dealer mock {dealerCalls+::1};
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     cp::0 1i!`p1`p2;
-    autoH::`long$();
     stick[];
     (exec first wait from .bs.tab where player=1) musteq 1b;
     (exec first turn from .bs.tab where player=1) musteq 0b;
@@ -60,23 +60,20 @@ system "l src/server/bin/blackjackServer.q";
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`8`8;cnt:enlist 16i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
     cp::enlist[0i]!enlist`p1;
-    autoH::`long$();
     stick[];
     (exec first wait from .bs.tab) musteq 1b;
     dealerCalls musteq 1;
     };
-  should["triggers an async play prompt for the next player when their handle is in autoH"]{
+  should["triggers an async play prompt for the next player, addressed to their own handle"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
-    playCalls::0;
-    `play mock {playCalls+::1};
-    / both players share handle 0 so the server's raw async send (neg[h]) evaluates locally against our play mock
-    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 0i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    excFuncCalls::();
+    `excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
-    cp::enlist[0i]!enlist`p1;
-    autoH::enlist 0i;
+    cp::0 1i!`p1`p2;
     stick[];
-    playCalls musteq 1;
+    excFuncCalls mustmatch enlist(`.mc.play;1i);
     };
  };
 
@@ -94,11 +91,11 @@ system "l src/server/bin/blackjackServer.q";
   should["adds a card and updates the count for a hand under 21"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
+    `excFunc mock {[x;y;z]};
     `getCard mock {`5};
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`7`6;`9`7);cnt:13 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     cp::0 1i!`p1`p2;
-    autoH::`long$();
     acelow::0;
     .bs.double:0b;
     hit[];
@@ -109,11 +106,11 @@ system "l src/server/bin/blackjackServer.q";
   should["automatically sticks on exactly 21 and passes the turn"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
+    `excFunc mock {[x;y;z]};
     `getCard mock {`6};
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`7`8;`9`7);cnt:15 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     cp::0 1i!`p1`p2;
-    autoH::`long$();
     acelow::0;
     .bs.double:0b;
     hit[];
@@ -125,15 +122,14 @@ system "l src/server/bin/blackjackServer.q";
   should["busts the hand and passes the turn to the next player when one remains"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
+    `excFunc mock {[x;y;z]};
     `getCard mock {`10};
     dealerCalls::0;
     `.bs.dealer mock {dealerCalls+::1};
-    DC::`5`6;
+    DC::`5`5;  / .bs.hit1 unconditionally reads the global DC after the dealer branch; real gameplay sets it in .bs.deal0
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`7`8;`9`7);cnt:15 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
-    / cp holds only the local handle - the busted-hand branch also broadcasts .bs.turn via a raw async send
     cp::enlist[0i]!enlist`p1;
-    autoH::`long$();
     acelow::0;
     .bs.double:0b;
     hit[];
@@ -148,11 +144,10 @@ system "l src/server/bin/blackjackServer.q";
     `getCard mock {`10};
     dealerCalls::0;
     `.bs.dealer mock {dealerCalls+::1};
-    DC::`5`6;
+    DC::`5`5;  / .bs.hit1 unconditionally reads the global DC after the dealer branch; real gameplay sets it in .bs.deal0
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`7`8;cnt:enlist 15i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
     cp::enlist[0i]!enlist`p1;
-    autoH::`long$();
     acelow::0;
     .bs.double:0b;
     hit[];
@@ -207,7 +202,6 @@ system "l src/server/bin/blackjackServer.q";
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`7`8;cnt:enlist 15i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
     cp::enlist[0i]!enlist`p1;
-    autoH::`long$();
     acelow::0;
     double[];
     (exec first bet from .bs.tab) musteq 20f;
@@ -238,11 +232,11 @@ system "l src/server/bin/blackjackServer.q";
     };
   should["forces the count to 22 before splitting a pair of aces"]{
     `pubMsg mock {[x;y]};
+    `excFunc mock {[x;y;z]};
     `getCard mock {`2};
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     cp::enlist[0i]!enlist`p1;
-    autoH::`long$();
     acelow::0;
     split[];
     (count .bs.tab) musteq 3;
@@ -252,12 +246,12 @@ system "l src/server/bin/blackjackServer.q";
   should["splits a pair into two one-card hands, each dealt a new card"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
+    `excFunc mock {[x;y;z]};
     cardseq::`3`4;
     `getCard mock {c:first cardseq;cardseq::1_cardseq;c};
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     cp::0 1i!`p1`p2;
-    autoH::`long$();
     acelow::0;
     split[];
     (count .bs.tab) musteq 3;

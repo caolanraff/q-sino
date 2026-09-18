@@ -70,7 +70,7 @@ stake:{
     sendMsg[.bs.turn]each key cp;
     lg"The count is ",(string .bs.count);
     h:first exec handle from .bs.tab where turn;
-    if[h in autoH;neg[h](`play;`)]];
+    excFunc[`.mc.play;`;h]];
 	};
 
 /// Dealer function ///

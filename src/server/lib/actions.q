@@ -21,7 +21,7 @@ checks:{
 		 p:first exec name from .bs.tab where handle=h;
 		 pubMsg["It's ",string[p],"'s turn";h];
 		 {sendMsg[.bs.turn;x]}each key cp;
-		 if[h in autoH;neg[h](`play;`)]]];
+		 excFunc[`.mc.play;`;h]]];
 	};
 
 stick:{
@@ -69,14 +69,14 @@ stick:{
 			 h:first exec handle from .bs.tab where turn;
 			 sendMsg[(string p)," it's your turn";h];
 			 {neg[x](show;.bs.turn)}'[key cp];
-			 if[h in autoH;neg[h](`play;`)]]];
+			 excFunc[`.mc.play;`;h]]];
 		 DT:DC];
 
 	if[ucnt<21;
 		$[.bs.double;
 			stick[];
 		  [sendMsg["Hit or Stick?";h];
-		   if[h in autoH;neg[h](`play;`)]]]];
+		   excFunc[`.mc.play;`;h]]]];
 	};
 
 hit:{

@@ -111,23 +111,13 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
-.tst.desc["regAuto (lib/messaging.q)"]{
-  should["appends the connecting handle to autoH"]{
-    autoH::`long$();
-    regAuto[];
-    (count autoH) musteq 1;
-    };
- };
-
-.tst.desc["leave prunes autoH (bin/blackjackServer.q)"]{
-  should["removes the disconnecting handle from autoH, leaving other handles untouched"]{
+.tst.desc["leave removes the disconnecting handle from cp (bin/blackjackServer.q)"]{
+  should["drops only the disconnecting handle's key, leaving other connected players untouched"]{
     cp::(5i;6i)!`alice`bob;
-    autoH::5 6i;
     .bs.tab::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
     .bs.res::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
     leave[5i];
-    autoH musteq enlist 6i;
-    (count cp) musteq 1;
+    cp musteq enlist[6i]!enlist`bob;
     };
  };
 

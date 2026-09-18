@@ -12,20 +12,23 @@ ld:{
 getTab:{set[`.mc.tab;h`.bs.tab]};
 getRes:{set[`.mc.res;h`.bs.res]};
 
-stake:{
-  Count[];
-  bet:getBet[];
-  neg[h](`stake;bet);
-  };
-
 handDict:`H`S`D`SP!`hit`stick`double`split;
 
-play:{
-  getTab[];
-  .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
-  dec:handDict Help[.mc.c];
-  .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=mh;
-  neg[h](dec;`);
+// overrides playerCore.q's prompt-only .mc.stake/.mc.play defaults with real auto-play decisions;
+// called once the strategy is loaded, so it runs after (and replaces) those defaults
+setAuto:{
+  .mc.stake:{
+    Count[];
+    bet:getBet[];
+    neg[h](`stake;bet);
+    };
+  .mc.play:{
+    getTab[];
+    .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
+    dec:handDict Help[.mc.c];
+    .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=mh;
+    neg[h](dec;`);
+    };
   };
 
 /// start ///
@@ -36,9 +39,9 @@ init:{
   p:$[count py:`$raze args[`player];py;`];
   if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
   ld[p];
+  setAuto[];
   h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
   mh::h`.z.w;
-  h"regAuto[]";
   };
 
 if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;init[]];
