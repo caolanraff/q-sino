@@ -38,7 +38,6 @@ init:{
   ld[p];
   h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
   mh::h`.z.w;
-  h"regAuto[]";
   };
 
 if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;init[]];

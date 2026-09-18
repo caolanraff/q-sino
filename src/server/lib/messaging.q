@@ -6,4 +6,3 @@ excFunc:{neg[first z](x;y)};
 user:{`$string[.z.u],"_",string[.z.w]};
 isDA:{.z.u~`detectionAlgo};
 regConn:{$[isDA[];DA::x;cp[x]:user[]]};
-regAuto:{autoH,:.z.w};

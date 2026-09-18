@@ -17,11 +17,11 @@ q src/server/bin/blackjackServer.q -hands 1000
 ```
 
 The server has no notion of "gameplay mode" - it just deals the game and
-exposes `stake`/`hit`/`stick`/`double`/`split`/`shuffle` to whoever is
-connected. `masterClient.q` bots self-register for auto-play triggers on
-connect (via `regAuto[]`); a manual/human client that never calls `regAuto[]`
-just calls those functions itself, whenever it wants. Both can be seated at
-the same table.
+exposes `stake`/`hit`/`stick`/`double`/`split`/`shuffle` to every connection
+the same way. It also unconditionally pushes `stake`/`play`/`shuffle`
+prompts to every connected handle at the relevant point in play;
+`masterClient.q` (+ `playerCore.q`) defines matching functions so a bot
+reacts to them automatically, driving itself through the hand.
 
 - `-hands` - number of hands to play before stopping. Optional, default `1000`.
 - `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
@@ -60,7 +60,7 @@ q src/client/bin/masterClient.q -player basicCardCounter          # terminal 2
 q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3
 ```
 
-A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on the handle.
+A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on the handle. Since the server pushes `stake`/`play`/`shuffle` to every connection regardless of type, a plain session like this - which never defines those functions - prints a harmless error to its own console each time one arrives; it doesn't affect gameplay or the connection.
 
 ## Enhancements
 - change globals to use namespace
