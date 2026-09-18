@@ -111,6 +111,16 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
+.tst.desc["leave removes the disconnecting handle from cp (bin/blackjackServer.q)"]{
+  should["drops only the disconnecting handle's key, leaving other connected players untouched"]{
+    cp::(5i;6i)!`alice`bob;
+    .bs.tab::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    leave[5i];
+    cp musteq enlist[6i]!enlist`bob;
+    };
+ };
+
 .tst.desc[".z.pc"]{
   should["resets DA to null for the detectionAlgo handle, without calling leave"]{
     DA::7i;

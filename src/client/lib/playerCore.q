@@ -70,7 +70,29 @@ Count:{
   theCount::runCount%(startCards-count acr)%52;	//true count
   };
 
-shuffle:{theCount::0f};
+.mc.shuffle:{theCount::0f};
+
+// real auto-play hooks the server pushes to every connected handle; loaded whenever a
+// strategy file loads this, overriding masterClient.q's log-only defaults
+handsPlayed:0;
+
+.mc.stake:{
+  if[(handsPlayed+:1)>toth;
+    -1"Played ",string[toth]," hand",$[toth=1;"";"s"],", disconnecting";
+    hclose h;
+    exit 0];
+  Count[];
+  bet:getBet[];
+  neg[h](`stake;bet);
+  };
+
+.mc.play:{
+  getTab[];
+  .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
+  dec:handDict Help[.mc.c];
+  .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=mh;
+  neg[h](dec;`);
+  };
 
 // links www.blackjackinfo.com - lesson 14 part 2
 // tells the player whether to hit or stick

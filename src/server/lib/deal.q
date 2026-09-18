@@ -70,7 +70,7 @@ stake:{
     sendMsg[.bs.turn]each key cp;
     lg"The count is ",(string .bs.count);
     h:first exec handle from .bs.tab where turn;
-    if[gp=`auto;neg[h](`play;`)]];
+    excFunc[`.mc.play;`;h]];
 	};
 
 /// Dealer function ///
@@ -156,7 +156,5 @@ stake:{
 	.bs.bd:0b;.bs.hd:1b;
 	pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key cp];
 	if[not null DA;excFunc[`gameover;.bs.res;DA]];
-	$[(exec last round from .bs.res)>=toth;
-		pubMsg["Total hands requested played";key cp];
-		.bs.start[]];
+	.bs.start[];
 	};
