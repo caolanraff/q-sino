@@ -4,7 +4,7 @@ pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounte
 
 ld:{
   system"l src/client/lib/playerCore.q";
-  system"l src/client/lib/",string[x],".q";
+  if[not null x;system"l src/client/lib/",string[x],".q"];
   };
 
 /// Play functions ///
@@ -35,11 +35,12 @@ setAuto:{
 
 init:{
   args:.Q.opt .z.x;
-  if[not `player in key args;show"[ERROR] Missing player in command line, options - ",","sv string pt;exit 1];
-  p:$[count py:`$raze args[`player];py;`];
-  if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1];
+  p:`;
+  if[`player in key args;
+    p:$[count py:`$raze args[`player];py;`];
+    if[(null p)|(not p in pt);show"[ERROR] Unknown player, options - ",","sv string pt;exit 1]];
   ld[p];
-  setAuto[];
+  if[not null p;setAuto[]];
   h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
   mh::h`.z.w;
   };

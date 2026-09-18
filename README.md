@@ -4,7 +4,7 @@ KDB+ blackjack game
 ## Scripts
 - `src/server/bin/blackjackServer.q` - the dealer/game engine. Listens on port `5555`. Loads shared code from `src/server/lib/`.
 - `src/server/bin/detectionAlgo.q` - watches for card-counting behavior. Connects to the server; listens on port `5556`.
-- `src/client/bin/masterClient.q` - generic player client. Loads `playerCore.q` and one strategy script from `src/client/lib/`, then connects to the server.
+- `src/client/bin/masterClient.q` - generic player client, one script for both modes. Always loads `playerCore.q`, then connects to the server; with `-player <name>` it additionally loads that strategy and plays automatically, without it you play manually (see below).
 - `src/client/lib/playerCore.q` - shared basic-strategy tables and card-counting helpers used by the strategy scripts.
 - `src/client/lib/*.q` (all except `playerCore.q`) - pluggable per-player strategies (see below).
 
@@ -37,13 +37,21 @@ q src/server/bin/detectionAlgo.q
 
 ### Running a player
 
-Each player connects with `masterClient.q`, from the repo root (it loads `playerCore.q` and the chosen strategy from `src/client/lib/`):
+Each player connects with `masterClient.q`, from the repo root:
 
 ```bash
-q src/client/bin/masterClient.q -player <name>
+q src/client/bin/masterClient.q               # manual - play by hand, prompted each turn
+q src/client/bin/masterClient.q -player <name> # auto - <name> plays every hand for you
 ```
 
-Run one `masterClient.q` per player you want at the table - `-player` selects which `src/client/lib/*.q` strategy that client plays:
+**Manual mode** (no `-player`): connects and loads `playerCore.q`, which gives
+you a friendly prompt each time it's your turn (`It's your turn to stake -
+run stake[bet] when ready`, etc.) instead of auto-playing. You then call
+`stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`,
+`buildDeck[]`, `hist[]` on the handle yourself, whenever you're ready.
+
+**Auto mode** (`-player <name>`): additionally loads that strategy from
+`src/client/lib/` and plays every hand automatically:
 
 | `-player` value | Strategy |
 |---|---|
@@ -55,15 +63,20 @@ Run one `masterClient.q` per player you want at the table - `-player` selects wh
 | `omegaCardCounter` | Full basic-strategy play; sizes bets off the Omega II running count. |
 | `perfectCardCounter` | Full basic-strategy play; sizes bets off a "perfect" (level-9) running count. |
 
-For example, a manual 2-player game:
+Run one `masterClient.q` per player you want at the table, mixing manual and
+auto freely - for example:
 
 ```bash
 q src/server/bin/blackjackServer.q -hands 100                     # terminal 1
-q src/client/bin/masterClient.q -player basicCardCounter          # terminal 2
-q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3
+q src/client/bin/masterClient.q                                   # terminal 2 (manual)
+q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3 (auto)
 ```
 
-A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on the handle. Loading just `playerCore.q` first (`` system"l src/client/lib/playerCore.q" ``) picks up the friendly `.mc.stake`/`.mc.play` prompts; without even that, the server's pushes still arrive but print a harmless error to the session's own console each time, since `.mc.stake`/`.mc.play`/`.mc.shuffle` are undefined - it doesn't affect gameplay or the connection.
+A human can also join directly with a plain `q` session connected to the
+server (`` h:hopen`:localhost:5555 ``) instead of running `masterClient.q` -
+same manual commands, but without the friendly prompts (the server's
+pushes just print a harmless error to the session's own console, since
+`.mc.stake`/`.mc.play`/`.mc.shuffle` are undefined there).
 
 ## Enhancements
 - change globals to use namespace
