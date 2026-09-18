@@ -1,3 +1,5 @@
+system"l src/client/lib/playerCore.q";
+
 // recommended value that tells the user what to bet. uses theCount function to determine this value
 // use generic values to start - use percentages after a while - beating the double deck game part 2 - blackjackinfo.com
 getBet:{
