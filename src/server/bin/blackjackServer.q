@@ -74,8 +74,6 @@ init:{
   seed::$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
   system "S ",string seed;
 
-  toth::$[`hands in key args;"I"$raze args[`hands];1000i];
-
   system "p 5555";
 
   show "Welcome to Qsino Blackjack!";

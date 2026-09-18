@@ -269,7 +269,7 @@ system "l src/server/bin/blackjackServer.q";
   should["skips .bs.dealer0/.bs.dealer1 when every player is already out, but still records the result"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
-    wwch::0b; DA::0Ni; toth::1000; DC::`K`5;
+    wwch::0b; DA::0Ni; DC::`K`5;
     dealer0Calls::0; dealer1Calls::0;
     `.bs.dealer0 mock {dealer0Calls+::1};
     `.bs.dealer1 mock {[p]dealer1Calls+::1};
@@ -289,7 +289,7 @@ system "l src/server/bin/blackjackServer.q";
   should["resolves every waiting player through .bs.dealer0/.bs.dealer1 and marks them out"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
-    wwch::0b; DA::0Ni; toth::1000;
+    wwch::0b; DA::0Ni;
     dealer0Calls::0; dealer1Args::();
     `.bs.dealer0 mock {dealer0Calls+::1};
     `.bs.dealer1 mock {[p]dealer1Args,::p};
@@ -308,7 +308,7 @@ system "l src/server/bin/blackjackServer.q";
   should["notifies the detection algo with the round's results when DA is connected"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
-    wwch::0b; DA::99i; toth::1000; DC::`K`5;
+    wwch::0b; DA::99i; DC::`K`5;
     `.bs.start mock {};
     excFuncCalls::();
     `excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
@@ -319,10 +319,10 @@ system "l src/server/bin/blackjackServer.q";
     .bs.dealer[];
     excFuncCalls mustmatch enlist(`gameover;99i);
     };
-  should["starts the next hand when fewer rounds have been played than requested"]{
+  should["always starts the next hand - the server has no round-count cap of its own"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
-    wwch::0b; DA::0Ni; toth::1000; DC::`K`5;
+    wwch::0b; DA::0Ni; DC::`K`5;
     startCalls::0;
     `.bs.start mock {startCalls+::1};
     .bs.res::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
@@ -331,18 +331,5 @@ system "l src/server/bin/blackjackServer.q";
     cp::enlist[0i]!enlist`p1;
     .bs.dealer[];
     startCalls musteq 1;
-    };
-  should["does not start another hand once the requested number of rounds has been played"]{
-    `pubMsg mock {[x;y]};
-    `sendMsg mock {[x;y]};
-    wwch::0b; DA::0Ni; toth::1; DC::`K`5;
-    startCalls::0;
-    `.bs.start mock {startCalls+::1};
-    .bs.res::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
-    .bs.tab::([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
-    .bs.tab::update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bs.tab;
-    cp::enlist[0i]!enlist`p1;
-    .bs.dealer[];
-    startCalls musteq 0;
     };
  };

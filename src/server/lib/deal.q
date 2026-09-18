@@ -156,7 +156,5 @@ stake:{
 	.bs.bd:0b;.bs.hd:1b;
 	pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key cp];
 	if[not null DA;excFunc[`gameover;.bs.res;DA]];
-	$[(exec last round from .bs.res)>=toth;
-		pubMsg["Total hands requested played";key cp];
-		.bs.start[]];
+	.bs.start[];
 	};

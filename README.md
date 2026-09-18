@@ -13,7 +13,7 @@ KDB+ blackjack game
 Start the server first, from the repo root:
 
 ```bash
-q src/server/bin/blackjackServer.q -hands 1000
+q src/server/bin/blackjackServer.q
 ```
 
 The server has no notion of "gameplay mode" - it just deals the game and
@@ -25,9 +25,11 @@ prompts ("it's your turn - run ... when ready"); loading a strategy via
 `-player <name>` also pulls in `playerCore.q` (each `src/client/lib/*.q`
 strategy file loads it itself, at its own top), which redefines the same
 three names with the real auto-play logic, so a bot reacts to the pushes
-automatically instead.
+automatically instead. The server itself has no notion of "how many hands"
+either - it always deals the next hand once everyone's bet; each
+`masterClient.q` decides for itself, via its own `-hands`, how many it
+plays before disconnecting (see below).
 
-- `-hands` - number of hands to play before stopping. Optional, default `1000`.
 - `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
 
 Optionally start the detection process (after the server is up):
@@ -41,8 +43,8 @@ q src/server/bin/detectionAlgo.q
 Each player connects with `masterClient.q`, from the repo root:
 
 ```bash
-q src/client/bin/masterClient.q               # manual - play by hand, prompted each turn
-q src/client/bin/masterClient.q -player <name> # auto - <name> plays every hand for you
+q src/client/bin/masterClient.q                          # manual - play by hand, prompted each turn
+q src/client/bin/masterClient.q -player <name> -hands 100 # auto - <name> plays 100 hands, then disconnects
 ```
 
 **Manual mode** (no `-player`): connects without touching `playerCore.q` or
@@ -50,10 +52,14 @@ any strategy file, so you get `masterClient.q`'s own log-only prompt each
 time it's your turn (`It's your turn to stake - run stake[bet] when ready`,
 etc.) instead of auto-playing. You then call `stake[bet]`, `hit[]`,
 `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on
-the handle yourself, whenever you're ready.
+the handle yourself, whenever you're ready, for as long as you want -
+`-hands` only applies to auto mode.
 
 **Auto mode** (`-player <name>`): loads that strategy from `src/client/lib/`
-(which pulls in `playerCore.q` itself) and plays every hand automatically:
+(which pulls in `playerCore.q` itself) and plays every hand automatically.
+`-hands` (optional, default `1000`) caps how many hands *this client*
+plays before it disconnects on its own - other players at the table, auto
+or manual, aren't affected and the server keeps dealing regardless:
 
 | `-player` value | Strategy |
 |---|---|
@@ -69,9 +75,9 @@ Run one `masterClient.q` per player you want at the table, mixing manual and
 auto freely - for example:
 
 ```bash
-q src/server/bin/blackjackServer.q -hands 100                     # terminal 1
-q src/client/bin/masterClient.q                                   # terminal 2 (manual)
-q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3 (auto)
+q src/server/bin/blackjackServer.q                                 # terminal 1
+q src/client/bin/masterClient.q                                    # terminal 2 (manual)
+q src/client/bin/masterClient.q -player avgPlayer1 -hands 100      # terminal 3 (auto, 100 hands)
 ```
 
 A human can also join directly with a plain `q` session connected to the
