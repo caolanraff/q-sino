@@ -2,11 +2,9 @@
 
 pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;
 
-ld:{
-  if[not null x;
-    system"l src/client/lib/playerCore.q";
-    system"l src/client/lib/",string[x],".q"];
-  };
+// each strategy file in src/client/lib/ loads its own playerCore.q dependency at its top,
+// so a new player file only needs to be dropped in here - it isn't coupled to this loader
+ld:{if[not null x;system"l src/client/lib/",string[x],".q"]};
 
 /// Play functions ///
 
@@ -15,8 +13,8 @@ getRes:{set[`.mc.res;h`.bs.res]};
 
 handDict:`H`S`D`SP!`hit`stick`double`split;
 
-// log-only defaults for a manual player; -player loads playerCore.q, which overrides these
-// with the real auto-play logic (see ld[] and its use in init[] below)
+// log-only defaults for a manual player; -player loads a strategy (which loads playerCore.q),
+// overriding these with the real auto-play logic (see ld[] and its use in init[] below)
 .mc.stake:{-1"It's your turn to stake - run stake[bet] when ready"};
 .mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
 .mc.shuffle:{-1"Deck reshuffled"};

@@ -1,3 +1,5 @@
+system"l src/client/lib/playerCore.q";
+
 setCountDict[`omega];
 
 // reccommended value that tells the user what to bet. uses theCount function to determine this value

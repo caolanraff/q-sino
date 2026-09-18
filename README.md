@@ -4,9 +4,9 @@ KDB+ blackjack game
 ## Scripts
 - `src/server/bin/blackjackServer.q` - the dealer/game engine. Listens on port `5555`. Loads shared code from `src/server/lib/`.
 - `src/server/bin/detectionAlgo.q` - watches for card-counting behavior. Connects to the server; listens on port `5556`.
-- `src/client/bin/masterClient.q` - generic player client, one script for both modes. With `-player <name>` it loads `playerCore.q` and that strategy and plays automatically; without it, it connects with just its own log-only prompts and you play manually (see below).
-- `src/client/lib/playerCore.q` - shared basic-strategy tables, card-counting helpers, and the real auto-play logic used by the strategy scripts; only loaded when `-player` is given.
-- `src/client/lib/*.q` (all except `playerCore.q`) - pluggable per-player strategies (see below).
+- `src/client/bin/masterClient.q` - generic player client, one script for both modes. With `-player <name>` it loads that strategy and plays automatically; without it, it connects with just its own log-only prompts and you play manually (see below).
+- `src/client/lib/playerCore.q` - shared basic-strategy tables, card-counting helpers, and the real auto-play logic; each strategy script loads this itself, so it's never loaded for manual play.
+- `src/client/lib/*.q` (all except `playerCore.q`) - pluggable per-player strategies, each self-contained (loads `playerCore.q` itself) - see below.
 
 ## Usage
 
@@ -22,8 +22,9 @@ the same way. It also unconditionally pushes `.mc.stake`/`.mc.play`/
 `.mc.shuffle` to every connected handle at the relevant point in play.
 `masterClient.q` defines those three names itself, as simple log-only
 prompts ("it's your turn - run ... when ready"); loading a strategy via
-`-player <name>` pulls in `playerCore.q`, which redefines the same three
-names with the real auto-play logic, so a bot reacts to the pushes
+`-player <name>` also pulls in `playerCore.q` (each `src/client/lib/*.q`
+strategy file loads it itself, at its own top), which redefines the same
+three names with the real auto-play logic, so a bot reacts to the pushes
 automatically instead.
 
 - `-hands` - number of hands to play before stopping. Optional, default `1000`.
@@ -51,8 +52,8 @@ etc.) instead of auto-playing. You then call `stake[bet]`, `hit[]`,
 `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on
 the handle yourself, whenever you're ready.
 
-**Auto mode** (`-player <name>`): additionally loads that strategy from
-`src/client/lib/` and plays every hand automatically:
+**Auto mode** (`-player <name>`): loads that strategy from `src/client/lib/`
+(which pulls in `playerCore.q` itself) and plays every hand automatically:
 
 | `-player` value | Strategy |
 |---|---|
