@@ -1,6 +1,6 @@
 system "l src/server/bin/blackjackServer.q";
 
-.tst.desc["checks[] (lib/actions.q:2)"]{
+.tst.desc["checks[]"]{
   should["returns 0b and does not act when it isn't the caller's turn"]{
     pubCalls::0;
     `pubMsg mock {[x;y] pubCalls+::1};
@@ -27,7 +27,7 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
-.tst.desc["stick[] / .bs.stick0 (lib/actions.q:11,27)"]{
+.tst.desc["stick[] / .bs.stick0"]{
   should["does nothing when checks[] fails"]{
     `checks mock {0b};
     `pubMsg mock {[x;y]};
@@ -80,7 +80,7 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
-.tst.desc["hit[] / .bs.hit0 / .bs.hit1 (lib/actions.q:33,51,82)"]{
+.tst.desc["hit[] / .bs.hit0 / .bs.hit1"]{
   should["does nothing when checks[] fails"]{
     `checks mock {0b};
     getCardCalls::0;
@@ -181,7 +181,7 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
-.tst.desc["double[] (lib/actions.q:89)"]{
+.tst.desc["double[]"]{
   should["does nothing when checks[] fails"]{
     `checks mock {0b};
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`7`8;cnt:enlist 15i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
@@ -219,7 +219,7 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
-.tst.desc["split[] / .bs.split0 / .bs.splitHit (lib/actions.q:101,116,127)"]{
+.tst.desc["split[] / .bs.split0 / .bs.splitHit"]{
   should["does nothing when checks[] fails"]{
     `checks mock {0b};
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`10`9;cnt:enlist 19i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
