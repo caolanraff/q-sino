@@ -18,10 +18,13 @@ q src/server/bin/blackjackServer.q -hands 1000
 
 The server has no notion of "gameplay mode" - it just deals the game and
 exposes `stake`/`hit`/`stick`/`double`/`split`/`shuffle` to every connection
-the same way. It also unconditionally pushes `stake`/`play`/`shuffle`
-prompts to every connected handle at the relevant point in play;
-`masterClient.q` (+ `playerCore.q`) defines matching functions so a bot
-reacts to them automatically, driving itself through the hand.
+the same way. It also unconditionally pushes `.mc.stake`/`.mc.play`/
+`.mc.shuffle` to every connected handle at the relevant point in play.
+`playerCore.q` gives every client a default `.mc.stake`/`.mc.play` that
+just prints "it's your turn" and waits - a client that loads only
+`playerCore.q` plays manually with friendly prompts. `masterClient.q`
+overrides those same names with real auto-play logic once a strategy is
+loaded, so a bot reacts to the pushes automatically instead.
 
 - `-hands` - number of hands to play before stopping. Optional, default `1000`.
 - `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
@@ -60,7 +63,7 @@ q src/client/bin/masterClient.q -player basicCardCounter          # terminal 2
 q src/client/bin/masterClient.q -player avgPlayer1                # terminal 3
 ```
 
-A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on the handle. Since the server pushes `stake`/`play`/`shuffle` to every connection regardless of type, a plain session like this - which never defines those functions - prints a harmless error to its own console each time one arrives; it doesn't affect gameplay or the connection.
+A human can also join directly with a plain `q` session connected to the server (`` h:hopen`:localhost:5555 ``), calling `stake[bet]`, `hit[]`, `stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on the handle. Loading just `playerCore.q` first (`` system"l src/client/lib/playerCore.q" ``) picks up the friendly `.mc.stake`/`.mc.play` prompts; without even that, the server's pushes still arrive but print a harmless error to the session's own console each time, since `.mc.stake`/`.mc.play`/`.mc.shuffle` are undefined - it doesn't affect gameplay or the connection.
 
 ## Enhancements
 - change globals to use namespace

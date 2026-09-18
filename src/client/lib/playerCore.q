@@ -70,7 +70,12 @@ Count:{
   theCount::runCount%(startCards-count acr)%52;	//true count
   };
 
-shuffle:{theCount::0f};
+.mc.shuffle:{theCount::0f};
+
+// default hooks the server pushes to every connected handle; a manual player just gets the prompt
+// and runs the command by hand, an auto strategy overrides these (see masterClient.q's setAuto)
+.mc.stake:{-1"It's your turn to stake - run stake[bet] when ready"};
+.mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
 
 // links www.blackjackinfo.com - lesson 14 part 2
 // tells the player whether to hit or stick

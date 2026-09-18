@@ -73,7 +73,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     cp::0 1i!`p1`p2;
     stick[];
-    excFuncCalls mustmatch enlist(`play;1i);
+    excFuncCalls mustmatch enlist(`.mc.play;1i);
     };
  };
 

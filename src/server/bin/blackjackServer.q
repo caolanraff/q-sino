@@ -44,7 +44,7 @@ hist:{.bs.hist,.bs.res};
   .bs.stake:0#.bs.stake;
   `.bs.tab upsert ([]player:1+til count cp;name:value cp;handle:key cp);
   sendMsg["Please place your bets via the stake[] function"]each key cp;
-  excFunc[`stake;`]each key cp;
+  excFunc[`.mc.stake;`]each key cp;
   };
 
 leave:{[h]
