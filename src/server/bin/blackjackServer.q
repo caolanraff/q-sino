@@ -52,12 +52,12 @@ hist:{.bs.hist,.bs.res};
   .[.bs.sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
   p:exec first player from .bs.tab where handle=h;
   .bs.lg string[p]," has left the table";
-  .bs.cp::.bs.cp _ h;
+  .bs.cp:.bs.cp _ h;
   delete from `.bs.tab where handle=h;
   };
 
 .z.po:{.bs.regConn[.z.w];if[not .bs.isDA[];.bs.start[];neg[.z.w](.bs.intro;`)]};
-.z.pc:{$[x=.bs.da;.bs.da::0Ni;.bs.leave x]};
+.z.pc:{$[x=.bs.da;.bs.da:0Ni;.bs.leave x]};
 
 /// Deck functions ///
 system "l src/server/lib/deck.q";

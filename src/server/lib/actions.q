@@ -13,7 +13,7 @@
 	update wait:1b, turn:0b from `.bs.tab where turn;
 	update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b,not turn);
 	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-	.bs.acelow::0;
+	.bs.acelow:0;
 	$[(count select from .bs.tab where turn)=0;
 		[.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
 		 .bs.dealer[]];
@@ -39,10 +39,10 @@ stick:{
 	ucnt:("I"$(string UH))+(first exec cnt from .bs.tab where turn);
 
 	if[(UH=`11)&(ucnt>21);
-		ucnt:ucnt-10i;.bs.acelow+::1];
+		ucnt:ucnt-10i;.bs.acelow+:1];
 	if[all((ucnt>21);((count a[where a=`A])>.bs.acelow);(`A in a:(raze exec cards from .bs.tab where turn)));
 		ucnt:ucnt-10i;
-		$[`A`A~(2#a);.bs.acelow+::2;.bs.acelow+::1]];
+		$[`A`A~(2#a);.bs.acelow+:2;.bs.acelow+:1]];
 
 	.bs.pubMsg[(string .z.u),"'s count is now ",(string ucnt);key .bs.cp];
 	update cnt:ucnt from `.bs.tab where handle=.z.w,turn;
@@ -61,7 +61,7 @@ stick:{
 		update return:0f, out:1b, turn:0b from `.bs.tab where handle=h;
 		update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b, wait=0b);
 		.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-		.bs.acelow::0;
+		.bs.acelow:0;
 		$[(count select from .bs.tab where turn)=0;
 			[.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
 			 .bs.dealer[]];

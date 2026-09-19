@@ -75,8 +75,8 @@
 init:{
   show "Loading detection algorithm";
   system "p 5556";
-  .da.h::@[hopen;`$":localhost:5555:detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
-  .da.startCards::.da.h"count .bs.deck";
+  .da.h:@[hopen;`$":localhost:5555:detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
+  .da.startCards:.da.h"count .bs.deck";
   };
 
 if[(not null .z.f) and "detectionAlgo.q"~last "/" vs string .z.f;init[]];

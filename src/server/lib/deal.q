@@ -17,7 +17,7 @@ stake:{
 	if[0=count .bs.tab;.bs.lg"No players at the table";:()];
 	if[(count .bs.deck)<78;.bs.lg"Deck needs reshuffled";buildDeck[];shuffle[]];
 
-	.bs.hd:.bs.acelow::.bs.acelowD::.bs.wwch::0b;
+	.bs.hd:.bs.acelow:.bs.acelowD:.bs.wwch:0b;
 	.bs.rnd+:1;num:count .bs.tab;
 	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b from `.bs.tab;
 
@@ -33,7 +33,7 @@ stake:{
 
 	DC2:.bs.getCard[];
 	.bs.pubMsg["Dealers second card is dealt face down";key .bs.cp];
-	.bs.dc::DC1,DC2;
+	.bs.dc:DC1,DC2;
 
 	while[(count select from .bs.tab where null cnt)>0;
 		h:first exec handle from .bs.tab where null cnt;
@@ -49,7 +49,7 @@ stake:{
 					[.bs.sendMsg["Winner winner chicken dinner!";h];
 					 update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
 					 if[not count select from .bs.tab where not out;
-					  .bs.hd:1b;.bs.wwch::1b;
+					  .bs.hd:1b;.bs.wwch:1b;
 					  .bs.dealer[]]]]];
 			[$[(first U)~(last U);
 				.bs.sendMsg["Hit, stick or split?";h];
@@ -78,8 +78,8 @@ stake:{
 	.bs.pubMsg["Dealer has ",(string first .bs.dc),",",(string last .bs.dc);key .bs.cp];
 	update dealer:(dealer,'(last .bs.dc)) from `.bs.tab;
 	D:.bs.cardDict[.bs.dc];
-	.bs.dealerCount::sum "I"$string D;
-	if[all .bs.dc=`A`A;.bs.dealerCount::12i];
+	.bs.dealerCount:sum "I"$string D;
+	if[all .bs.dc=`A`A;.bs.dealerCount:12i];
 	.bs.pubMsg["Dealers hand count is ",(string .bs.dealerCount);key .bs.cp];
 	update dealerCnt:.bs.dealerCount from `.bs.tab;
 	DT:.bs.dc;
@@ -89,10 +89,10 @@ stake:{
 		.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
 		update dealer:(dealer,'DH) from `.bs.tab;
 		DH:.bs.cardDict[DH];
-		.bs.dt::.bs.dc,DH;
-		.bs.dealerCount::("I"$(string DH))+.bs.dealerCount;
-		if[(DH=`11)&(.bs.dealerCount>21);.bs.dealerCount::.bs.dealerCount-10i];
-		if[all((`A in .bs.dc);(.bs.dealerCount>21);(.bs.acelowD=0b));.bs.dealerCount::.bs.dealerCount-10i;.bs.acelowD::1b];
+		.bs.dt:.bs.dc,DH;
+		.bs.dealerCount:("I"$(string DH))+.bs.dealerCount;
+		if[(DH=`11)&(.bs.dealerCount>21);.bs.dealerCount:.bs.dealerCount-10i];
+		if[all((`A in .bs.dc);(.bs.dealerCount>21);(.bs.acelowD=0b));.bs.dealerCount:.bs.dealerCount-10i;.bs.acelowD:1b];
 		.bs.pubMsg["Dealers hand count is now ",(string .bs.dealerCount);key .bs.cp];
 		update dealerCnt:.bs.dealerCount from `.bs.tab];
 	};
