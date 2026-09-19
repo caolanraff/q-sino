@@ -35,25 +35,27 @@ stake:{
 	pubMsg["Dealers second card is dealt face down";key cp];
 	DC::DC1,DC2;
 
-	{[h]
-		UC:(first exec cards from .bs.tab where handle=h);
-		sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
-		U::cardDict[UC];
-		ucnt:("I"$(string first U))+("I"$(string last U));
-		if[all U=`11`11;ucnt:12i];
-		update cnt:ucnt from `.bs.tab where handle=h;
-		$[ucnt=21;
-			[$[("I"$(string first D))>=10;
-					stick[];
-					[sendMsg["Winner winner chicken dinner!";h];
-					 update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
-					 if[not count select from .bs.tab where not out;
-					  .bs.hd:1b;wwch::1b;
-					  .bs.dealer[]]]]];
-			[$[(first U)~(last U);
-				sendMsg["Hit, stick or split?";h];
-				sendMsg["Hit or stick?";h]]]];
-	} each exec handle from .bs.tab where null cnt;
+	.bs.deal1 each exec handle from .bs.tab where null cnt;
+	};
+
+.bs.deal1:{[h]
+	UC:(first exec cards from .bs.tab where handle=h);
+	sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
+	U::cardDict[UC];
+	ucnt:("I"$(string first U))+("I"$(string last U));
+	if[all U=`11`11;ucnt:12i];
+	update cnt:ucnt from `.bs.tab where handle=h;
+	$[ucnt=21;
+		[$[("I"$(string first D))>=10;
+				stick[];
+				[sendMsg["Winner winner chicken dinner!";h];
+				 update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
+				 if[not count select from .bs.tab where not out;
+				  .bs.hd:1b;wwch::1b;
+				  .bs.dealer[]]]]];
+		[$[(first U)~(last U);
+			sendMsg["Hit, stick or split?";h];
+			sendMsg["Hit or stick?";h]]]];
 	};
 
 .bs.deal:{
