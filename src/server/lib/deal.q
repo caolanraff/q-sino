@@ -21,39 +21,41 @@ stake:{
 	.bs.rnd+:1;num:count .bs.tab;
 	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b from `.bs.tab;
 
-	while[count pd:select from .bs.tab where (count each cards)=0;.bs.dealCard[pd]];
+	.bs.dealCard each select from .bs.tab where (count each cards)=0;
 
 	DC1:.bs.getCard[];
 	.bs.pubMsg["Dealers first card is ",(string DC1);key .bs.cp];
 	update dealer:num#DC1 from `.bs.tab;
-	D:.bs.cardDict[DC1];
-	update dealerCnt:num#"I"$(string D) from `.bs.tab;
+	.bs.dealerUpValue:.bs.cardDict[DC1];
+	update dealerCnt:num#"I"$(string .bs.dealerUpValue) from `.bs.tab;
 
-	while[count pd:select from .bs.tab where (count each cards)=1;.bs.dealCard[pd]];
+	.bs.dealCard each select from .bs.tab where (count each cards)=1;
 
 	DC2:.bs.getCard[];
 	.bs.pubMsg["Dealers second card is dealt face down";key .bs.cp];
 	.bs.dc:DC1,DC2;
 
-	while[(count select from .bs.tab where null cnt)>0;
-		h:first exec handle from .bs.tab where null cnt;
-		UC:(first exec cards from .bs.tab where handle=h);
-		.bs.sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
-		U:.bs.cardDict[UC];
-		ucnt:("I"$(string first U))+("I"$(string last U));
-		if[all U=`11`11;ucnt:12i];
-		update cnt:ucnt from `.bs.tab where handle=h;
-		$[ucnt=21;
-			[$[("I"$(string first D))>=10;
-					stick[];
-					[.bs.sendMsg["Winner winner chicken dinner!";h];
-					 update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
-					 if[not count select from .bs.tab where not out;
-					  .bs.hd:1b;.bs.wwch:1b;
-					  .bs.dealer[]]]]];
-			[$[(first U)~(last U);
-				.bs.sendMsg["Hit, stick or split?";h];
-				.bs.sendMsg["Hit or stick?";h]]]]];
+	.bs.deal1 each exec handle from .bs.tab where null cnt;
+	};
+
+.bs.deal1:{[h]
+	UC:(first exec cards from .bs.tab where handle=h);
+	.bs.sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
+	U:.bs.cardDict[UC];
+	ucnt:("I"$(string first U))+("I"$(string last U));
+	if[all U=`11`11;ucnt:12i];
+	update cnt:ucnt from `.bs.tab where handle=h;
+	$[ucnt=21;
+		[$[("I"$(string first .bs.dealerUpValue))>=10;
+				stick[];
+				[.bs.sendMsg["Winner winner chicken dinner!";h];
+				 update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
+				 if[not count select from .bs.tab where not out;
+				  .bs.hd:1b;.bs.wwch:1b;
+				  .bs.dealer[]]]]];
+		[$[(first U)~(last U);
+			.bs.sendMsg["Hit, stick or split?";h];
+			.bs.sendMsg["Hit or stick?";h]]]];
 	};
 
 .bs.deal:{
@@ -139,10 +141,7 @@ stake:{
 			 .bs.pubMsg["Dealer wins!";key .bs.cp];
 		         update dealer:(dealer,'(last .bs.dc)) from `.bs.tab];
 			[.bs.dealer0[];
-			 while[(count select from .bs.tab where wait=1b)>0;
-				p:first exec player from .bs.tab where wait=1b;
-				.bs.dealer1[p];
-				update wait:0b,out:1b from `.bs.tab where player=p]]]];
+			 {.bs.dealer1[x];update wait:0b,out:1b from `.bs.tab where player=x} each exec player from .bs.tab where wait=1b]]];
 
 	.bs.lg"Hand stats;";
 	show .bs.tab;
