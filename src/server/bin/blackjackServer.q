@@ -4,21 +4,21 @@
 .bs.hd:1b;
 .bs.bd:.bs.double:0b;
 .bs.rnd:0;
-DA:0Ni;	    //detection algo handle
+.bs.da:0Ni;	    //detection algo handle
 
-cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
-deck:raze 4#enlist key cardDict;
-deckCnt:6;
-shufflecnt:0;
+.bs.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
+.bs.deckTemplate:raze 4#enlist key .bs.cardDict;
+.bs.deckCnt:6;
+.bs.shuffleCnt:0;
 
-cp:()!();
+.bs.cp:()!();
 .bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
 system "l src/server/lib/messaging.q";
 
-intro:{
+.bs.intro:{
   show "Welcome to Qsino Blackjack!";
   show "Functions;";
   show " stake     - How much you want to bet. Default is no bet";
@@ -34,30 +34,30 @@ intro:{
 hist:{.bs.hist,.bs.res};
 
 .bs.start:{
-  if[not .bs.hd;sendMsg"Please wait until the hand is over";:()];
-  if[0=count cp;lg"No users are connected";:()];
+  if[not .bs.hd;.bs.sendMsg"Please wait until the hand is over";:()];
+  if[0=count .bs.cp;.bs.lg"No users are connected";:()];
   cpn:(!) . value flip distinct select handle,name from .bs.tab;
-  $[cpn~cp;
-    lg"No new users have joined the table";
-    lg"New users have joined the table"];
+  $[cpn~.bs.cp;
+    .bs.lg"No new users have joined the table";
+    .bs.lg"New users have joined the table"];
   .bs.tab:0#.bs.tab;
   .bs.stake:0#.bs.stake;
-  `.bs.tab upsert ([]player:1+til count cp;name:value cp;handle:key cp);
-  sendMsg["Please place your bets via the stake[] function"]each key cp;
-  excFunc[`.mc.stake;`]each key cp;
+  `.bs.tab upsert ([]player:1+til count .bs.cp;name:value .bs.cp;handle:key .bs.cp);
+  .bs.sendMsg["Please place your bets via the stake[] function"]each key .bs.cp;
+  .bs.excFunc[`.mc.stake;`]each key .bs.cp;
   };
 
-leave:{[h]
-  .[sendMsg;("Your total winnings are - $",(string (exec sum return from .bs.res where handle=h));h);{}];
-  .[sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
+.bs.leave:{[h]
+  .[.bs.sendMsg;("Your total winnings are - $",(string (exec sum return from .bs.res where handle=h));h);{}];
+  .[.bs.sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
   p:exec first player from .bs.tab where handle=h;
-  lg string[p]," has left the table";
-  cp::cp _ h;
+  .bs.lg string[p]," has left the table";
+  .bs.cp::.bs.cp _ h;
   delete from `.bs.tab where handle=h;
   };
 
-.z.po:{regConn[.z.w];if[not isDA[];.bs.start[];neg[.z.w](intro;`)]};
-.z.pc:{$[x=DA;DA::0Ni;leave x]};
+.z.po:{.bs.regConn[.z.w];if[not .bs.isDA[];.bs.start[];neg[.z.w](.bs.intro;`)]};
+.z.pc:{$[x=.bs.da;.bs.da::0Ni;.bs.leave x]};
 
 /// Deck functions ///
 system "l src/server/lib/deck.q";
@@ -71,7 +71,7 @@ system "l src/server/lib/actions.q";
 /// Start ///
 init:{
   args:.Q.opt .z.x;
-  seed::$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
+  seed:$[`seed in key args;"I"$raze args[`seed];(first "I"$(system "date +%s"))+"i"$.z.t];
   system "S ",string seed;
 
   system "p 5555";
