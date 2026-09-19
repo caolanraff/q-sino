@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      QHOME: ${{ github.workspace }}/vendor/kdb/4.0-2022.05.11
+      QLIC: ${{ github.workspace }}/vendor/kdb/licenses/main
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write kdb+ license from secret
+        run: |
+          mkdir -p "$QLIC"
+          echo "${{ secrets.KDB_LICENSE_B64 }}" | base64 -d > "$QLIC/k4.lic"
+
+      - name: Run q test suite
+        run: |
+          "$QHOME/l64/q" test/run.q \
+            src/server/test \
+            src/client/test \
+            -q
