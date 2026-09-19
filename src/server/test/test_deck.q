@@ -95,13 +95,13 @@ system "l src/server/bin/blackjackServer.q";
  };
 
 .tst.desc["dealCard"]{
-  should["deals exactly one card to the first row's player only"]{
+  should["deals exactly one card to the given row's player only"]{
     `sendMsg mock {[x;y]};
     getCardCalls::0;
     `getCard mock {getCardCalls+::1;`7};
     .bs.tab::([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
-    pd::select from .bs.tab where player=1;
-    dealCard[pd];
+    row::first select from .bs.tab where player=1;
+    dealCard[row];
     getCardCalls musteq 1;
     (exec first cards from .bs.tab where player=1) mustmatch enlist`7;
     (exec first cards from .bs.tab where player=2) mustmatch ();

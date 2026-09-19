@@ -21,7 +21,7 @@ stake:{
 	.bs.rnd+:1;num:count .bs.tab;
 	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b from `.bs.tab;
 
-	while[count pd:select from .bs.tab where (count each cards)=0;dealCard[pd]];
+	dealCard each select from .bs.tab where (count each cards)=0;
 
 	DC1:getCard[];
 	pubMsg["Dealers first card is ",(string DC1);key cp];
@@ -29,7 +29,7 @@ stake:{
 	D:cardDict[DC1];
 	update dealerCnt:num#"I"$(string D) from `.bs.tab;
 
-	while[count pd:select from .bs.tab where (count each cards)=1;dealCard[pd]];
+	dealCard each select from .bs.tab where (count each cards)=1;
 
 	DC2:getCard[];
 	pubMsg["Dealers second card is dealt face down";key cp];

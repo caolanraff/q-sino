@@ -77,6 +77,23 @@ system "l src/server/bin/blackjackServer.q";
     DC mustmatch `8`3;
     .bs.hd musteq 0b;
     };
+  should["deals each player's first card in seating order before either gets a second, with multiple players"]{
+    `pubMsg mock {[x;y]};
+    `sendMsg mock {[x;y]};
+    .bs.deck::200#`2;
+    cardseq::`2`9`5`3`8`6;  / p1's 1st, p2's 1st, dealer's up-card, p1's 2nd, p2's 2nd, dealer's hole card
+    `getCard mock {c:first cardseq;cardseq::1_cardseq;c};
+    .bs.rnd::0;
+    .bs.hd::1b;
+    .bs.tab::([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
+    .bs.deal0[];
+    (exec first cards from .bs.tab where player=1) mustmatch `2`3;
+    (exec first cards from .bs.tab where player=2) mustmatch `9`8;
+    (exec first cnt from .bs.tab where player=1) musteq 5i;
+    (exec first cnt from .bs.tab where player=2) musteq 17i;
+    DC mustmatch `5`6;
+    .bs.hd musteq 0b;
+    };
   should["an immediate player blackjack against a dealer up-card under 10 pays out and calls .bs.dealer[] when no one else is left to act"]{
     `pubMsg mock {[x;y]};
     `sendMsg mock {[x;y]};
