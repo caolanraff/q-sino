@@ -139,10 +139,7 @@ stake:{
 			 pubMsg["Dealer wins!";key cp];
 		         update dealer:(dealer,'(last DC)) from `.bs.tab];
 			[.bs.dealer0[];
-			 while[(count select from .bs.tab where wait=1b)>0;
-				p:first exec player from .bs.tab where wait=1b;
-				.bs.dealer1[p];
-				update wait:0b,out:1b from `.bs.tab where player=p]]]];
+			 {.bs.dealer1[x];update wait:0b,out:1b from `.bs.tab where player=x} each exec player from .bs.tab where wait=1b]]];
 
 	lg"Hand stats;";
 	show .bs.tab;
