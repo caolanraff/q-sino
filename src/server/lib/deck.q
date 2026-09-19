@@ -24,8 +24,8 @@ getCard:{
   };
 
 dealCard:{
-  p:first[x]`player;
-  h:first[x]`handle;
+  p:x`player;
+  h:x`handle;
   c:getCard[];
   sendMsg["Your card is ",(string c);h];
   update cards:(cards,'c) from `.bs.tab where player=p;
