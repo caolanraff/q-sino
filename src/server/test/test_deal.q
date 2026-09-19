@@ -133,6 +133,43 @@ system "l src/server/bin/blackjackServer.q";
     stickCalls musteq 1;
     dealerCalls musteq 0;
     };
+  should["pays out one player's immediate blackjack but doesn't call .bs.dealer[] while another player still needs to act"]{
+    `pubMsg mock {[x;y]};
+    `sendMsg mock {[x;y]};
+    .bs.deck::200#`2;
+    cardseq::`A`9`5`K`8`3;  / p1: A,K = 21 (blackjack); p2: 9,8 = 17 (no blackjack); dealer up-card 5 (<10)
+    `getCard mock {c:first cardseq;cardseq::1_cardseq;c};
+    dealerCalls::0;
+    `.bs.dealer mock {dealerCalls+::1};
+    .bs.rnd::0;
+    .bs.hd::1b;
+    .bs.tab::([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
+    .bs.deal0[];
+    (exec first return from .bs.tab where player=1) musteq 25f;
+    (exec first out from .bs.tab where player=1) musteq 1b;
+    (exec first cnt from .bs.tab where player=2) musteq 17i;
+    (exec first out from .bs.tab where player=2) musteq 0b;
+    dealerCalls musteq 0;
+    .bs.hd musteq 0b;
+    };
+  should["calls .bs.dealer[] exactly once, after the last player's immediate blackjack leaves nobody still in"]{
+    `pubMsg mock {[x;y]};
+    `sendMsg mock {[x;y]};
+    .bs.deck::200#`2;
+    cardseq::`A`A`5`K`Q`3;  / p1: A,K = 21 (blackjack); p2: A,Q = 21 (blackjack); dealer up-card 5 (<10)
+    `getCard mock {c:first cardseq;cardseq::1_cardseq;c};
+    dealerCalls::0;
+    `.bs.dealer mock {dealerCalls+::1};
+    .bs.rnd::0;
+    .bs.hd::1b;
+    .bs.tab::([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
+    .bs.deal0[];
+    (exec first return from .bs.tab where player=1) musteq 25f;
+    (exec first return from .bs.tab where player=2) musteq 25f;
+    (exec out from .bs.tab) musteq 11b;
+    dealerCalls musteq 1;
+    .bs.hd musteq 1b;
+    };
  };
 
 .tst.desc[".bs.deal"]{
