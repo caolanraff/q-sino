@@ -25,15 +25,15 @@ system "l src/server/bin/blackjackServer.q";
 .tst.desc[".bs.start player-table upsert (bin/blackjackServer.q:15,41)"]{
   should["succeeds for exactly one connected player"]{
     .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
-    cp::enlist[5i]!enlist`alice;
-    threw:@[{`.bs.tab upsert ([]player:1+til count cp;name:value cp;handle:key cp);0b};();{1b}];
+    .bs.cp:enlist[5i]!enlist`alice;
+    threw:@[{`.bs.tab upsert ([]player:1+til count .bs.cp;name:value .bs.cp;handle:key .bs.cp);0b};();{1b}];
     threw musteq 0b;
     (count .bs.tab) musteq 1;
     };
   should["succeeds for two connected players"]{
     .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
-    cp::(5i;6i)!`alice`bob;
-    threw:@[{`.bs.tab upsert ([]player:1+til count cp;name:value cp;handle:key cp);0b};();{1b}];
+    .bs.cp:(5i;6i)!`alice`bob;
+    threw:@[{`.bs.tab upsert ([]player:1+til count .bs.cp;name:value .bs.cp;handle:key .bs.cp);0b};();{1b}];
     threw musteq 0b;
     (count .bs.tab) musteq 2;
     (asc exec name from .bs.tab) musteq `alice`bob;
@@ -42,7 +42,7 @@ system "l src/server/bin/blackjackServer.q";
 
 .tst.desc[".bs.tab keeps a typed bet column (bin/blackjackServer.q:15)"]{
   should["select ... where null bet doesn't throw before anyone has staked this round"]{
-    .bs.tab::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
     `.bs.tab upsert ([]player:1 2f;name:`alice`bob;handle:10 11i);
     threw:@[{select from .bs.tab where null bet;0b};();{1b}];
     threw musteq 0b;
@@ -52,8 +52,8 @@ system "l src/server/bin/blackjackServer.q";
 
 .tst.desc["hist[] (bin/blackjackServer.q:34)"]{
   should["returns .bs.hist and .bs.res concatenated"]{
-    .bs.hist::([]round:1 2);
-    .bs.res::([]round:enlist 3);
+    .bs.hist:([]round:1 2);
+    .bs.res:([]round:enlist 3);
     (exec round from hist[]) musteq 1 2 3;
     };
  };
@@ -75,27 +75,27 @@ system "l src/server/bin/blackjackServer.q";
 
 .tst.desc["regConn"]{
   should["adds a plain connection to cp when isDA is false"]{
-    cp::()!(); DA::0Ni;
-    `isDA mock {0b};
-    regConn[42i];
-    (count cp) musteq 1;
-    DA musteq 0Ni;
+    .bs.cp:()!(); .bs.da:0Ni;
+    `.bs.isDA mock {0b};
+    .bs.regConn[42i];
+    (count .bs.cp) musteq 1;
+    .bs.da musteq 0Ni;
     };
   should["routes a detectionAlgo connection to DA instead of cp"]{
-    cp::()!(); DA::0Ni;
-    `isDA mock {1b};
-    regConn[42i];
-    DA musteq 42i;
-    (count cp) musteq 0;
+    .bs.cp:()!(); .bs.da:0Ni;
+    `.bs.isDA mock {1b};
+    .bs.regConn[42i];
+    .bs.da musteq 42i;
+    (count .bs.cp) musteq 0;
     };
  };
 
 .tst.desc[".z.po"]{
   should["registers the connection and starts the table for a plain client"]{
-    cp::()!(); DA::0Ni;
+    .bs.cp:()!(); .bs.da:0Ni;
     regConnCalls::0; startCalls::0;
-    `regConn mock {regConnCalls::regConnCalls+1};
-    `isDA mock {0b};
+    `.bs.regConn mock {regConnCalls::regConnCalls+1};
+    `.bs.isDA mock {0b};
     `.bs.start mock {startCalls::startCalls+1};
     .z.po[];
     regConnCalls musteq 1;
@@ -103,8 +103,8 @@ system "l src/server/bin/blackjackServer.q";
     };
   should["skips .bs.start for a detectionAlgo connection"]{
     startCalls::0;
-    `regConn mock {};
-    `isDA mock {1b};
+    `.bs.regConn mock {};
+    `.bs.isDA mock {1b};
     `.bs.start mock {startCalls::startCalls+1};
     .z.po[];
     startCalls musteq 0;
@@ -113,29 +113,29 @@ system "l src/server/bin/blackjackServer.q";
 
 .tst.desc["leave removes the disconnecting handle from cp (bin/blackjackServer.q)"]{
   should["drops only the disconnecting handle's key, leaving other connected players untouched"]{
-    cp::(5i;6i)!`alice`bob;
-    .bs.tab::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
-    .bs.res::flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
-    leave[5i];
-    cp musteq enlist[6i]!enlist`bob;
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.leave[5i];
+    .bs.cp musteq enlist[6i]!enlist`bob;
     };
  };
 
 .tst.desc[".z.pc"]{
   should["resets DA to null for the detectionAlgo handle, without calling leave"]{
-    DA::7i;
+    .bs.da:7i;
     leaveCalls::0;
-    `leave mock {leaveCalls::leaveCalls+1};
+    `.bs.leave mock {leaveCalls::leaveCalls+1};
     .z.pc[7i];
-    DA musteq 0Ni;
+    .bs.da musteq 0Ni;
     leaveCalls musteq 0;
     };
   should["calls leave for a non-DA disconnect, leaving DA untouched"]{
-    DA::7i;
+    .bs.da:7i;
     leaveArg::0Ni;
-    `leave mock {leaveArg::x};
+    `.bs.leave mock {leaveArg::x};
     .z.pc[3i];
-    DA musteq 7i;
+    .bs.da musteq 7i;
     leaveArg musteq 3i;
     };
  };

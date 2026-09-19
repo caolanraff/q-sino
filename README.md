@@ -87,7 +87,8 @@ pushes just print a harmless error to the session's own console, since
 `.mc.stake`/`.mc.play`/`.mc.shuffle` are undefined there).
 
 ## Enhancements
-- change globals to use namespace
+- change globals to use namespace (done for the server package; the client
+  package still has bare globals)
 - create generic functions for bust and 21, as used in deal and hit functions
 - use qprof to check speed of functions
 - supervised learning (using seed values)
