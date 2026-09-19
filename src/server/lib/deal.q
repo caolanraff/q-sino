@@ -26,7 +26,7 @@ stake:{
 	DC1:getCard[];
 	pubMsg["Dealers first card is ",(string DC1);key cp];
 	update dealer:num#DC1 from `.bs.tab;
-	D:cardDict[DC1];
+	D::cardDict[DC1];
 	update dealerCnt:num#"I"$(string D) from `.bs.tab;
 
 	dealCard each select from .bs.tab where (count each cards)=1;
@@ -35,8 +35,7 @@ stake:{
 	pubMsg["Dealers second card is dealt face down";key cp];
 	DC::DC1,DC2;
 
-	while[(count select from .bs.tab where null cnt)>0;
-		h:first exec handle from .bs.tab where null cnt;
+	{[h]
 		UC:(first exec cards from .bs.tab where handle=h);
 		sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
 		U::cardDict[UC];
@@ -53,7 +52,8 @@ stake:{
 					  .bs.dealer[]]]]];
 			[$[(first U)~(last U);
 				sendMsg["Hit, stick or split?";h];
-				sendMsg["Hit or stick?";h]]]]];
+				sendMsg["Hit or stick?";h]]]];
+	} each exec handle from .bs.tab where null cnt;
 	};
 
 .bs.deal:{
