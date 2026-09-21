@@ -8,9 +8,6 @@ system "l src/client/bin/masterClient.q";
  };
 
 .tst.desc[".mc.dispatch"]{
-  / a real IPC handle applied to (`func;arg) sends that single list as one sync
-  / request, which the remote destructures as func[arg] - a unary mock of `h`
-  / that does the same destructuring stands in for the real handle here
   should["forwards the given function name and argument to h as a single sync request"]{
     req::();
     `h mock {[fx] req::fx};

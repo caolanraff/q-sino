@@ -15,13 +15,15 @@ handDict:`H`S`D`SP!`hit`stick`double`split;
 .mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
 .mc.shuffle:{-1"Deck reshuffled"};
 
-// forwards a manual-play command to the same-named function on the server
-// over the connection handle `h` (opened in init[] below); mockable by name
-// for tests, unlike the plain stake/hit/etc. globals bound below, which
-// can't be defined at load time - they'd collide with blackjackServer.q's
-// own root-scope stake/hit/stick/double/split/shuffle/buildDeck/hist when
-// both files are system"l"ed into one process by the test runner
-.mc.dispatch:{[f;x] h(f;x)};
+.mc.dispatch:{[f;x]h(f;x)};
+stake:{.mc.dispatch[`stake;x]};
+hit:{.mc.dispatch[`hit;x]};
+stick:{.mc.dispatch[`stick;x]};
+double:{.mc.dispatch[`double;x]};
+split:{.mc.dispatch[`split;x]};
+shuffle:{.mc.dispatch[`shuffle;x]};
+buildDeck:{.mc.dispatch[`buildDeck;x]};
+hist:{.mc.dispatch[`hist;x]};
 
 /// start ///
 
@@ -39,19 +41,6 @@ init:{
   if[not null p;system"l src/client/lib/",string[p],".q"];
   h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
   mh::h`.z.w;
-  // manual-play helpers - let a manual player call stake[bet]/hit[]/stick[]/
-  // double[]/split[]/shuffle[]/buildDeck[]/hist[] directly instead of going
-  // via `h` themselves; bound only here (the process's own entry point), so
-  // they never leak into a process that merely system"l"s this file (e.g.
-  // the test runner) and collide with the server's same-named globals
-  stake::{.mc.dispatch[`stake;x]};
-  hit::{.mc.dispatch[`hit;x]};
-  stick::{.mc.dispatch[`stick;x]};
-  double::{.mc.dispatch[`double;x]};
-  split::{.mc.dispatch[`split;x]};
-  shuffle::{.mc.dispatch[`shuffle;x]};
-  buildDeck::{.mc.dispatch[`buildDeck;x]};
-  hist::{.mc.dispatch[`hist;x]};
   };
 
 if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;init[]];
