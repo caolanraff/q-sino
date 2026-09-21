@@ -6,3 +6,18 @@ system "l src/client/bin/masterClient.q";
     (asc pt) mustmatch onDisk;
     };
  };
+
+.tst.desc[".mc.dispatch"]{
+  should["forwards the given function name and argument to h as a single sync request"]{
+    req::();
+    `h mock {[fx] req::fx};
+    .mc.dispatch[`stake;10];
+    req mustmatch (`stake;10);
+    };
+  should["passes through whatever argument it's given, including no argument"]{
+    req::();
+    `h mock {[fx] req::fx};
+    .mc.dispatch[`hit;::];
+    req mustmatch (`hit;::);
+    };
+ };

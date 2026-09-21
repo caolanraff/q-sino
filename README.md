@@ -51,9 +51,11 @@ q src/client/bin/masterClient.q -player <name> -hands 100 # auto - <name> plays 
 any strategy file, so you get `masterClient.q`'s own log-only prompt each
 time it's your turn (`It's your turn to stake - run stake[bet] when ready`,
 etc.) instead of auto-playing. You then call `stake[bet]`, `hit[]`,
-`stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]` on
-the handle yourself, whenever you're ready, for as long as you want -
-`-hands` only applies to auto mode.
+`stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]`
+directly in your console, whenever you're ready, for as long as you want -
+`masterClient.q` defines each of these itself, forwarding it to the server
+over the connection it opened, so you never have to touch the handle
+yourself. `-hands` only applies to auto mode.
 
 **Auto mode** (`-player <name>`): loads that strategy from `src/client/lib/`
 (which pulls in `playerCore.q` itself) and plays every hand automatically.

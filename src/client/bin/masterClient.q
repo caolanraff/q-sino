@@ -15,6 +15,16 @@ handDict:`H`S`D`SP!`hit`stick`double`split;
 .mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
 .mc.shuffle:{-1"Deck reshuffled"};
 
+.mc.dispatch:{[f;x]h(f;x)};
+stake:{.mc.dispatch[`stake;x]};
+hit:{.mc.dispatch[`hit;x]};
+stick:{.mc.dispatch[`stick;x]};
+double:{.mc.dispatch[`double;x]};
+split:{.mc.dispatch[`split;x]};
+shuffle:{.mc.dispatch[`shuffle;x]};
+buildDeck:{.mc.dispatch[`buildDeck;x]};
+hist:{.mc.dispatch[`hist;x]};
+
 /// start ///
 
 init:{
