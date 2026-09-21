@@ -15,7 +15,7 @@ stake:{
 /// Deal function ///
 .bs.deal0:{
 	if[0=count .bs.tab;.bs.lg"No players at the table";:()];
-	if[(count .bs.deck)<78;.bs.lg"Deck needs reshuffled";buildDeck[];shuffle[]];
+	if[(count .bs.deck)<78;.bs.lg"Deck needs reshuffled";.bs.buildDeck[];.bs.shuffle[]];
 
 	.bs.hd:.bs.acelow:.bs.acelowD:.bs.wwch:0b;
 	.bs.rnd+:1;num:count .bs.tab;

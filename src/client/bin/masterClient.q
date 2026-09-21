@@ -21,8 +21,6 @@ hit:{.mc.dispatch[`hit;x]};
 stick:{.mc.dispatch[`stick;x]};
 double:{.mc.dispatch[`double;x]};
 split:{.mc.dispatch[`split;x]};
-shuffle:{.mc.dispatch[`shuffle;x]};
-buildDeck:{.mc.dispatch[`buildDeck;x]};
 hist:{.mc.dispatch[`hist;x]};
 
 /// start ///

@@ -17,8 +17,10 @@ q src/server/bin/blackjackServer.q
 ```
 
 The server has no notion of "gameplay mode" - it just deals the game and
-exposes `stake`/`hit`/`stick`/`double`/`split`/`shuffle` to every connection
-the same way. It also unconditionally pushes `.mc.stake`/`.mc.play`/
+exposes `stake`/`hit`/`stick`/`double`/`split` to every connection the same
+way (`shuffle`/`buildDeck` are server-internal only - reshuffling happens
+automatically once the deck runs low, not on player request). It also
+unconditionally pushes `.mc.stake`/`.mc.play`/
 `.mc.shuffle` to every connected handle at the relevant point in play.
 `masterClient.q` defines those three names itself, as simple log-only
 prompts ("it's your turn - run ... when ready"); loading a strategy via
@@ -51,8 +53,8 @@ q src/client/bin/masterClient.q -player <name> -hands 100 # auto - <name> plays 
 any strategy file, so you get `masterClient.q`'s own log-only prompt each
 time it's your turn (`It's your turn to stake - run stake[bet] when ready`,
 etc.) instead of auto-playing. You then call `stake[bet]`, `hit[]`,
-`stick[]`, `double[]`, `split[]`, `shuffle[]`, `buildDeck[]`, `hist[]`
-directly in your console, whenever you're ready, for as long as you want -
+`stick[]`, `double[]`, `split[]`, `hist[]` directly in your console,
+whenever you're ready, for as long as you want -
 `masterClient.q` defines each of these itself, forwarding it to the server
 over the connection it opened, so you never have to touch the handle
 yourself. `-hands` only applies to auto mode.

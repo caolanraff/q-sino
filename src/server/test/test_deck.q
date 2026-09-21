@@ -1,26 +1,26 @@
 system "l src/server/bin/blackjackServer.q";
 
-.tst.desc["buildDeck"]{
+.tst.desc[".bs.buildDeck"]{
   should["builds N decks worth of cards (4 of each rank per deck) when given a count"]{
-    buildDeck[2];
+    .bs.buildDeck[2];
     (count .bs.deck) musteq 104;
     (count distinct .bs.deck) musteq 13;
     (all 8 = value count each group .bs.deck) musteq 1b;
     };
   should["defaults to .bs.deckCnt decks when no count is given"]{
-    buildDeck[];
+    .bs.buildDeck[];
     (count .bs.deck) musteq .bs.deckCnt*52;
     (all (.bs.deckCnt*4) = value count each group .bs.deck) musteq 1b;
     };
  };
 
-.tst.desc["shuffle"]{
+.tst.desc[".bs.shuffle"]{
   should["refuses to reshuffle before the hand is done"]{
     .bs.hd:0b;
     .bs.deck:`A`K`Q;
     origDeck::`A`K`Q;
     .bs.shuffleCnt:0;
-    shuffle[];
+    .bs.shuffle[];
     (.bs.deck~origDeck) musteq 1b;
     .bs.shuffleCnt musteq 0;
     };
@@ -34,7 +34,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.shuffleCnt:0;
     .bs.da:0Ni;
     .bs.cp:()!();
-    shuffle[];
+    .bs.shuffle[];
     ((asc .bs.deck)~(asc origDeck)) musteq 1b;
     (count .bs.hist) musteq 1;
     (count .bs.res) musteq 0;
@@ -51,7 +51,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.shuffleCnt:0;
     .bs.da:0Ni;
     .bs.cp:0 1i!`p1`p2;
-    shuffle[];
+    .bs.shuffle[];
     (asc excCalls) mustmatch asc (enlist(`.mc.shuffle;0i)),enlist(`.mc.shuffle;1i);
     };
   should["does not notify the detection algo on the very first shuffle, even when it's connected"]{
@@ -64,7 +64,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.shuffleCnt:0;
     .bs.da:99i;
     .bs.cp:()!();
-    shuffle[];
+    .bs.shuffle[];
     excCalls musteq ();
     };
   should["notifies the detection algo on subsequent shuffles when it's connected"]{
@@ -77,7 +77,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.shuffleCnt:1;
     .bs.da:99i;
     .bs.cp:()!();
-    shuffle[];
+    .bs.shuffle[];
     excCalls mustmatch enlist(`.da.shuffle;99i);
     };
  };

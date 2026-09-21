@@ -27,8 +27,6 @@ system "l src/server/lib/messaging.q";
   show " split     - Split your hand";
   show " double    - Double your hand.";
   show " hist      - Hand results so far";
-  show " shuffle   - Shuffle the cards";
-  show " buildDeck - Builds the deck. Can input required amount, default is 6";
   };
 
 hist:{.bs.hist,.bs.res};
@@ -77,8 +75,8 @@ init:{
   system "p 5555";
 
   show "Welcome to Qsino Blackjack!";
-  buildDeck[];
-  shuffle[];
+  .bs.buildDeck[];
+  .bs.shuffle[];
   };
 
 if[(not null .z.f) and "blackjackServer.q"~last "/" vs string .z.f;init[]];

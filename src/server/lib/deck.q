@@ -1,11 +1,11 @@
 /// Deck functions ///
-buildDeck:{
+.bs.buildDeck:{
   dc:$[null x;.bs.deckCnt;x];
   d:value ssr[{((x*2)-1)#"x,"}[dc];"x";".bs.deckTemplate"];
   .bs.deck:(-52*dc)?d;
   };
 
-shuffle:{
+.bs.shuffle:{
   if[not .bs.hd;.bs.lg"Please wait unil the hand is over before requesting a reshuffle";:()];
   .bs.lg"Shuffling the deck";
   .bs.deck:(neg count .bs.deck)?.bs.deck;
