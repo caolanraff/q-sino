@@ -9,7 +9,7 @@ decks:6;
 startCards:decks*52;
 
 // hard hand
-h:3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21;
+hTotal:3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21;
 TWO:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
 THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
 FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
@@ -20,10 +20,10 @@ EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
 ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
-hard:([h]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
+hard:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 // if player has an ACE the hand is considered a soft hand
-h:13 14 15 16 17 18 19 20 21;
+hTotal:13 14 15 16 17 18 19 20 21;
 TWO:`H`H`H`H`D`S`S`S`S;
 THREE:`H`H`H`H`D`D`S`S`S;
 FOUR:`D`D`D`D`D`D`S`S`S;
@@ -34,10 +34,10 @@ EIGHT:`H`H`H`H`H`S`S`S`S;
 NINE:`H`H`H`H`H`H`S`S`S;
 TEN:`H`H`H`H`H`H`S`S`S;
 ACE:`H`H`H`H`H`S`S`S`S;
-soft:([h]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
+soft:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //if we are dealt pairs
-h:2 3 4 5 6 7 8 9 10 11;
+hTotal:2 3 4 5 6 7 8 9 10 11;
 TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
 THREE:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
 FOUR:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
@@ -48,7 +48,7 @@ EIGHT:`H`SP`H`D`H`SP`SP`SP`S`SP;
 NINE:`H`H`H`D`H`H`SP`SP`S`SP;
 TEN:`H`H`H`H`H`S`SP`S`S`SP;
 ACE:`H`H`H`H`H`H`SP`S`S`SP;
-pair:([h]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
+pair:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //mapping dealers cards to table headers
 dealerDict:(`2`3`4`5`6`7`8`9`10`J`Q`K`11)!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
@@ -62,8 +62,8 @@ setCountDict:{`countDict set value x};
 setCountDict[`basic]; /can be overriden in player script
 
 // keeps the current count of the cards. This should determine the players bet.
-Count:{
-  getTab[];getRes[];
+.mc.Count:{
+  .mc.getTab[];.mc.getRes[];
   acr:(,//)value exec cards,dealer from .mc.res;
   act:(,//)value exec cards,dealer from .mc.tab;
   runCount:sum countDict acr,act;
@@ -74,42 +74,42 @@ Count:{
 
 // real auto-play hooks the server pushes to every connected handle; loaded whenever a
 // strategy file loads this, overriding masterClient.q's log-only defaults
-handsPlayed:0;
+.mc.handsPlayed:0;
 
 .mc.stake:{
-  if[(handsPlayed+:1)>toth;
-    -1"Played ",string[toth]," hand",$[toth=1;"";"s"],", disconnecting";
-    hclose h;
+  if[(.mc.handsPlayed+:1)>.mc.toth;
+    -1"Played ",string[.mc.toth]," hand",$[.mc.toth=1;"";"s"],", disconnecting";
+    hclose .mc.h;
     exit 0];
-  Count[];
+  .mc.Count[];
   bet:getBet[];
-  neg[h](`stake;bet);
+  neg[.mc.h](`stake;bet);
   };
 
 .mc.play:{
-  getTab[];
+  .mc.getTab[];
   .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
-  dec:handDict Help[.mc.c];
-  .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=mh;
-  neg[h](dec;`);
+  dec:.mc.handDict Help[.mc.c];
+  .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=.mc.mh;
+  neg[.mc.h](dec;`);
   };
 
 // links www.blackjackinfo.com - lesson 14 part 2
 // tells the player whether to hit or stick
-cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
+.mc.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 
 Help:{
-  dc:cardDict[-1#x];
-  pc:"I"$string cardDict[-1_x];
+  dc:.mc.cardDict[-1#x];
+  pc:"I"$string .mc.cardDict[-1_x];
   csum:sum pc;
   if[all 11=distinct pc;:`SP];
   pc[(0|(sum pc=11)&ceiling (csum-21)%10)#where pc=11]:1;
   csum:sum pc;
   r:first $[any 11 in pc;
-      ?[soft;enlist(=;`h;csum);();first dealerDict[dc]];
+      ?[soft;enlist(=;`hTotal;csum);();first dealerDict[dc]];
     (pc[0]~pc[1])&(3>count pc);  //lost chance to split if count x>3 as we must have already hit
-      ?[pair;enlist(=;`h;pc[1]);();first dealerDict[dc]];
-      ?[hard;enlist(=;`h;csum);();first dealerDict[dc]]];
+      ?[pair;enlist(=;`hTotal;pc[1]);();first dealerDict[dc]];
+      ?[hard;enlist(=;`hTotal;csum);();first dealerDict[dc]]];
   if[(r=`D)&(2<count pc);:`H];
   if[(r=`SP)&(2<count pc);:`S];
   r
