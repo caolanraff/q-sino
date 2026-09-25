@@ -45,17 +45,23 @@ stake:{
 	ucnt:("I"$(string first U))+("I"$(string last U));
 	if[all U=`11`11;ucnt:12i];
 	update cnt:ucnt from `.bs.tab where handle=h;
-	$[ucnt=21;
-		[$[("I"$(string first .bs.dealerUpValue))>=10;
-				stick[];
-				[.bs.sendMsg["Winner winner chicken dinner!";h];
-				 update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
-				 if[not count select from .bs.tab where not out;
-				  .bs.hd:1b;.bs.wwch:1b;
-				  .bs.dealer[]]]]];
-		[$[(first U)~(last U);
-			.bs.sendMsg["Hit, stick or split?";h];
-			.bs.sendMsg["Hit or stick?";h]]]];
+	dealerUp10:("I"$(string first .bs.dealerUpValue))>=10;
+	pair:(first U)~(last U);
+
+	if[(ucnt=21)&dealerUp10;
+		stick[];
+		:()];
+	if[ucnt=21;
+		.bs.sendMsg["Winner winner chicken dinner!";h];
+		update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
+		if[not count select from .bs.tab where not out;
+			.bs.hd:1b;.bs.wwch:1b;
+			.bs.dealer[]];
+		:()];
+	if[pair;
+		.bs.sendMsg["Hit, stick or split?";h];
+		:()];
+	.bs.sendMsg["Hit or stick?";h];
 	};
 
 .bs.deal:{
