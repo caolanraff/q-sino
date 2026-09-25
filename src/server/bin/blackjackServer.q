@@ -13,6 +13,7 @@
 .bs.maxSplitHands:4;   //split up to 3 times, i.e. at most 4 hands per player
 
 .bs.cp:()!();
+.bs.joined:(`int$())!`long$();   //handle -> .bs.rnd when that connection joined, so a reused handle doesn't inherit an earlier session's results
 .bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
 .bs.stake:([name:();handle:()]bet:());
 
@@ -49,12 +50,14 @@ hist:{.bs.hist,.bs.res};
   };
 
 .bs.leave:{[h]
-  .[.bs.sendMsg;("Your total winnings are - $",(string (exec sum return from .bs.res where handle=h));h);{}];
+  won:sum 0f,exec profit from hist[] where handle=h,round>.bs.joined h;
+  .[.bs.sendMsg;("Your net winnings this session are ",$[won<0;"-$";"$"],.Q.f[2;abs won];h);{}];
   .[.bs.sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
   p:exec first player from .bs.tab where handle=h;
   .bs.lg string[p]," has left the table";
   hadTurn:$[.bs.hd;0b;h in exec handle from .bs.tab where turn];
   .bs.cp:.bs.cp _ h;
+  .bs.joined:.bs.joined _ h;
   delete from `.bs.tab where handle=h;
   delete from `.bs.stake where handle=h;
   / between hands: the leaver may have been the last player the deal was waiting on

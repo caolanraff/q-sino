@@ -155,8 +155,8 @@ stake:{
 	.bs.lg"Hand stats;";
 	show .bs.tab;
 	if[.bs.wwch;update dealer:(enlist each dealer) from `.bs.tab];
-	upsert[`.bs.res;update "j"$player,profit:return from delete out, wait, turn from .bs.tab];
-	update profit:sums return by player from `.bs.res;
+	/ return includes the stake; profit is the hand's net result
+	upsert[`.bs.res;update "j"$player,profit:return-bet from delete out, wait, turn from .bs.tab];
 	.bs.sumtab:select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bs.tab;
 	.bs.sendMsg["Results table for the round;"]each key .bs.cp;
 	.bs.sendMsg[.bs.sumtab]each key .bs.cp;
