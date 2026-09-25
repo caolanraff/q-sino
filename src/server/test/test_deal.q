@@ -247,7 +247,7 @@ system "l src/server/bin/blackjackServer.q";
     (exec first dealer from .bs.tab) mustmatch `6`5`4`2;
     (exec first dealerCnt from .bs.tab) musteq 17i;
     };
-  should["reduces a newly-drawn ace by 10 to avoid busting, without setting acelowD"]{
+  should["reduces a newly-drawn ace by 10 to avoid busting, and marks it lowered"]{
     `.bs.pubMsg mock {[x;y]};
     .bs.dc:`6`9;
     .bs.acelowD:0b;
@@ -256,7 +256,28 @@ system "l src/server/bin/blackjackServer.q";
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`6;dealerCnt:enlist 6i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.dealer0[];
     (exec first dealerCnt from .bs.tab) musteq 19i;
-    .bs.acelowD musteq 0b;
+    .bs.acelowD musteq 1;
+    };
+ };
+
+.tst.desc[".bs.reduceAce"]{
+  should["leaves the count and lowered tally untouched when there's no bust"]{
+    (.bs.reduceAce[18;`8;`A`8;0]) mustmatch (18;0);
+    };
+  should["leaves the count untouched when the hand has no ace to fall back on"]{
+    (.bs.reduceAce[25;`10;`9`6`10;0]) mustmatch (25;0);
+    };
+  should["reduces a newly-drawn ace by 10 and marks it lowered"]{
+    (.bs.reduceAce[26;`11;`6`9`A;0]) mustmatch (16;1);
+    };
+  should["reduces an existing (not just-drawn) ace by 10 when a later card busts"]{
+    (.bs.reduceAce[25;`5;`A`9`5;0]) mustmatch (15;1);
+    };
+  should["marks both aces lowered when the hand started as a pair of aces"]{
+    (.bs.reduceAce[24;`2;`A`A`2;0]) mustmatch (14;2);
+    };
+  should["doesn't lower an ace a second time once it's already accounted for"]{
+    (.bs.reduceAce[25;`5;`A`9`5;1]) mustmatch (25;1);
     };
  };
 

@@ -41,14 +41,11 @@ stick:{
 	.bs.pubMsg["Hit by ",(string .z.u);key .bs.cp];
 	.bs.pubMsg[(string .z.u)," got a ",(string UH);key .bs.cp];
 	update cards:(cards,'UH) from `.bs.tab where handle=.z.w,turn;
+	a:raze exec cards from .bs.tab where turn;
 	UH:.bs.cardDict[UH];
 	ucnt:("I"$(string UH))+(first exec cnt from .bs.tab where turn);
-
-	if[(UH=`11)&(ucnt>21);
-		ucnt:ucnt-10i;.bs.acelow+:1];
-	if[all((ucnt>21);((count a[where a=`A])>.bs.acelow);(`A in a:(raze exec cards from .bs.tab where turn)));
-		ucnt:ucnt-10i;
-		$[`A`A~(2#a);.bs.acelow+:2;.bs.acelow+:1]];
+	res:.bs.reduceAce[ucnt;UH;a;.bs.acelow];
+	ucnt:res 0;.bs.acelow:res 1;
 
 	.bs.pubMsg[(string .z.u),"'s count is now ",(string ucnt);key .bs.cp];
 	update cnt:ucnt from `.bs.tab where handle=.z.w,turn;
