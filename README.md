@@ -92,6 +92,5 @@ pushes just print a harmless error to the session's own console, since
 
 ## Enhancements
 - use qprof to check speed of functions
-- supervised learning (using seed values)
 - protected eval function
 - detection algo to publish data to websockets
