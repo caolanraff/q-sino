@@ -107,3 +107,32 @@ system "l src/server/bin/blackjackServer.q";
     (exec first cards from .bs.tab where player=2) mustmatch ();
     };
  };
+
+.tst.desc[".bs.handCount"]{
+  should["totals a hand with no aces at face value"]{
+    (.bs.handCount `K`7) musteq 17i;
+    (.bs.handCount `K`7`9) musteq 26i;
+    };
+  should["counts an ace as 11 when that doesn't bust the hand"]{
+    (.bs.handCount `A`6) musteq 17i;
+    (.bs.handCount `3`2`A) musteq 16i;
+    };
+  should["drops an ace to 1 once a later card would otherwise bust the hand, wherever the ace was dealt"]{
+    (.bs.handCount `A`5`10) musteq 16i;
+    (.bs.handCount `3`2`A`10) musteq 16i;
+    };
+  should["only drops as many aces to 1 as needed"]{
+    (.bs.handCount `A`A) musteq 12i;
+    (.bs.handCount `A`5`A`10) musteq 17i;
+    (.bs.handCount `A`A`A`A`7) musteq 21i;
+    };
+ };
+
+.tst.desc[".bs.isBJ"]{
+  should["is true only for a two-card 21"]{
+    (.bs.isBJ `A`K) musteq 1b;
+    (.bs.isBJ `10`A) musteq 1b;
+    (.bs.isBJ `7`7`7) musteq 0b;
+    (.bs.isBJ `A`9) musteq 0b;
+    };
+ };

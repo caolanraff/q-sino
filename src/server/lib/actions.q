@@ -10,7 +10,6 @@
 /// Turn-advance helper (shared by .bs.stick0 and .bs.hit1's bust branch) ///
 .bs.nextTurn:{
 	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-	.bs.acelow:0;
 	if[0=count select from .bs.tab where turn;
 		.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
 		.bs.dealer[];
@@ -41,11 +40,7 @@ stick:{
 	.bs.pubMsg["Hit by ",(string .z.u);key .bs.cp];
 	.bs.pubMsg[(string .z.u)," got a ",(string UH);key .bs.cp];
 	update cards:(cards,'UH) from `.bs.tab where handle=.z.w,turn;
-	a:raze exec cards from .bs.tab where turn;
-	UH:.bs.cardDict[UH];
-	ucnt:("I"$(string UH))+(first exec cnt from .bs.tab where turn);
-	res:.bs.reduceAce[ucnt;UH;a;.bs.acelow];
-	ucnt:res 0;.bs.acelow:res 1;
+	ucnt:.bs.handCount first exec cards from .bs.tab where turn;
 
 	.bs.pubMsg[(string .z.u),"'s count is now ",(string ucnt);key .bs.cp];
 	update cnt:ucnt from `.bs.tab where handle=.z.w,turn;
@@ -61,7 +56,7 @@ stick:{
 
 	if[ucnt>21;
 		.bs.pubMsg[(string .z.u)," is now bust!";key .bs.cp];
-		update return:0f, out:1b, turn:0b from `.bs.tab where handle=h;
+		update return:0f, out:1b, turn:0b from `.bs.tab where turn;
 		update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b, wait=0b);
 		.bs.nextTurn[];
 		DT:.bs.dc];
