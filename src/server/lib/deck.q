@@ -1,7 +1,7 @@
 /// Deck functions ///
 .bs.buildDeck:{
   dc:$[null x;.bs.deckCnt;x];
-  d:value ssr[{((x*2)-1)#"x,"}[dc];"x";".bs.deckTemplate"];
+  d:raze dc#enlist .bs.deckTemplate;
   .bs.deck:(-52*dc)?d;
   };
 
@@ -18,8 +18,9 @@
   };
 
 .bs.getCard:{
-  c:rand .bs.deck;
-  .bs.deck:.bs.deck except[til count .bs.deck;first where .bs.deck=c];
+  i:rand count .bs.deck;
+  c:.bs.deck i;
+  .bs.deck:(i#.bs.deck),(i+1)_.bs.deck;
   c
   };
 
