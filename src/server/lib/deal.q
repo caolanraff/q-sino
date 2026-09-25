@@ -83,11 +83,10 @@ stake:{
 
 /// Ace-reduction helper (shared bust fix-up, used by .bs.dealer0 and .bs.hit0) ///
 .bs.reduceAce:{[cnt;justDrawn;hand;lowered]
-	if[(justDrawn=`11)&cnt>21;
-		:(cnt-10i;lowered+1)];
+	if[(justDrawn=`11)&cnt>21;:(cnt-10i;lowered+1)];
 	if[all(cnt>21;(count hand[where hand=`A])>lowered;`A in hand);
 		:(cnt-10i;lowered+$[`A`A~2#hand;2;1])];
-	(cnt;lowered)
+	:(cnt;lowered);
 	};
 
 /// Dealer function ///
