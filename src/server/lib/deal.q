@@ -6,7 +6,24 @@ stake:{
   upsert[`.bs.stake;(.bs.user[];.z.w;bet)];
   .bs.bd:1b;
   .bs.tab:.bs.tab lj .bs.stake;
+  if[null .bs.betDeadline;.bs.armBetTimer[]];
   .bs.dealIfReady[];
+  };
+
+/ first bet of the round starts the clock for everyone else
+.bs.armBetTimer:{
+  .bs.betDeadline:.z.p+.bs.betTimeout;
+  .bs.sendMsg["Betting closes in ",string["j"$.bs.betTimeout%0D00:00:01]," seconds"]each exec handle from .bs.tab where null bet;
+  };
+
+/ timer tick: once betting closes, anyone still unbet sits the hand out (.bs.deal drops them) and the rest are dealt
+.bs.betTimer:{
+  if[null .bs.betDeadline;:()];
+  if[.z.p<.bs.betDeadline;:()];
+  / every bettor has since left - dealing now would unseat everyone, so wait for a fresh first bet
+  if[0=count select from .bs.tab where not null bet;.bs.betDeadline:0Np;:()];
+  .bs.lg"Betting closed";
+  .bs.deal[];
   };
 
 / deal once every seated player has a bet down
@@ -78,8 +95,9 @@ stake:{
 .bs.deal:{
 	if[not .bs.hd;.bs.lg"Please finish the previous hand before dealing again";:()];
 	if[not .bs.bd;.bs.lg"Please place your bets!";:()];
+	.bs.betDeadline:0Np;
 	if[count h:exec handle from .bs.tab where null bet;
-		.bs.sendMsg["No bet placed, please wait until the next hand";h];
+		.bs.sendMsg["No bet placed, please wait until the next hand"]each h;
 		delete from `.bs.tab where null bet];
 	.bs.deal0[];
 	if[not .bs.hd;

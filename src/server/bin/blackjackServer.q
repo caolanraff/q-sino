@@ -11,6 +11,8 @@
 .bs.deckCnt:6;
 .bs.shuffleCnt:0;
 .bs.maxSplitHands:4;   //split up to 3 times, i.e. at most 4 hands per player
+.bs.betTimeout:0D00:00:30;   //once the first bet is down, anyone still unbet after this long sits the hand out
+.bs.betDeadline:0Np;
 
 .bs.cp:()!();
 .bs.joined:(`int$())!`long$();   //handle -> .bs.rnd when that connection joined, so a reused handle doesn't inherit an earlier session's results
@@ -70,6 +72,7 @@ hist:{.bs.hist,.bs.res};
 
 .z.po:{.bs.regConn[.z.w];if[not .bs.isDA[];.bs.start[];neg[.z.w](.bs.intro;`)]};
 .z.pc:{$[x=.bs.da;.bs.da:0Ni;.bs.leave x]};
+.z.ts:{.bs.betTimer[]};
 
 /// Deck functions ///
 system "l src/server/lib/deck.q";
@@ -87,6 +90,7 @@ init:{
   system "S ",string seed;
 
   system "p 5555";
+  system "t 1000";  / drives .bs.betTimer
 
   show "Welcome to Qsino Blackjack!";
   .bs.buildDeck[];
