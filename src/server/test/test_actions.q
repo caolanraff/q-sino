@@ -187,11 +187,11 @@ system "l src/server/bin/blackjackServer.q";
     (exec first turn from .bs.tab where player=1.02) musteq 1b;
     dealerCalls musteq 0;
     };
-  should["scores each split hand from its own cards, unaffected by aces in the other hand"]{
+  should["refuses to hit a split ace hand, which stands on its one card"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.sendMsg mock {[x;y]};
     `.bs.excFunc mock {[x;y;z]};
-    cardseq::`5`A`10;  / hand 1 gets 5 (A,5), hand 2 gets A (A,A); hand 1 then hits 10
+    cardseq::`5`A`10;  / hand 1 gets 5 (A,5), hand 2 gets A (A,A); the 10 must never be drawn
     `.bs.getCard mock {c:first cardseq;cardseq::1_cardseq;c};
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`9;`9);dealerCnt:9 9i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
@@ -199,10 +199,10 @@ system "l src/server/bin/blackjackServer.q";
     .bs.double:0b;
     split[];
     hit[];
-    (exec first cards from .bs.tab where player=1.01) mustmatch `A`5`10;
+    (exec first cards from .bs.tab where player=1.01) mustmatch `A`5;
     (exec first cnt from .bs.tab where player=1.01) musteq 16i;
-    (exec first out from .bs.tab where player=1.01) musteq 0b;
     (exec first cnt from .bs.tab where player=1.02) musteq 12i;
+    cardseq mustmatch enlist`10;
     };
  };
 
@@ -270,6 +270,68 @@ system "l src/server/bin/blackjackServer.q";
     (count .bs.tab) musteq 3;
     (asc exec cnt from .bs.tab where player in 1.01 1.02) musteq 13 13i;
     (exec cards from .bs.tab where player=1.01) mustmatch enlist `A`2;
+    };
+  should["refuses to split a hand of more than two cards, even if every card matches"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`5`5`5;`9`7);cnt:15 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    split[];
+    (count .bs.tab) musteq 2;
+    (exec first cards from .bs.tab where player=1) mustmatch `5`5`5;
+    (exec first split from .bs.tab where player=1) musteq 0b;
+    };
+  should["refuses a fourth split once the player already has four hands"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.tab:([]round:1 1 1 1 1;player:1.01 1.02 1.03 1.04 2;name:`p1`p1`p1`p1`p2;handle:0 0 0 0 1i;cards:(`8`8;`8`3;`8`10;`8`2;`9`7);cnt:16 11 18 10 16i;dealer:5#`5;dealerCnt:5#5i;bet:5#10f;return:5#0n;profit:5#0n;split:11110b;double:00000b);
+    .bs.tab:update out:00000b,wait:00000b,turn:10000b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    split[];
+    (count .bs.tab) musteq 5;
+    (exec first cards from .bs.tab where player=1.01) mustmatch `8`8;
+    };
+  should["allows a re-split while the player has fewer than four hands"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.excFunc mock {[x;y;z]};
+    `.bs.getCard mock {`3};
+    .bs.tab:([]round:1 1 1;player:1.01 1.02 2;name:`p1`p1`p2;handle:0 0 1i;cards:(`8`8;`8`3;`9`7);cnt:16 11 16i;dealer:3#`5;dealerCnt:3#5i;bet:3#10f;return:3#0n;profit:3#0n;split:110b;double:000b);
+    .bs.tab:update out:000b,wait:000b,turn:100b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    split[];
+    (count select from .bs.tab where handle=0i) musteq 3;
+    };
+  should["deals each split ace one card, stands both hands, and passes the turn on"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    excFuncCalls::();
+    `.bs.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    cardseq::`K`7;
+    `.bs.getCard mock {c:first cardseq;cardseq::1_cardseq;c};
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    split[];
+    (exec cards from .bs.tab where player in 1.01 1.02) mustmatch (`A`K;`A`7);
+    (exec cnt from .bs.tab where player in 1.01 1.02) musteq 21 18i;
+    (exec wait from .bs.tab where player in 1.01 1.02) musteq 11b;
+    (exec turn from .bs.tab where player in 1.01 1.02) musteq 00b;
+    (exec first turn from .bs.tab where player=2) musteq 1b;
+    excFuncCalls mustmatch enlist(`.mc.play;1i);
+    };
+  should["goes to the dealer after split aces when nobody else is left to act"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.getCard mock {`9};
+    dealerCalls::0;
+    `.bs.dealer mock {dealerCalls+::1};
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`A;cnt:enlist 12i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
+    .bs.cp:enlist[0i]!enlist`p1;
+    split[];
+    (exec wait from .bs.tab) musteq 11b;
+    dealerCalls musteq 1;
     };
   should["splits a pair into two one-card hands, each dealt a new card"]{
     `.bs.pubMsg mock {[x;y]};

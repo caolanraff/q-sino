@@ -13,3 +13,17 @@
     Help[`10`2`10] musteq `H;
     };
  };
+
+.tst.desc[".mc.decide"]{
+  before{system "l src/client/lib/playerCore.q"};
+  should["passes Help's split through while the player is under the hand cap"]{
+    .mc.decide[`8`8`10;3] musteq `SP;
+    };
+  should["plays a pair as its hard total once the player is at the hand cap"]{
+    .mc.decide[`8`8`10;4] musteq `H;   / hard 16 vs 10
+    .mc.decide[`10`10`6;4] musteq `S;  / hard 20 vs 6
+    };
+  should["leaves non-split decisions alone at the hand cap"]{
+    .mc.decide[`5`6`6;4] musteq `D;
+    };
+ };

@@ -110,16 +110,29 @@ double:{
   update turn:1b from `.bs.tab where not turn,splithand=1;
   update turn:0b from `.bs.tab where turn,splithand=2;
   delete splithand from `.bs.tab;
-  .bs.hit1[];
+  };
+
+/ split aces get one card each and both hands stand
+.bs.standSplitAces:{
+  .bs.pubMsg["Split aces get one card each - both hands stand";key .bs.cp];
+  update wait:1b,turn:0b from `.bs.tab where handle=.z.w,split,not out,`A=first each cards;
+  update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b);
+  .bs.nextTurn[];
   };
 
 split:{
   if[not .bs.checks[];:()];
+  if[not 2=first exec count each cards from .bs.tab where turn;
+    .bs.sendMsg["You can only split your first two cards ",(string .z.u);.z.w];:()];
   if[not 1=count distinct crds:.bs.cardDict[first exec cards from .bs.tab where turn];
-  .bs.sendMsg["You can't split this hand ",(string .z.u);.z.w];:()];
+    .bs.sendMsg["You can't split this hand ",(string .z.u);.z.w];:()];
+  if[.bs.maxSplitHands<=count select from .bs.tab where handle=.z.w;
+    .bs.sendMsg["You can't split more than ",string[.bs.maxSplitHands-1]," times ",(string .z.u);.z.w];:()];
   .bs.pubMsg[(string .z.u)," is splitting";key .bs.cp];
-  if[all crds=`11`11;update cnt:22i from `.bs.tab where turn];
+  aces:all crds=`11`11;
+  if[aces;update cnt:22i from `.bs.tab where turn];
   update split:1b from `.bs.tab where turn;
   .bs.split0[];
   .bs.splitHit[];
+  $[aces;.bs.standSplitAces[];.bs.hit1[]];
   };
