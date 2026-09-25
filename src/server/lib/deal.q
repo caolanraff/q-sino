@@ -95,7 +95,7 @@ stake:{
 	dTotal:.bs.handCount dh;
 	.bs.pubMsg["Dealers hand count is now ",(string dTotal);key .bs.cp];
 	update dealerCnt:dTotal from `.bs.tab;
-	(dh;dTotal)
+	:(dh;dTotal);
 	};
 
 .bs.dealer0:{
