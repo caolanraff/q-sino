@@ -95,7 +95,7 @@ setCountDict[`basic]; /can be overriden in player script
   r:Help[x];
   if[(r=`SP)&hands>=.mc.maxSplitHands;
     r:first ?[hard;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]]];
-  r
+  :r;
   };
 
 .mc.play:{
