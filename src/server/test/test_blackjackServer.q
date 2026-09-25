@@ -116,8 +116,125 @@ system "l src/server/bin/blackjackServer.q";
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
     .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.hd:1b;
     .bs.leave[5i];
     .bs.cp musteq enlist[6i]!enlist`bob;
+    };
+ };
+
+.tst.desc[".bs.leave mid-hand"]{
+  should["passes the turn to the next player's hand when the leaver held it"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    excFuncCalls::();
+    `.bs.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.hd:0b;
+    .bs.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.leave[5i];
+    (exec handle from .bs.tab) musteq enlist 6i;
+    (exec first turn from .bs.tab) musteq 1b;
+    excFuncCalls mustmatch enlist(`.mc.play;6i);
+    };
+  should["runs the dealer when the leaver was the last player still to act"]{
+    `.bs.pubMsg mock {[x;y]};
+    dealerCalls::0;
+    `.bs.dealer mock {dealerCalls+::1};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.hd:0b;
+    .bs.tab:update out:00b,wait:10b,turn:01b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.leave[6i];
+    dealerCalls musteq 1;
+    };
+  should["leaves the turn with its holder when someone else leaves"]{
+    `.bs.pubMsg mock {[x;y]};
+    nextTurnCalls::0;
+    `.bs.nextTurn mock {nextTurnCalls+::1};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.hd:0b;
+    .bs.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.leave[6i];
+    (exec handle from .bs.tab where turn) musteq enlist 5i;
+    nextTurnCalls musteq 0;
+    };
+  should["removes every split hand belonging to the leaver"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.nextTurn mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.hd:0b;
+    .bs.tab:([]round:1 1 1;player:1 2.01 2.02;name:`alice`bob`bob;handle:5 6 6i;cards:(`8`8;`9`3;`9`4);cnt:16 12 13i;dealer:3#`5;dealerCnt:5 5 5i;bet:10 10 10;return:3#0n;profit:3#0n;split:011b;double:000b);
+    .bs.tab:update out:000b,wait:000b,turn:100b from .bs.tab;
+    .bs.leave[6i];
+    (exec handle from .bs.tab) musteq enlist 5i;
+    };
+ };
+
+.tst.desc[".bs.leave between hands"]{
+  should["deals when the leaver was the only seated player yet to bet"]{
+    `.bs.pubMsg mock {[x;y]};
+    dealCalls::0;
+    `.bs.deal mock {dealCalls+::1};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.hd:1b;
+    .bs.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
+    .bs.tab:update bet:10 0N from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.leave[6i];
+    dealCalls musteq 1;
+    };
+  should["doesn't deal while another remaining player still hasn't bet"]{
+    `.bs.pubMsg mock {[x;y]};
+    dealCalls::0;
+    `.bs.deal mock {dealCalls+::1};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i;7i)!`alice`bob`carol;
+    .bs.hd:1b;
+    .bs.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`alice`bob`carol;handle:5 6 7i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.leave[6i];
+    dealCalls musteq 0;
+    };
+  should["drops the leaver's pending bet"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.deal mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.hd:1b;
+    .bs.stake:([name:`alice`bob;handle:5 6i]bet:10 20);
+    .bs.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.leave[6i];
+    (exec handle from .bs.stake) musteq enlist 5i;
+    };
+ };
+
+.tst.desc[".bs.start"]{
+  should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
+    `.bs.sendMsg mock {[x;y]};
+    excFuncCalls::();
+    `.bs.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    .bs.hd:1b;
+    .bs.cp:(5i;6i;7i)!`alice`bob`carol;
+    .bs.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
+    .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    .bs.start[];
+    (exec bet from .bs.tab where handle=5i) musteq enlist 10;
+    (exec handle from .bs.tab where null bet) musteq 6 7i;
+    excFuncCalls mustmatch ((`.mc.stake;6i);(`.mc.stake;7i));
+    };
+  should["prompts every player when nobody has bet yet"]{
+    `.bs.sendMsg mock {[x;y]};
+    excFuncCalls::();
+    `.bs.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    .bs.hd:1b;
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.stake:([name:();handle:()]bet:());
+    .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    .bs.start[];
+    excFuncCalls mustmatch ((`.mc.stake;5i);(`.mc.stake;6i));
     };
  };
 

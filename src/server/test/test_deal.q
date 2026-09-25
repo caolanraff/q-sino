@@ -453,6 +453,20 @@ system "l src/server/bin/blackjackServer.q";
     .bs.dealer[];
     excFuncCalls mustmatch enlist(`.da.gameover;99i);
     };
+  should["clears the round's bets before starting the next hand"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    .bs.wwch:0b; .bs.da:0Ni; .bs.dc:`K`5;
+    stakeAtStart::-1;
+    `.bs.start mock {stakeAtStart::count .bs.stake};
+    .bs.stake:([name:enlist`p1;handle:enlist 0i]bet:enlist 10);
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bs.tab;
+    .bs.cp:enlist[0i]!enlist`p1;
+    .bs.dealer[];
+    stakeAtStart musteq 0;
+    };
   should["always starts the next hand - the server has no round-count cap of its own"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.sendMsg mock {[x;y]};

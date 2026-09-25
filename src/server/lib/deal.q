@@ -6,10 +6,16 @@ stake:{
   upsert[`.bs.stake;(.bs.user[];.z.w;bet)];
   .bs.bd:1b;
   .bs.tab:.bs.tab lj .bs.stake;
-  if[0=count select from .bs.tab where null bet;
-    .bs.lg"All players have placed their bet";
-    .bs.lg"Time to deal";
-    .bs.deal[]];
+  .bs.dealIfReady[];
+  };
+
+/ deal once every seated player has a bet down
+.bs.dealIfReady:{
+  if[0=count .bs.tab;:()];
+  if[count select from .bs.tab where null bet;:()];
+  .bs.lg"All players have placed their bet";
+  .bs.lg"Time to deal";
+  .bs.deal[];
   };
 
 /// Deal function ///
@@ -156,6 +162,7 @@ stake:{
 	.bs.sendMsg[.bs.sumtab]each key .bs.cp;
 	update player:`int$player from `.bs.tab;
 	.bs.bd:0b;.bs.hd:1b;
+	.bs.stake:0#.bs.stake;
 	.bs.pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key .bs.cp];
 	if[not null .bs.da;.bs.excFunc[`.da.gameover;.bs.res;.bs.da]];
 	.bs.start[];
