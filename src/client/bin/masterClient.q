@@ -33,12 +33,12 @@ hist:{.mc.dispatch[`hist;x]};
     if[(null p)|(not p in .mc.pt);show"[ERROR] Unknown player, options - ",","sv string .mc.pt;exit 1]];
   // number of hands this client plays before disconnecting; only meaningful in auto mode
   // (playerCore.q's .mc.stake counts them) - a manual player just disconnects themselves
-  .mc.toth::$[`hands in key args;"I"$raze args[`hands];1000i];
+  .mc.toth:$[`hands in key args;"I"$raze args[`hands];1000i];
   // each strategy file in src/client/lib/ loads its own playerCore.q dependency at its top,
   // so a new player file only needs to be dropped in here - it isn't coupled to this loader
   if[not null p;system"l src/client/lib/",string[p],".q"];
-  .mc.h::@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
-  .mc.mh::.mc.h`.z.w;
+  .mc.h:@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
+  .mc.mh:.mc.h`.z.w;
   };
 
 if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;.mc.init[]];
