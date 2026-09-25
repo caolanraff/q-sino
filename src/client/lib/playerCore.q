@@ -9,52 +9,46 @@ decks:6;
 startCards:decks*52;
 
 // hard hand
-hard:{[]
-  h:3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21;
-  TWO:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
-  THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
-  FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
-  FIVE:`H`H`H`H`H`D`D`D`D`S`S`S`S`S`S`S`S`S`S;
-  SIX:`H`H`H`H`H`D`D`D`D`S`S`S`S`S`S`S`S`S`S;
-  SEVEN:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
-  EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
-  NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
-  TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
-  ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
-  ([h]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE)
-  }[];
+hTotal:3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21;
+TWO:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
+THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
+FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
+FIVE:`H`H`H`H`H`D`D`D`D`S`S`S`S`S`S`S`S`S`S;
+SIX:`H`H`H`H`H`D`D`D`D`S`S`S`S`S`S`S`S`S`S;
+SEVEN:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
+ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
+hard:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 // if player has an ACE the hand is considered a soft hand
-soft:{[]
-  h:13 14 15 16 17 18 19 20 21;
-  TWO:`H`H`H`H`D`S`S`S`S;
-  THREE:`H`H`H`H`D`D`S`S`S;
-  FOUR:`D`D`D`D`D`D`S`S`S;
-  FIVE:`D`D`D`D`D`D`S`S`S;
-  SIX:`D`D`D`D`D`D`D`S`S;
-  SEVEN:`H`H`H`H`H`S`S`S`S;
-  EIGHT:`H`H`H`H`H`S`S`S`S;
-  NINE:`H`H`H`H`H`H`S`S`S;
-  TEN:`H`H`H`H`H`H`S`S`S;
-  ACE:`H`H`H`H`H`S`S`S`S;
-  ([h]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE)
-  }[];
+hTotal:13 14 15 16 17 18 19 20 21;
+TWO:`H`H`H`H`D`S`S`S`S;
+THREE:`H`H`H`H`D`D`S`S`S;
+FOUR:`D`D`D`D`D`D`S`S`S;
+FIVE:`D`D`D`D`D`D`S`S`S;
+SIX:`D`D`D`D`D`D`D`S`S;
+SEVEN:`H`H`H`H`H`S`S`S`S;
+EIGHT:`H`H`H`H`H`S`S`S`S;
+NINE:`H`H`H`H`H`H`S`S`S;
+TEN:`H`H`H`H`H`H`S`S`S;
+ACE:`H`H`H`H`H`S`S`S`S;
+soft:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //if we are dealt pairs
-pair:{[]
-  h:2 3 4 5 6 7 8 9 10 11;
-  TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
-  THREE:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
-  FOUR:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
-  FIVE:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
-  SIX:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
-  SEVEN:`SP`SP`H`D`SP`SP`SP`S`S`SP;
-  EIGHT:`H`SP`H`D`H`SP`SP`SP`S`SP;
-  NINE:`H`H`H`D`H`H`SP`SP`S`SP;
-  TEN:`H`H`H`H`H`S`SP`S`S`SP;
-  ACE:`H`H`H`H`H`H`SP`S`S`SP;
-  ([h]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE)
-  }[];
+hTotal:2 3 4 5 6 7 8 9 10 11;
+TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
+THREE:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
+FOUR:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
+FIVE:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
+SIX:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
+SEVEN:`SP`SP`H`D`SP`SP`SP`S`S`SP;
+EIGHT:`H`SP`H`D`H`SP`SP`SP`S`SP;
+NINE:`H`H`H`D`H`H`SP`SP`S`SP;
+TEN:`H`H`H`H`H`S`SP`S`S`SP;
+ACE:`H`H`H`H`H`H`SP`S`S`SP;
+pair:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //mapping dealers cards to table headers
 dealerDict:(`2`3`4`5`6`7`8`9`10`J`Q`K`11)!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
@@ -112,10 +106,10 @@ Help:{
   pc[(0|(sum pc=11)&ceiling (csum-21)%10)#where pc=11]:1;
   csum:sum pc;
   r:first $[any 11 in pc;
-      ?[soft;enlist(=;`h;csum);();first dealerDict[dc]];
+      ?[soft;enlist(=;`hTotal;csum);();first dealerDict[dc]];
     (pc[0]~pc[1])&(3>count pc);  //lost chance to split if count x>3 as we must have already hit
-      ?[pair;enlist(=;`h;pc[1]);();first dealerDict[dc]];
-      ?[hard;enlist(=;`h;csum);();first dealerDict[dc]]];
+      ?[pair;enlist(=;`hTotal;pc[1]);();first dealerDict[dc]];
+      ?[hard;enlist(=;`hTotal;csum);();first dealerDict[dc]]];
   if[(r=`D)&(2<count pc);:`H];
   if[(r=`SP)&(2<count pc);:`S];
   r
