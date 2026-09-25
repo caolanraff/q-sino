@@ -11,14 +11,15 @@
 .bs.nextTurn:{
 	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
 	.bs.acelow:0;
-	$[0=count select from .bs.tab where turn;
-		[.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
-		 .bs.dealer[]];
-		[h:first exec handle from .bs.tab where turn;
-		 p:first exec name from .bs.tab where handle=h;
-		 .bs.pubMsg["It's ",string[p],"'s turn";h];
-		 .bs.sendMsg[.bs.turn]each key .bs.cp;
-		 .bs.excFunc[`.mc.play;`;h]]];
+	if[0=count select from .bs.tab where turn;
+		.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
+		.bs.dealer[];
+		:()];
+	h:first exec handle from .bs.tab where turn;
+	p:first exec name from .bs.tab where handle=h;
+	.bs.pubMsg["It's ",string[p],"'s turn";h];
+	.bs.sendMsg[.bs.turn]each key .bs.cp;
+	.bs.excFunc[`.mc.play;`;h];
 	};
 
 /// Stick function ///
