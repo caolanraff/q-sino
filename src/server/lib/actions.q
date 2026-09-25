@@ -7,21 +7,27 @@
   1b
   };
 
+/// Turn-advance helper (shared by .bs.stick0 and .bs.hit1's bust branch) ///
+.bs.nextTurn:{
+	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
+	.bs.acelow:0;
+	if[0=count select from .bs.tab where turn;
+		.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
+		.bs.dealer[];
+		:()];
+	h:first exec handle from .bs.tab where turn;
+	p:first exec name from .bs.tab where handle=h;
+	.bs.pubMsg["It's ",string[p],"'s turn";h];
+	.bs.sendMsg[.bs.turn]each key .bs.cp;
+	.bs.excFunc[`.mc.play;`;h];
+	};
+
 /// Stick function ///
 .bs.stick0:{
 	.bs.pubMsg[(string .z.u)," has decided to stick";key .bs.cp];
 	update wait:1b, turn:0b from `.bs.tab where turn;
 	update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b,not turn);
-	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-	.bs.acelow:0;
-	$[(count select from .bs.tab where turn)=0;
-		[.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
-		 .bs.dealer[]];
-		[h:first exec handle from .bs.tab where turn;
-		 p:first exec name from .bs.tab where handle=h;
-		 .bs.pubMsg["It's ",string[p],"'s turn";h];
-		 {.bs.sendMsg[.bs.turn;x]}each key .bs.cp;
-		 .bs.excFunc[`.mc.play;`;h]]];
+	.bs.nextTurn[];
 	};
 
 stick:{
@@ -60,17 +66,8 @@ stick:{
 		.bs.pubMsg[(string .z.u)," is now bust!";key .bs.cp];
 		update return:0f, out:1b, turn:0b from `.bs.tab where handle=h;
 		update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b, wait=0b);
-		.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-		.bs.acelow:0;
-		$[(count select from .bs.tab where turn)=0;
-			[.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
-			 .bs.dealer[]];
-			[p:first exec name from .bs.tab where turn;
-			 h:first exec handle from .bs.tab where turn;
-			 .bs.sendMsg[(string p)," it's your turn";h];
-			 {neg[x](show;.bs.turn)}'[key .bs.cp];
-			 .bs.excFunc[`.mc.play;`;h]]];
-		 DT:.bs.dc];
+		.bs.nextTurn[];
+		DT:.bs.dc];
 
 	if[ucnt<21;
 		$[.bs.double;
