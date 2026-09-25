@@ -93,22 +93,24 @@ stake:{
 	};
 
 /// Dealer function ///
+.bs.dealerHit:{[s]
+	DH:.bs.getCard[];
+	.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
+	update dealer:(dealer,'DH) from `.bs.tab;
+	dh:s[0],DH;
+	dTotal:.bs.handCount dh;
+	.bs.pubMsg["Dealers hand count is now ",(string dTotal);key .bs.cp];
+	update dealerCnt:dTotal from `.bs.tab;
+	:(dh;dTotal);
+	};
+
 .bs.dealer0:{
 	.bs.pubMsg["Dealer has ",(string first .bs.dc),",",(string last .bs.dc);key .bs.cp];
 	update dealer:(dealer,'(last .bs.dc)) from `.bs.tab;
-	dh:.bs.dc;
-	.bs.dealerCount:.bs.handCount dh;
-	.bs.pubMsg["Dealers hand count is ",(string .bs.dealerCount);key .bs.cp];
-	update dealerCnt:.bs.dealerCount from `.bs.tab;
-
-	while[.bs.dealerCount<17;
-		DH:.bs.getCard[];
-		.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
-		update dealer:(dealer,'DH) from `.bs.tab;
-		dh,:DH;
-		.bs.dealerCount:.bs.handCount dh;
-		.bs.pubMsg["Dealers hand count is now ",(string .bs.dealerCount);key .bs.cp];
-		update dealerCnt:.bs.dealerCount from `.bs.tab];
+	dTotal:.bs.handCount .bs.dc;
+	.bs.pubMsg["Dealers hand count is ",(string dTotal);key .bs.cp];
+	update dealerCnt:dTotal from `.bs.tab;
+	.bs.dealerCount:last .bs.dealerHit/[{x[1]<17};(.bs.dc;dTotal)];
 	};
 
 .bs.dealer1:{[p]
