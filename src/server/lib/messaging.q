@@ -5,4 +5,8 @@
 .bs.excFunc:{neg[first z](x;y)};
 .bs.user:{`$string[.z.u],"_",string[.z.w]};
 .bs.isDA:{.z.u~`detectionAlgo};
-.bs.regConn:{$[.bs.isDA[];.bs.da:x;[.bs.cp[x]:.bs.user[];.bs.joined[x]:.bs.rnd]]};
+.bs.regConn:{
+  if[.bs.isDA[];:.bs.da:x];
+  .bs.cp[x]:.bs.user[];
+  .bs.joined[x]:.bs.rnd;
+  };
