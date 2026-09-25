@@ -453,6 +453,31 @@ system "l src/server/bin/blackjackServer.q";
     .bs.dealer[];
     excFuncCalls mustmatch enlist(`.da.gameover;99i);
     };
+  should["records each hand's net profit - return minus bet - in .bs.res"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.start mock {};
+    .bs.wwch:0b; .bs.da:0Ni; .bs.dc:`K`5;
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    / win, loss, push, blackjack, doubled win
+    .bs.tab:([]round:5#1;player:1 2 3 4 5f;name:`p1`p2`p3`p4`p5;handle:0 1 2 3 4i;cards:(`K`9;`K`6;`K`8;`A`K;`5`6`K);cnt:19 16 18 21 21i;dealer:5#`K;dealerCnt:5#18i;bet:10 10 10 10 20;return:20 0 10 25 40f;profit:5#0n;split:00000b;double:00001b);
+    .bs.tab:update out:11111b,wait:00000b,turn:00000b from .bs.tab;
+    .bs.cp:(0 1 2 3 4i)!`p1`p2`p3`p4`p5;
+    .bs.dealer[];
+    (exec profit from .bs.res) musteq 10 -10 0 15 20f;
+    };
+  should["doesn't carry a running total into a player's later hands"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.start mock {};
+    .bs.wwch:0b; .bs.da:0Ni; .bs.dc:`K`5;
+    .bs.res:([]round:enlist 1;player:enlist 1;name:enlist`p1;handle:enlist 0i;cards:enlist`K`9;cnt:enlist 19i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 20f;profit:enlist 10f;split:enlist 0b;double:enlist 0b);
+    .bs.tab:([]round:enlist 2;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`K`6`K;cnt:enlist 26i;dealer:enlist`K;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bs.tab;
+    .bs.cp:enlist[0i]!enlist`p1;
+    .bs.dealer[];
+    (exec profit from .bs.res) musteq 10 -10f;
+    };
   should["clears the round's bets before starting the next hand"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.sendMsg mock {[x;y]};

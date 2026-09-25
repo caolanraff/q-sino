@@ -115,7 +115,7 @@ system "l src/server/bin/blackjackServer.q";
   should["drops only the disconnecting handle's key, leaving other connected players untouched"]{
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.hd:1b;
     .bs.leave[5i];
     .bs.cp musteq enlist[6i]!enlist`bob;
@@ -128,7 +128,7 @@ system "l src/server/bin/blackjackServer.q";
     `.bs.sendMsg mock {[x;y]};
     excFuncCalls::();
     `.bs.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.hd:0b;
     .bs.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
@@ -141,7 +141,7 @@ system "l src/server/bin/blackjackServer.q";
     `.bs.pubMsg mock {[x;y]};
     dealerCalls::0;
     `.bs.dealer mock {dealerCalls+::1};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.hd:0b;
     .bs.tab:update out:00b,wait:10b,turn:01b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
@@ -152,7 +152,7 @@ system "l src/server/bin/blackjackServer.q";
     `.bs.pubMsg mock {[x;y]};
     nextTurnCalls::0;
     `.bs.nextTurn mock {nextTurnCalls+::1};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.hd:0b;
     .bs.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b);
@@ -163,7 +163,7 @@ system "l src/server/bin/blackjackServer.q";
   should["removes every split hand belonging to the leaver"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.nextTurn mock {};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.hd:0b;
     .bs.tab:([]round:1 1 1;player:1 2.01 2.02;name:`alice`bob`bob;handle:5 6 6i;cards:(`8`8;`9`3;`9`4);cnt:16 12 13i;dealer:3#`5;dealerCnt:5 5 5i;bet:10 10 10;return:3#0n;profit:3#0n;split:011b;double:000b);
@@ -178,7 +178,7 @@ system "l src/server/bin/blackjackServer.q";
     `.bs.pubMsg mock {[x;y]};
     dealCalls::0;
     `.bs.deal mock {dealCalls+::1};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.hd:1b;
     .bs.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -190,7 +190,7 @@ system "l src/server/bin/blackjackServer.q";
     `.bs.pubMsg mock {[x;y]};
     dealCalls::0;
     `.bs.deal mock {dealCalls+::1};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i;7i)!`alice`bob`carol;
     .bs.hd:1b;
     .bs.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -201,7 +201,7 @@ system "l src/server/bin/blackjackServer.q";
   should["drops the leaver's pending bet"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.deal mock {};
-    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!();
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(); .bs.hist:.bs.res;
     .bs.cp:(5i;6i)!`alice`bob;
     .bs.hd:1b;
     .bs.stake:([name:`alice`bob;handle:5 6i]bet:10 20);
@@ -254,5 +254,86 @@ system "l src/server/bin/blackjackServer.q";
     .z.pc[3i];
     .bs.da musteq 7i;
     leaveArg musteq 3i;
+    };
+ };
+
+.tst.desc[".bs.leave winnings message"]{
+  should["reports net winnings across every shoe this session, ignoring other players"]{
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hd:1b;
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.joined:(5 6i)!0 0;
+    .bs.hist:([]round:1 1;handle:5 6i;profit:10 50f);
+    .bs.res:([]round:2 3 3;handle:5 5 6i;profit:-5 15 -50f);
+    .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
+    .bs.leave[5i];
+    (first msgs) mustmatch "Your net winnings this session are $20.00";
+    };
+  should["shows a net loss with a leading minus sign"]{
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hd:1b;
+    .bs.cp:enlist[5i]!enlist`alice;
+    .bs.joined:enlist[5i]!enlist 0;
+    .bs.hist:([]round:0#0;handle:0#0i;profit:0#0f);
+    .bs.res:([]round:1 2;handle:5 5i;profit:-10 -2.5);
+    .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
+    .bs.leave[5i];
+    (first msgs) mustmatch "Your net winnings this session are -$12.50";
+    };
+  should["ignores results from an earlier connection that had the same handle"]{
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hd:1b;
+    .bs.cp:enlist[5i]!enlist`alice;
+    .bs.joined:enlist[5i]!enlist 2;  / this session joined after round 2
+    .bs.hist:([]round:1 2;handle:5 5i;profit:100 100f);
+    .bs.res:([]round:enlist 3;handle:enlist 5i;profit:enlist 10f);
+    .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
+    .bs.leave[5i];
+    (first msgs) mustmatch "Your net winnings this session are $10.00";
+    };
+  should["reports zero for a player who never finished a hand"]{
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hd:1b;
+    .bs.cp:enlist[5i]!enlist`alice;
+    .bs.joined:enlist[5i]!enlist 0;
+    .bs.hist:.bs.res:([]round:0#0;handle:0#0i;profit:0#0f);
+    .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
+    .bs.leave[5i];
+    (first msgs) mustmatch "Your net winnings this session are $0.00";
+    };
+  should["forgets the session's join round"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hd:1b;
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.joined:(5 6i)!0 3;
+    .bs.hist:.bs.res:([]round:0#0;handle:0#0i;profit:0#0f);
+    .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
+    .bs.leave[5i];
+    .bs.joined musteq enlist[6i]!enlist 3;
+    };
+ };
+
+.tst.desc["regConn join round"]{
+  should["records the current round against a plain connection's handle"]{
+    .bs.cp:()!(); .bs.da:0Ni; .bs.joined:(`int$())!`long$();
+    `.bs.isDA mock {0b};
+    .bs.rnd:7;
+    .bs.regConn[42i];
+    .bs.joined[42i] musteq 7;
+    };
+  should["doesn't record a detectionAlgo connection"]{
+    .bs.cp:()!(); .bs.da:0Ni; .bs.joined:(`int$())!`long$();
+    `.bs.isDA mock {1b};
+    .bs.regConn[42i];
+    (count .bs.joined) musteq 0;
     };
  };
