@@ -17,7 +17,7 @@ stake:{
 	if[0=count .bs.tab;.bs.lg"No players at the table";:()];
 	if[(count .bs.deck)<78;.bs.lg"Deck needs reshuffled";.bs.buildDeck[];.bs.shuffle[]];
 
-	.bs.hd:.bs.acelow:.bs.acelowD:.bs.wwch:0b;
+	.bs.hd:.bs.wwch:0b;
 	.bs.rnd+:1;num:count .bs.tab;
 	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b from `.bs.tab;
 
@@ -34,23 +34,28 @@ stake:{
 	DC2:.bs.getCard[];
 	.bs.pubMsg["Dealers second card is dealt face down";key .bs.cp];
 	.bs.dc:DC1,DC2;
+	update cnt:.bs.handCount each cards from `.bs.tab;
 
-	.bs.deal1 each exec handle from .bs.tab where null cnt;
+	/ dealer peeks under an ace/10 up-card: a dealer blackjack ends the hand before anyone acts
+	if[.bs.isBJ .bs.dc;.bs.dealerPeek[];:()];
+
+	.bs.deal1 each exec handle from .bs.tab;
+	};
+
+.bs.dealerPeek:{
+	.bs.pubMsg["Dealer has blackjack!";key .bs.cp];
+	update wait:1b from `.bs.tab;
+	.bs.dealer[];
 	};
 
 .bs.deal1:{[h]
 	UC:(first exec cards from .bs.tab where handle=h);
 	.bs.sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
 	U:.bs.cardDict[UC];
-	ucnt:("I"$(string first U))+("I"$(string last U));
-	if[all U=`11`11;ucnt:12i];
-	update cnt:ucnt from `.bs.tab where handle=h;
-	dealerUp10:("I"$(string first .bs.dealerUpValue))>=10;
+	ucnt:first exec cnt from .bs.tab where handle=h;
 	pair:(first U)~(last U);
 
-	if[(ucnt=21)&dealerUp10;
-		stick[];
-		:()];
+	/ the dealer has already peeked, so a natural here can't be beaten - pay it now
 	if[ucnt=21;
 		.bs.sendMsg["Winner winner chicken dinner!";h];
 		update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
@@ -81,35 +86,21 @@ stake:{
     .bs.excFunc[`.mc.play;`;h]];
 	};
 
-/// Ace-reduction helper (shared bust fix-up, used by .bs.dealer0 and .bs.hit0) ///
-.bs.reduceAce:{[cnt;justDrawn;hand;lowered]
-	if[(justDrawn=`11)&cnt>21;:(cnt-10i;lowered+1)];
-	if[all(cnt>21;(count hand[where hand=`A])>lowered;`A in hand);
-		:(cnt-10i;lowered+$[`A`A~2#hand;2;1])];
-	:(cnt;lowered);
-	};
-
 /// Dealer function ///
 .bs.dealer0:{
 	.bs.pubMsg["Dealer has ",(string first .bs.dc),",",(string last .bs.dc);key .bs.cp];
 	update dealer:(dealer,'(last .bs.dc)) from `.bs.tab;
-	D:.bs.cardDict[.bs.dc];
-	.bs.dealerCount:sum "I"$string D;
-	if[all .bs.dc=`A`A;.bs.dealerCount:12i];
+	dh:.bs.dc;
+	.bs.dealerCount:.bs.handCount dh;
 	.bs.pubMsg["Dealers hand count is ",(string .bs.dealerCount);key .bs.cp];
 	update dealerCnt:.bs.dealerCount from `.bs.tab;
-	DT:.bs.dc;
 
 	while[.bs.dealerCount<17;
 		DH:.bs.getCard[];
 		.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
 		update dealer:(dealer,'DH) from `.bs.tab;
-		d:first exec dealer from .bs.tab;
-		DH:.bs.cardDict[DH];
-		.bs.dt:.bs.dc,DH;
-		.bs.dealerCount:("I"$(string DH))+.bs.dealerCount;
-		res:.bs.reduceAce[.bs.dealerCount;DH;d;.bs.acelowD];
-		.bs.dealerCount:res 0;.bs.acelowD:res 1;
+		dh,:DH;
+		.bs.dealerCount:.bs.handCount dh;
 		.bs.pubMsg["Dealers hand count is now ",(string .bs.dealerCount);key .bs.cp];
 		update dealerCnt:.bs.dealerCount from `.bs.tab];
 	};
@@ -118,27 +109,31 @@ stake:{
 	d:first select from .bs.tab where player=p;
 	ucnt:d[`cnt];h:d[`handle];nam:d[`name];bet:d[`bet];
 	dBust:.bs.dealerCount>21;pBust:ucnt>21;
+	dBJ:.bs.isBJ d[`dealer];pBJ:(not d[`split])&.bs.isBJ d[`cards];
 
-	if[dBust&not pBust;
-		.bs.pubMsg["Dealer busts! Player wins!";h];
-		:update return:`float$(bet*2) from `.bs.tab where player=p];
-	if[dBust;
-		.bs.pubMsg["Dealer busts also, no winner!";h];
-		:update return:0f from `.bs.tab where player=p];
 	if[pBust;
 		.bs.pubMsg["Dealer wins!";h];
 		:update return:0f from `.bs.tab where player=p];
+	if[dBJ&pBJ;
+		.bs.pubMsg["Push! ",(string nam)," gets their money back!";h];
+		:update return:`float$bet from `.bs.tab where player=p];
+	if[dBJ;
+		.bs.pubMsg["Dealer has blackjack, dealer wins!";h];
+		:update return:0f from `.bs.tab where player=p];
+	if[pBJ;
+		.bs.pubMsg[(string nam)," gets Blackjack!";h];
+		:update return:`float$(((bet*3)%2)+bet) from `.bs.tab where player=p];
+	if[dBust;
+		.bs.pubMsg["Dealer busts! Player wins!";h];
+		:update return:`float$(bet*2) from `.bs.tab where player=p];
 	if[.bs.dealerCount=ucnt;
 		.bs.pubMsg["Push! ",(string nam)," gets their money back!";h];
 		:update return:`float$bet from `.bs.tab where player=p];
 	if[.bs.dealerCount>ucnt;
 		.bs.pubMsg["Dealer wins!";h];
 		:update return:0f from `.bs.tab where player=p];
-	if[all(ucnt=21;2=count d[`cards];2<count d[`dealer]);
-		.bs.pubMsg[string[.z.u]," get's Blackjack!";h];
-		:update return:`float$(((bet*3)%2)+bet) from `.bs.tab where player=p];
 
-	.bs.pubMsg[(string .z.u)," wins";h];
+	.bs.pubMsg[(string nam)," wins";h];
 	update return:`float$(bet*2) from `.bs.tab where player=p;
 	};
 
