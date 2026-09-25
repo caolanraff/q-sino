@@ -81,6 +81,14 @@ stake:{
     .bs.excFunc[`.mc.play;`;h]];
 	};
 
+/// Ace-reduction helper (shared bust fix-up, used by .bs.dealer0 and .bs.hit0) ///
+.bs.reduceAce:{[cnt;justDrawn;hand;lowered]
+	if[(justDrawn=`11)&cnt>21;:(cnt-10i;lowered+1)];
+	if[all(cnt>21;(count hand[where hand=`A])>lowered;`A in hand);
+		:(cnt-10i;lowered+$[`A`A~2#hand;2;1])];
+	:(cnt;lowered);
+	};
+
 /// Dealer function ///
 .bs.dealer0:{
 	.bs.pubMsg["Dealer has ",(string first .bs.dc),",",(string last .bs.dc);key .bs.cp];
@@ -96,11 +104,12 @@ stake:{
 		DH:.bs.getCard[];
 		.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
 		update dealer:(dealer,'DH) from `.bs.tab;
+		d:first exec dealer from .bs.tab;
 		DH:.bs.cardDict[DH];
 		.bs.dt:.bs.dc,DH;
 		.bs.dealerCount:("I"$(string DH))+.bs.dealerCount;
-		if[(DH=`11)&(.bs.dealerCount>21);.bs.dealerCount:.bs.dealerCount-10i];
-		if[all((`A in .bs.dc);(.bs.dealerCount>21);(.bs.acelowD=0b));.bs.dealerCount:.bs.dealerCount-10i;.bs.acelowD:1b];
+		res:.bs.reduceAce[.bs.dealerCount;DH;d;.bs.acelowD];
+		.bs.dealerCount:res 0;.bs.acelowD:res 1;
 		.bs.pubMsg["Dealers hand count is now ",(string .bs.dealerCount);key .bs.cp];
 		update dealerCnt:.bs.dealerCount from `.bs.tab];
 	};
