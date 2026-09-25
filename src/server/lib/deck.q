@@ -35,7 +35,7 @@
 / best total for a hand: aces count 11, dropping to 1 one at a time only while the hand would otherwise bust
 .bs.handCount:{[c]
   v:sum "I"$string .bs.cardDict c;
-  "i"$v-10*(sum c=`A)&0|ceiling(v-21)%10
+  :"i"$v-10*(sum c=`A)&0|ceiling(v-21)%10;
   };
 
 / a two-card 21 - callers must exclude split hands, whose two-card 21 isn't a natural
