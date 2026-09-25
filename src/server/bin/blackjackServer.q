@@ -39,10 +39,12 @@ hist:{.bs.hist,.bs.res};
     .bs.lg"No new users have joined the table";
     .bs.lg"New users have joined the table"];
   .bs.tab:0#.bs.tab;
-  .bs.stake:0#.bs.stake;
   `.bs.tab upsert ([]player:1+til count .bs.cp;name:value .bs.cp;handle:key .bs.cp);
-  .bs.sendMsg["Please place your bets via the stake[] function"]each key .bs.cp;
-  .bs.excFunc[`.mc.stake;`]each key .bs.cp;
+  / keep bets already placed this round (a player joining mid-betting mustn't wipe them); only prompt those still to bet
+  .bs.tab:.bs.tab lj .bs.stake;
+  unbet:exec handle from .bs.tab where null bet;
+  .bs.sendMsg["Please place your bets via the stake[] function"]each unbet;
+  .bs.excFunc[`.mc.stake;`]each unbet;
   };
 
 .bs.leave:{[h]
@@ -50,8 +52,16 @@ hist:{.bs.hist,.bs.res};
   .[.bs.sendMsg;("Thanks for playing Qasino Blackjack";h);{}];
   p:exec first player from .bs.tab where handle=h;
   .bs.lg string[p]," has left the table";
+  hadTurn:$[.bs.hd;0b;h in exec handle from .bs.tab where turn];
   .bs.cp:.bs.cp _ h;
   delete from `.bs.tab where handle=h;
+  delete from `.bs.stake where handle=h;
+  / between hands: the leaver may have been the last player the deal was waiting on
+  if[.bs.hd;.bs.dealIfReady[];:()];
+  / mid-hand: pass on the turn if it was theirs, else nobody would ever act again
+  if[not hadTurn;:()];
+  update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b);
+  .bs.nextTurn[];
   };
 
 .z.po:{.bs.regConn[.z.w];if[not .bs.isDA[];.bs.start[];neg[.z.w](.bs.intro;`)]};
