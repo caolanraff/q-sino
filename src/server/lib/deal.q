@@ -103,17 +103,39 @@ stake:{
 	d:first select from .bs.tab where player=p;
 	ucnt:d[`cnt];h:d[`handle];nam:d[`name];bet:d[`bet];
 	dBust:.bs.dealerCount>21;pBust:ucnt>21;
-	bj:all(ucnt=21;2=count d[`cards];2<count d[`dealer]);
 
-	ret:$[dBust&not pBust;[.bs.pubMsg["Dealer busts! Player wins!";h];`float$(bet*2)];
-	      dBust;[.bs.pubMsg["Dealer busts also, no winner!";h];0f];
-	      pBust;[.bs.pubMsg["Dealer wins!";h];0f];
-	      .bs.dealerCount=ucnt;[.bs.pubMsg["Push! ",(string nam)," gets their money back!";h];`float$bet];
-	      .bs.dealerCount>ucnt;[.bs.pubMsg["Dealer wins!";h];0f];
-	      bj;[.bs.pubMsg[string[.z.u]," get's Blackjack!";h];`float$(((bet*3)%2)+bet)];
-	      [.bs.pubMsg[(string .z.u)," wins";h];`float$(bet*2)]];
+	if[dBust&not pBust;
+		.bs.pubMsg["Dealer busts! Player wins!";h];
+		update return:`float$(bet*2) from `.bs.tab where player=p;
+		:()];
 
-	update return:ret from `.bs.tab where player=p;
+	if[dBust;
+		.bs.pubMsg["Dealer busts also, no winner!";h];
+		update return:0f from `.bs.tab where player=p;
+		:()];
+
+	if[pBust;
+		.bs.pubMsg["Dealer wins!";h];
+		update return:0f from `.bs.tab where player=p;
+		:()];
+
+	if[.bs.dealerCount=ucnt;
+		.bs.pubMsg["Push! ",(string nam)," gets their money back!";h];
+		update return:`float$bet from `.bs.tab where player=p;
+		:()];
+
+	if[.bs.dealerCount>ucnt;
+		.bs.pubMsg["Dealer wins!";h];
+		update return:0f from `.bs.tab where player=p;
+		:()];
+
+	if[all(ucnt=21;2=count d[`cards];2<count d[`dealer]);
+		.bs.pubMsg[string[.z.u]," get's Blackjack!";h];
+		update return:`float$(((bet*3)%2)+bet) from `.bs.tab where player=p;
+		:()];
+
+	.bs.pubMsg[(string .z.u)," wins";h];
+	update return:`float$(bet*2) from `.bs.tab where player=p;
 	};
 
 .bs.dealer:{
