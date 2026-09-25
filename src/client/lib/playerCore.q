@@ -86,10 +86,22 @@ setCountDict[`basic]; /can be overriden in player script
   neg[.mc.h](`stake;bet);
   };
 
+// the server caps each player at this many hands (keep in sync with .bs.maxSplitHands, blackjackServer.q)
+.mc.maxSplitHands:4;
+
+// Help's decision for cards x, given the player already holds `hands` hands. A split the server
+// would refuse (at the hand cap) never gets another .mc.play push, so play the pair as a hard total instead
+.mc.decide:{[x;hands]
+  r:Help[x];
+  if[(r=`SP)&hands>=.mc.maxSplitHands;
+    r:first ?[hard;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]]];
+  :r;
+  };
+
 .mc.play:{
   .mc.getTab[];
   .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
-  dec:.mc.handDict Help[.mc.c];
+  dec:.mc.handDict .mc.decide[.mc.c;count select from .mc.tab where handle=.mc.mh];
   .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=.mc.mh;
   neg[.mc.h](dec;`);
   };

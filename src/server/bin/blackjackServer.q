@@ -10,6 +10,7 @@
 .bs.deckTemplate:raze 4#enlist key .bs.cardDict;
 .bs.deckCnt:6;
 .bs.shuffleCnt:0;
+.bs.maxSplitHands:4;   //split up to 3 times, i.e. at most 4 hands per player
 
 .bs.cp:()!();
 .bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
