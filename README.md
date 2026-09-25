@@ -17,8 +17,8 @@ q src/server/bin/blackjackServer.q
 ```
 
 The server has no notion of "gameplay mode" - it just deals the game and
-exposes `stake`/`hit`/`stick`/`double`/`split` to every connection the same
-way (`shuffle`/`buildDeck` are server-internal only - reshuffling happens
+exposes `stake`/`hit`/`stick`/`double`/`split`/`hist` to every connection the
+same way (`shuffle`/`buildDeck` are server-internal only - reshuffling happens
 automatically once the deck runs low, not on player request). It also
 unconditionally pushes `.mc.stake`/`.mc.play`/
 `.mc.shuffle` to every connected handle at the relevant point in play.
@@ -91,9 +91,6 @@ pushes just print a harmless error to the session's own console, since
 `.mc.stake`/`.mc.play`/`.mc.shuffle` are undefined there).
 
 ## Enhancements
-- change globals to use namespace (done for the server package; the client
-  package still has bare globals)
-- create generic functions for bust and 21, as used in deal and hit functions
 - use qprof to check speed of functions
 - supervised learning (using seed values)
 - protected eval function
