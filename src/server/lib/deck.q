@@ -21,7 +21,7 @@
   i:rand count .bs.deck;
   c:.bs.deck i;
   .bs.deck:(i#.bs.deck),(i+1)_.bs.deck;
-  c
+  :c;
   };
 
 .bs.dealCard:{
