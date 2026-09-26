@@ -10,7 +10,6 @@
   .bs.hist,:.bs.res;
   .bs.res:0#.bs.res;
   .bs.shuffleCnt+:1;
-  .bs.count:0f;
   if[(.bs.shuffleCnt>1)&not null .bs.da;.bs.excFunc[`.da.shuffle;`;.bs.da]];
   .bs.excFunc[`.mc.shuffle;`]each key .bs.cp;
  };

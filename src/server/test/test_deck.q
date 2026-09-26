@@ -39,7 +39,6 @@ system"l src/server/bin/blackjackServer.q";
     count[.bs.hist] musteq 1;
     count[.bs.res] musteq 0;
     .bs.shuffleCnt musteq 1;
-    .bs.count musteq 0f;
   };
   should["unconditionally notifies every connected client's .mc.shuffle"]{
     .tst.excCalls:();

@@ -1,6 +1,5 @@
-/// Stake function ///
-stake:{
-  if[1>bet:x;.bs.sendMsg["Put some money down on the table or move on";.z.w];:()];
+stake:{[bet]
+  if[1>bet;.bs.sendMsg["Put some money down on the table or move on";.z.w];:()];
   if[not .bs.hd;.bs.sendMsg["Please wait until the current hand is complete";.z.w];:()];
   .bs.lg string[.z.u]," bets $",string bet;
   upsert[`.bs.stake;(.bs.user[];.z.w;bet)];
@@ -8,224 +7,223 @@ stake:{
   .bs.tab:.bs.tab lj .bs.stake;
   if[null .bs.betDeadline;.bs.armBetTimer[]];
   .bs.dealIfReady[];
-  };
+ };
 
-/ first bet of the round starts the clock for everyone else
 .bs.armBetTimer:{
   .bs.betDeadline:.z.p+.bs.betTimeout;
   .bs.sendMsg["Betting closes in ",string["j"$.bs.betTimeout%0D00:00:01]," seconds"]each exec handle from .bs.tab where null bet;
-  };
+ };
 
-/ timer tick: once betting closes, anyone still unbet sits the hand out (.bs.deal drops them) and the rest are dealt
 .bs.betTimer:{
   if[null .bs.betDeadline;:()];
   if[.z.p<.bs.betDeadline;:()];
-  / every bettor has since left - dealing now would unseat everyone, so wait for a fresh first bet
-  if[0=count select from .bs.tab where not null bet;.bs.betDeadline:0Np;:()];
+  if[0=count select from .bs.tab where not null bet;.bs.betDeadline:0Np;:()];                      / every bettor has left: dealing now would unseat everyone
   .bs.lg"Betting closed";
   .bs.deal[];
-  };
+ };
 
-/ deal once every seated player has a bet down
 .bs.dealIfReady:{
   if[0=count .bs.tab;:()];
   if[count select from .bs.tab where null bet;:()];
   .bs.lg"All players have placed their bet";
   .bs.lg"Time to deal";
   .bs.deal[];
-  };
+ };
 
-/// Deal function ///
+.bs.newRound:{
+  .bs.hd:.bs.wwch:0b;
+  .bs.rnd+:1;
+  update round:.bs.rnd,cnt:0Ni,out:0b,wait:0b,turn:0b,split:0b,double:0b,insurance:0f from`.bs.tab;
+ };
+
+.bs.dealUpCard:{
+  c:.bs.getCard[];
+  .bs.pubMsg["Dealers first card is ",string c;key .bs.cp];
+  update dealer:c,dealerCnt:"I"$string .bs.cardDict c from`.bs.tab;
+  .bs.dc:enlist c;
+ };
+
+.bs.dealHoleCard:{
+  .bs.dc,:.bs.getCard[];
+  .bs.pubMsg["Dealers second card is dealt face down";key .bs.cp];
+ };
+
 .bs.deal0:{
-	if[0=count .bs.tab;.bs.lg"No players at the table";:()];
-	if[(count .bs.deck)<78;.bs.lg"Deck needs reshuffled";.bs.buildDeck[];.bs.shuffle[]];
-
-	.bs.hd:.bs.wwch:0b;
-	.bs.rnd+:1;num:count .bs.tab;
-	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b,insurance:num#0f from `.bs.tab;
-
-	.bs.dealCard each select from .bs.tab where (count each cards)=0;
-
-	DC1:.bs.getCard[];
-	.bs.pubMsg["Dealers first card is ",(string DC1);key .bs.cp];
-	update dealer:num#DC1 from `.bs.tab;
-	.bs.dealerUpValue:.bs.cardDict[DC1];
-	update dealerCnt:num#"I"$(string .bs.dealerUpValue) from `.bs.tab;
-
-	.bs.dealCard each select from .bs.tab where (count each cards)=1;
-
-	DC2:.bs.getCard[];
-	.bs.pubMsg["Dealers second card is dealt face down";key .bs.cp];
-	.bs.dc:DC1,DC2;
-	update cnt:.bs.handCount each cards from `.bs.tab;
-
-	if[`A=DC1;.bs.offerInsurance[];:()];
-	.bs.settleDeal[];
-	};
+  if[0=count .bs.tab;:.bs.lg"No players at the table"];
+  if[78>count .bs.deck;.bs.lg"Deck needs reshuffled";.bs.buildDeck[];.bs.shuffle[]];
+  .bs.newRound[];
+  .bs.dealCard each select from .bs.tab where 0=count each cards;
+  .bs.dealUpCard[];
+  .bs.dealCard each select from .bs.tab where 1=count each cards;
+  .bs.dealHoleCard[];
+  update cnt:.bs.handCount each cards from`.bs.tab;
+  if[`A=first .bs.dc;:.bs.offerInsurance[]];
+  .bs.settleDeal[];
+ };
 
 .bs.settleDeal:{
-	/ dealer peeks under an ace/10 up-card: a dealer blackjack ends the hand before anyone acts
-	if[.bs.isBJ .bs.dc;.bs.dealerPeek[];:()];
-	.bs.deal1 each exec handle from .bs.tab;
-	};
+  if[.bs.isBJ .bs.dc;:.bs.dealerPeek[]];                                                           / dealer peek: a dealer blackjack ends the hand before anyone acts
+  .bs.deal1 each exec handle from .bs.tab;
+ };
 
 .bs.offerInsurance:{
-	.bs.insuring:1b;
-	.bs.insureDeadline:.z.p+.bs.betTimeout;
-	update insurance:0n from `.bs.tab;
-	.bs.pubMsg["Dealer shows an ace - insurance? insure[amount] up to half your bet, or insure[0] to decline";key .bs.cp];
-	.bs.trigger[`.mc.insure]each exec handle from .bs.tab;
-	};
+  .bs.insuring:1b;
+  .bs.insureDeadline:.z.p+.bs.betTimeout;
+  update insurance:0n from`.bs.tab;
+  .bs.pubMsg["Dealer shows an ace - insurance? insure[amount] up to half your bet, or insure[0] to decline";key .bs.cp];
+  .bs.trigger[`.mc.insure]each exec handle from .bs.tab;
+ };
 
 .bs.closeInsuranceIfDone:{
-	if[.bs.insuring&0=count select from .bs.tab where null insurance;.bs.closeInsurance[]];
-	};
+  if[.bs.insuring&0=count select from .bs.tab where null insurance;.bs.closeInsurance[]];
+ };
 
 .bs.insureTimer:{
-	if[null .bs.insureDeadline;:()];
-	if[.z.p<.bs.insureDeadline;:()];
-	.bs.closeInsurance[];
-	};
+  if[null .bs.insureDeadline;:()];
+  if[.z.p<.bs.insureDeadline;:()];
+  .bs.closeInsurance[];
+ };
 
 .bs.closeInsurance:{
-	.bs.insuring:0b;
-	.bs.insureDeadline:0Np;
-	update insurance:0f from `.bs.tab where null insurance;
-	.bs.lg"Insurance closed";
-	.bs.settleDeal[];
-	.bs.startTurns[];
-	};
+  .bs.insuring:0b;
+  .bs.insureDeadline:0Np;
+  update insurance:0f from`.bs.tab where null insurance;
+  .bs.lg"Insurance closed";
+  .bs.settleDeal[];
+  .bs.startTurns[];
+ };
 
 .bs.dealerPeek:{
-	.bs.pubMsg["Dealer has blackjack!";key .bs.cp];
-	update wait:1b from `.bs.tab;
-	.bs.dealer[];
-	};
+  .bs.pubMsg["Dealer has blackjack!";key .bs.cp];
+  update wait:1b from`.bs.tab;
+  .bs.dealer[];
+ };
+
+.bs.payNatural:{[h]
+  .bs.sendMsg["Winner winner chicken dinner!";h];
+  update return:2.5*bet,out:1b,turn:0b from`.bs.tab where handle=h;
+  if[all exec out from .bs.tab;
+    .bs.hd:1b;
+    .bs.wwch:1b;
+    .bs.dealer[];
+  ];
+ };
 
 .bs.deal1:{[h]
-	UC:(first exec cards from .bs.tab where handle=h);
-	.bs.sendMsg["Your hand is ",(string first UC),",",(string last UC);h];
-	U:.bs.cardDict[UC];
-	ucnt:first exec cnt from .bs.tab where handle=h;
-	pair:(first U)~(last U);
+  hand:first exec cards from .bs.tab where handle=h;
+  .bs.sendMsg["Your hand is ",","sv string hand;h];
+  if[21=first exec cnt from .bs.tab where handle=h;:.bs.payNatural h];                             / the dealer has already peeked, so a natural can't be beaten
+  if[(~/).bs.cardDict hand;:.bs.sendMsg["Hit, stick or split?";h]];
+  .bs.sendMsg["Hit or stick?";h];
+ };
 
-	/ the dealer has already peeked, so a natural here can't be beaten - pay it now
-	if[ucnt=21;
-		.bs.sendMsg["Winner winner chicken dinner!";h];
-		update return:`float$(((bet*3)%2)+bet),out:1b,turn:0b from `.bs.tab where handle=h;
-		if[not count select from .bs.tab where not out;
-			.bs.hd:1b;.bs.wwch:1b;
-			.bs.dealer[]];
-		:()];
-	if[pair;
-		.bs.sendMsg["Hit, stick or split?";h];
-		:()];
-	.bs.sendMsg["Hit or stick?";h];
-	};
+.bs.sitOutUnbet:{
+  .bs.sendMsg["No bet placed, please wait until the next hand"]each exec handle from .bs.tab where null bet;
+  delete from`.bs.tab where null bet;
+ };
 
 .bs.deal:{
-	if[not .bs.hd;.bs.lg"Please finish the previous hand before dealing again";:()];
-	if[not .bs.bd;.bs.lg"Please place your bets!";:()];
-	.bs.betDeadline:0Np;
-	if[count h:exec handle from .bs.tab where null bet;
-		.bs.sendMsg["No bet placed, please wait until the next hand"]each h;
-		delete from `.bs.tab where null bet];
-	.bs.deal0[];
-	if[not .bs.insuring;.bs.startTurns[]];
-	};
+  if[not .bs.hd;:.bs.lg"Please finish the previous hand before dealing again"];
+  if[not .bs.bd;:.bs.lg"Please place your bets!"];
+  .bs.betDeadline:0Np;
+  .bs.sitOutUnbet[];
+  .bs.deal0[];
+  if[not .bs.insuring;.bs.startTurns[]];
+ };
 
 .bs.startTurns:{
-	if[.bs.hd;:()];
-	update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b);
-	show .bs.tab;
-	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-	.bs.sendMsg[.bs.turn]each key .bs.cp;
-	.bs.lg"The count is ",(string .bs.count);
-	h:first exec handle from .bs.tab where turn;
-	.bs.trigger[`.mc.play;h];
-	};
+  if[.bs.hd;:()];
+  update turn:1b from`.bs.tab where player=(exec first player from .bs.tab where not out);
+  .bs.lg .Q.s .bs.tab;
+  .bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
+  .bs.sendMsg[.bs.turn]each key .bs.cp;
+  .bs.trigger[`.mc.play;first exec handle from .bs.tab where turn];
+ };
 
-/// Dealer function ///
-/ dealer draws below 17, and on soft 17 too when the table hits soft 17 (.bs.hitSoft17)
 .bs.dealerDraws:{[c]
-	n:.bs.handCount c;
-	:(n<17)|.bs.hitSoft17&(n=17)&.bs.isSoft c;
-	};
+  n:.bs.handCount c;
+  :(n<17)|.bs.hitSoft17&(n=17)&.bs.isSoft c;
+ };
 
 .bs.dealerHit:{[s]
-	DH:.bs.getCard[];
-	.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
-	update dealer:(dealer,'DH) from `.bs.tab;
-	dh:s[0],DH;
-	dTotal:.bs.handCount dh;
-	.bs.pubMsg["Dealers hand count is now ",(string dTotal);key .bs.cp];
-	update dealerCnt:dTotal from `.bs.tab;
-	:(dh;dTotal);
-	};
+  c:.bs.getCard[];
+  .bs.pubMsg["Dealers gets a ",string c;key .bs.cp];
+  update dealer:(dealer,'c)from`.bs.tab;
+  hand:first[s],c;
+  total:.bs.handCount hand;
+  .bs.pubMsg["Dealers hand count is now ",string total;key .bs.cp];
+  update dealerCnt:total from`.bs.tab;
+  :(hand;total);
+ };
 
 .bs.dealer0:{
-	.bs.pubMsg["Dealer has ",(string first .bs.dc),",",(string last .bs.dc);key .bs.cp];
-	update dealer:(dealer,'(last .bs.dc)) from `.bs.tab;
-	dTotal:.bs.handCount .bs.dc;
-	.bs.pubMsg["Dealers hand count is ",(string dTotal);key .bs.cp];
-	update dealerCnt:dTotal from `.bs.tab;
-	.bs.dealerCount:last .bs.dealerHit/[{.bs.dealerDraws x 0};(.bs.dc;dTotal)];
-	};
+  .bs.pubMsg["Dealer has ",","sv string .bs.dc;key .bs.cp];
+  update dealer:(dealer,'last .bs.dc)from`.bs.tab;
+  total:.bs.handCount .bs.dc;
+  .bs.pubMsg["Dealers hand count is ",string total;key .bs.cp];
+  update dealerCnt:total from`.bs.tab;
+  .bs.dealerCount:last .bs.dealerHit/[{.bs.dealerDraws first x};(.bs.dc;total)];
+ };
+
+.bs.settleHand:{[p;h;msg;ret]
+  .bs.pubMsg[msg;h];
+  update return:ret from`.bs.tab where player=p;
+ };
 
 .bs.dealer1:{[p]
-	d:first select from .bs.tab where player=p;
-	ucnt:d[`cnt];h:d[`handle];nam:d[`name];bet:d[`bet];
-	dBust:.bs.dealerCount>21;pBust:ucnt>21;
-	dBJ:.bs.isBJ d[`dealer];pBJ:(not d[`split])&.bs.isBJ d[`cards];
+  d:first select from .bs.tab where player=p;
+  s:.bs.settleHand[p;d`handle];
+  dBJ:.bs.isBJ d`dealer;
+  pBJ:not[d`split]&.bs.isBJ d`cards;
+  push:"Push! ",string[d`name]," gets their money back!";
+  if[d[`cnt]>21;:s["Dealer wins!";0f]];
+  if[dBJ&pBJ;:s[push;"f"$d`bet]];
+  if[dBJ;:s["Dealer has blackjack, dealer wins!";0f]];
+  if[pBJ;:s[string[d`name]," gets Blackjack!";2.5*d`bet]];
+  if[.bs.dealerCount>21;:s["Dealer busts! Player wins!";2f*d`bet]];
+  if[.bs.dealerCount=d`cnt;:s[push;"f"$d`bet]];
+  if[.bs.dealerCount>d`cnt;:s["Dealer wins!";0f]];
+  s[string[d`name]," wins";2f*d`bet];
+ };
 
-	if[pBust;
-		.bs.pubMsg["Dealer wins!";h];
-		:update return:0f from `.bs.tab where player=p];
-	if[dBJ&pBJ;
-		.bs.pubMsg["Push! ",(string nam)," gets their money back!";h];
-		:update return:`float$bet from `.bs.tab where player=p];
-	if[dBJ;
-		.bs.pubMsg["Dealer has blackjack, dealer wins!";h];
-		:update return:0f from `.bs.tab where player=p];
-	if[pBJ;
-		.bs.pubMsg[(string nam)," gets Blackjack!";h];
-		:update return:`float$(((bet*3)%2)+bet) from `.bs.tab where player=p];
-	if[dBust;
-		.bs.pubMsg["Dealer busts! Player wins!";h];
-		:update return:`float$(bet*2) from `.bs.tab where player=p];
-	if[.bs.dealerCount=ucnt;
-		.bs.pubMsg["Push! ",(string nam)," gets their money back!";h];
-		:update return:`float$bet from `.bs.tab where player=p];
-	if[.bs.dealerCount>ucnt;
-		.bs.pubMsg["Dealer wins!";h];
-		:update return:0f from `.bs.tab where player=p];
+.bs.settleWaiting:{[p]
+  .bs.dealer1 p;
+  update wait:0b,out:1b from`.bs.tab where player=p;
+ };
 
-	.bs.pubMsg[(string nam)," wins";h];
-	update return:`float$(bet*2) from `.bs.tab where player=p;
-	};
+.bs.resolveHands:{
+  if[.bs.wwch;:()];
+  if[all exec out from .bs.tab;
+    .bs.pubMsg["Everyone's out!";key .bs.cp];
+    .bs.pubMsg["Dealer wins!";key .bs.cp];
+    :update dealer:(dealer,'last .bs.dc)from`.bs.tab;
+  ];
+  .bs.dealer0[];
+  .bs.settleWaiting each exec player from .bs.tab where wait;
+ };
+
+.bs.recordRound:{
+  .bs.lg"Hand stats;\n",.Q.s .bs.tab;
+  if[.bs.wwch;update dealer:enlist each dealer from`.bs.tab];
+  ins:$[.bs.isBJ .bs.dc;2f;-1f];
+  upsert[`.bs.res;update"j"$player,profit:(return-bet)+ins*0f^insurance from delete out,wait,turn from .bs.tab];
+  .bs.sendMsg["Results table for the round;"]each key .bs.cp;
+  .bs.sendMsg[select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bs.tab]each key .bs.cp;
+ };
+
+.bs.endHand:{
+  update player:`int$player from`.bs.tab;
+  .bs.bd:0b;
+  .bs.hd:1b;
+  .bs.stake:0#.bs.stake;
+  .bs.pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key .bs.cp];
+  if[not null .bs.da;.bs.excFunc[`.da.gameover;`res`rnd!(.bs.res;.bs.rnd);.bs.da]];
+  .bs.start[];
+ };
 
 .bs.dealer:{
-	if[not .bs.wwch;
-		$[0=count select from .bs.tab where out=0b;
-			[.bs.pubMsg["Everyone's out!";key .bs.cp];
-			 .bs.pubMsg["Dealer wins!";key .bs.cp];
-		         update dealer:(dealer,'(last .bs.dc)) from `.bs.tab];
-			[.bs.dealer0[];
-			 {.bs.dealer1[x];update wait:0b,out:1b from `.bs.tab where player=x} each exec player from .bs.tab where wait=1b]]];
+  .bs.resolveHands[];
+  .bs.recordRound[];
+  .bs.endHand[];
+ };
 
-	.bs.lg"Hand stats;";
-	show .bs.tab;
-	if[.bs.wwch;update dealer:(enlist each dealer) from `.bs.tab];
-	/ return includes the stake; profit is the hand's net result
-	ins:$[.bs.isBJ .bs.dc;2f;-1f];
-	upsert[`.bs.res;update "j"$player,profit:(return-bet)+ins*0f^insurance from delete out, wait, turn from .bs.tab];
-	.bs.sumtab:select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bs.tab;
-	.bs.sendMsg["Results table for the round;"]each key .bs.cp;
-	.bs.sendMsg[.bs.sumtab]each key .bs.cp;
-	update player:`int$player from `.bs.tab;
-	.bs.bd:0b;.bs.hd:1b;
-	.bs.stake:0#.bs.stake;
-	.bs.pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key .bs.cp];
-	if[not null .bs.da;.bs.excFunc[`.da.gameover;`res`rnd!(.bs.res;.bs.rnd);.bs.da]];
-	.bs.start[];
-	};
