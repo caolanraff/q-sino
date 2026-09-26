@@ -72,7 +72,7 @@
   should["takes the table, results and this client's handle from the state the server pushed"]{
     t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
     r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
-    .mc.recv[`tab`res`me!(t;r;7i)];
+    .mc.recv[`tab`res`me`rules!(t;r;7i;enlist[`surrender]!enlist 0b)];
     .mc.tab mustmatch t;
     .mc.res mustmatch r;
     .mc.mh musteq 7i;
@@ -81,38 +81,41 @@
 
 .tst.desc["playerCore surrender"]{
   before{system "l src/client/lib/playerCore.q"};
-  should["marks the chart's late-surrender hands on two cards"]{
-    Help[`10`6`9] musteq `R;
-    Help[`10`5`10] musteq `R;
-    Help[`9`7`A] musteq `R;
-    Help[`10`7`A] musteq `RS;
-    Help[`8`8`A] musteq `RP;
+  should["plays the chart's usual hands while the table doesn't offer surrender"]{
+    Help[`10`6`9] musteq `H;
+    Help[`10`5`10] musteq `H;
+    Help[`10`7`A] musteq `S;
+    Help[`8`8`A] musteq `SP;
+    };
+  should["marks the chart's late-surrender hands SR once the table offers surrender"]{
+    .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 1b)];
+    Help[`10`6`9] musteq `SR;
+    Help[`10`5`10] musteq `SR;
+    Help[`9`7`A] musteq `SR;
+    Help[`10`7`A] musteq `SR;
+    Help[`8`8`A] musteq `SR;
     Help[`8`8`10] musteq `SP;
     };
   should["plays on once a third card rules surrender out"]{
+    .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 1b)];
     Help[`10`3`3`10] musteq `H;
     Help[`10`4`3`A] musteq `S;
-    };
-  should["surrenders when the table offers it and the hand isn't split"]{
-    .mc.rules:enlist[`surrender]!enlist 1b;
-    .mc.decide[`10`6`10;1] musteq `R;
-    .mc.decide[`10`7`A;1] musteq `R;
-    .mc.decide[`8`8`A;1] musteq `R;
-    };
-  should["falls back to hit, stand or split when the table doesn't offer surrender"]{
-    .mc.rules:enlist[`surrender]!enlist 0b;
-    .mc.decide[`10`6`10;1] musteq `H;
-    .mc.decide[`10`7`A;1] musteq `S;
-    .mc.decide[`8`8`A;1] musteq `SP;
+    Help[`A`5`10`10] musteq `H;
+    Help[`A`6`10`A] musteq `S;
     };
   should["doesn't surrender a split hand"]{
-    .mc.rules:enlist[`surrender]!enlist 1b;
+    .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 1b)];
+    .mc.decide[`10`6`10;1] musteq `SR;
     .mc.decide[`10`6`10;2] musteq `H;
+    .mc.decide[`10`7`A;2] musteq `S;
     .mc.decide[`8`8`A;2] musteq `SP;
     .mc.decide[`8`8`A;4] musteq `H;
     };
-  should["stores the table rules sent with each trigger"]{
+  should["goes back to the usual plays if the table stops offering surrender"]{
     .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 1b)];
-    .mc.rules[`surrender] musteq 1b;
+    .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 0b)];
+    Help[`10`6`9] musteq `H;
+    Help[`8`8`A] musteq `SP;
+    .mc.rules[`surrender] musteq 0b;
     };
  };

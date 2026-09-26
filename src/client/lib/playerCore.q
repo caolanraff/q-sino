@@ -8,9 +8,8 @@ bet:25;
 decks:6;
 startCards:decks*52;
 
-// basic strategy for a 4-8 deck shoe, dealer hits soft 17, double after split, late surrender.
-// each column is the dealer up-card; rows run over the table's hTotal. DS = double if allowed, else stand;
-// R/RS/RP = surrender if allowed, else hit/stand/split
+// basic strategy for a 4-8 deck shoe, dealer hits soft 17, double after split, no surrender.
+// each column is the dealer up-card; rows run over the table's hTotal. DS = double if allowed, else stand
 // hard hand
 hTotal:3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21;
 TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;
@@ -20,9 +19,9 @@ FIVE:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
 SIX:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
 SEVEN:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
-NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`R`S`S`S`S`S;
-TEN:`H`H`H`H`H`H`H`H`D`H`H`H`R`R`S`S`S`S`S;
-ACE:`H`H`H`H`H`H`H`H`D`H`H`H`R`R`RS`S`S`S`S;
+NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
+ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
 hard:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 // if player has an ACE the hand is considered a soft hand
@@ -50,8 +49,10 @@ SEVEN:`SP`SP`H`D`H`SP`SP`S`S`SP;
 EIGHT:`H`H`H`D`H`H`SP`SP`S`SP;
 NINE:`H`H`H`D`H`H`SP`SP`S`SP;
 TEN:`H`H`H`H`H`H`SP`S`S`SP;
-ACE:`H`H`H`H`H`H`RP`S`S`SP;
+ACE:`H`H`H`H`H`H`SP`S`S`SP;
 pair:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
+.mc.hardBase:hard;
+.mc.pairBase:pair;
 
 //mapping dealers cards to table headers
 dealerDict:(`2`3`4`5`6`7`8`9`10`J`Q`K`11)!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
@@ -86,7 +87,25 @@ setCountDict[`basic]; /can be overriden in player script
 .mc.handsPlayed:0;
 
 .mc.rules:enlist[`surrender]!enlist 0b;
-.mc.recv:{[s].mc.tab:s`tab;.mc.res:s`res;.mc.mh:s`me;.mc.rules:s`rules};
+.mc.applyRules:{
+  hard::.mc.hardBase;
+  pair::.mc.pairBase;
+  if[.mc.rules`surrender;
+    hard::update NINE:`SR from hard where hTotal=16;
+    hard::update TEN:`SR from hard where hTotal in 15 16;
+    hard::update ACE:`SR from hard where hTotal in 15 16 17;
+    pair::update ACE:`SR from pair where hTotal=8];
+  };
+.mc.noSurrender:{[x]
+  pc:"I"$string .mc.cardDict[-1_x];
+  pc[(0|(sum pc=11)&ceiling (sum[pc]-21)%10)#where pc=11]:1;
+  dc:first dealerDict .mc.cardDict last x;
+  :first $[(2=count pc)&pc[0]=pc[1];?[.mc.pairBase;enlist(=;`hTotal;pc 0);();dc];?[.mc.hardBase;enlist(=;`hTotal;sum pc);();dc]];
+  };
+.mc.recv:{[s]
+  .mc.tab:s`tab;.mc.res:s`res;.mc.mh:s`me;
+  if[not .mc.rules~s`rules;.mc.rules:s`rules;.mc.applyRules[]];
+  };
 
 .mc.stake:{[s]
   .mc.recv s;
@@ -106,10 +125,9 @@ setCountDict[`basic]; /can be overriden in player script
 // would refuse (at the hand cap) never gets another .mc.play push, so play the pair as a hard total instead
 .mc.decide:{[x;hands]
   r:Help[x];
-  if[r in `R`RS`RP;r:$[.mc.rules[`surrender]&hands=1;`R;(`R`RS`RP!`H`S`SP)r]];
+  if[(r=`SR)&hands>1;r:.mc.noSurrender x];
   if[(r=`SP)&hands>=.mc.maxSplitHands;
-    r:first ?[hard;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]];
-    if[r in `R`RS;r:(`R`RS!`H`S)r]];
+    r:first ?[.mc.hardBase;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]]];
   :r;
   };
 
@@ -140,6 +158,6 @@ Help:{
   if[(r=`D)&(2<count pc);:`H];
   if[r=`DS;:$[2<count pc;`S;`D]];
   if[(r=`SP)&(2<count pc);:`S];
-  if[(r in `R`RS)&2<count pc;:(`R`RS!`H`S)r];
+  if[(r=`SR)&2<count pc;:.mc.noSurrender x];
   r
   };
