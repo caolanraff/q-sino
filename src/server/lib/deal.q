@@ -15,8 +15,7 @@ stake:{[bet]
  };
 
 .bs.betTimer:{
-  if[null .bs.betDeadline;:()];
-  if[.z.p<.bs.betDeadline;:()];
+  if[null[.bs.betDeadline]|.z.p<.bs.betDeadline;:()];
   if[0=count select from .bs.tab where not null bet;.bs.betDeadline:0Np;:()];                      / every bettor has left: dealing now would unseat everyone
   .bs.lg"Betting closed";
   .bs.deal[];
@@ -25,8 +24,7 @@ stake:{[bet]
 .bs.dealIfReady:{
   if[0=count .bs.tab;:()];
   if[count select from .bs.tab where null bet;:()];
-  .bs.lg"All players have placed their bet";
-  .bs.lg"Time to deal";
+  .bs.lg"All players have placed their bet - time to deal";
   .bs.deal[];
  };
 
@@ -79,8 +77,7 @@ stake:{[bet]
  };
 
 .bs.insureTimer:{
-  if[null .bs.insureDeadline;:()];
-  if[.z.p<.bs.insureDeadline;:()];
+  if[null[.bs.insureDeadline]|.z.p<.bs.insureDeadline;:()];
   .bs.closeInsurance[];
  };
 
@@ -103,8 +100,7 @@ stake:{[bet]
   .bs.sendMsg["Winner winner chicken dinner!";h];
   update return:2.5*bet,out:1b,turn:0b from`.bs.tab where handle=h;
   if[all exec out from .bs.tab;
-    .bs.hd:1b;
-    .bs.wwch:1b;
+    .bs.hd:.bs.wwch:1b;
     .bs.dealer[];
   ];
  };
@@ -157,10 +153,9 @@ stake:{[bet]
  };
 
 .bs.dealer0:{
-  .bs.pubMsg["Dealer has ",","sv string .bs.dc;key .bs.cp];
   update dealer:(dealer,'last .bs.dc)from`.bs.tab;
   total:.bs.handCount .bs.dc;
-  .bs.pubMsg["Dealers hand count is ",string total;key .bs.cp];
+  .bs.pubMsg["Dealer has ",(","sv string .bs.dc),", hand count ",string total;key .bs.cp];
   update dealerCnt:total from`.bs.tab;
   .bs.dealerCount:last .bs.dealerHit/[{.bs.dealerDraws first x};(.bs.dc;total)];
  };
@@ -205,10 +200,8 @@ stake:{[bet]
 .bs.recordRound:{
   .bs.lg"Hand stats;\n",.Q.s .bs.tab;
   if[.bs.wwch;update dealer:enlist each dealer from`.bs.tab];
-  ins:$[.bs.isBJ .bs.dc;2f;-1f];
-  upsert[`.bs.res;update"j"$player,profit:(return-bet)+ins*0f^insurance from delete out,wait,turn from .bs.tab];
-  .bs.sendMsg["Results table for the round;"]each key .bs.cp;
-  .bs.sendMsg[select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bs.tab]each key .bs.cp;
+  upsert[`.bs.res;update"j"$player,profit:(return-bet)+(-1 2f .bs.isBJ .bs.dc)*0f^insurance from delete out,wait,turn from .bs.tab];
+  .bs.sendMsg["Results table for the round;\n",.Q.s select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bs.tab]each key .bs.cp;
  };
 
 .bs.endHand:{
