@@ -44,11 +44,11 @@
 / basic strategy is the baseline (6-deck, dealer hits soft 17 - the chart in playerCore.q): only plays that
 / depart from it are counter tells, so each flag leaves out hands that basic strategy plays the same way
 .da.handFacts:{[t]
-  update up:"I"$string .da.cardDict first each dealer,
+  :update up:"I"$string .da.cardDict first each dealer,
     two:{sum "I"$string .da.cardDict 2#x} each cards,
     soft:{`A in 2#x} each cards,
     theCount:basic_cnt
-    from t
+    from t;
   };
 
 .da.getPlayTrend:{
