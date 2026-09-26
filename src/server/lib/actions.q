@@ -89,7 +89,7 @@ double:{
 /// Surrender function ///
 surrender:{
   if[not .bs.checks[];:()];
-  if[not .bs.surrender;
+  if[not .bs.rules`surrender;
     .bs.sendMsg["This table doesn't offer surrender ",(string .z.u);.z.w];:()];
   if[not 2=first exec count each cards from .bs.tab where turn;
     .bs.sendMsg["You can only surrender your first two cards ",(string .z.u);.z.w];:()];

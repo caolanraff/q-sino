@@ -22,7 +22,7 @@ EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
 ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
-hard:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
+.mc.hard:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 // if player has an ACE the hand is considered a soft hand
 hTotal:13 14 15 16 17 18 19 20 21;
@@ -50,9 +50,7 @@ EIGHT:`H`H`H`D`H`H`SP`SP`S`SP;
 NINE:`H`H`H`D`H`H`SP`SP`S`SP;
 TEN:`H`H`H`H`H`H`SP`S`S`SP;
 ACE:`H`H`H`H`H`H`SP`S`S`SP;
-pair:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
-.mc.hardBase:hard;
-.mc.pairBase:pair;
+.mc.pair:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //mapping dealers cards to table headers
 dealerDict:(`2`3`4`5`6`7`8`9`10`J`Q`K`11)!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
@@ -88,19 +86,20 @@ setCountDict[`basic]; /can be overriden in player script
 
 .mc.rules:enlist[`surrender]!enlist 0b;
 .mc.applyRules:{
-  hard::.mc.hardBase;
-  pair::.mc.pairBase;
+  hard::.mc.hard;
+  pair::.mc.pair;
   if[.mc.rules`surrender;
     hard::update NINE:`SR from hard where hTotal=16;
     hard::update TEN:`SR from hard where hTotal in 15 16;
     hard::update ACE:`SR from hard where hTotal in 15 16 17;
     pair::update ACE:`SR from pair where hTotal=8];
   };
+.mc.applyRules[];
 .mc.noSurrender:{[x]
   pc:"I"$string .mc.cardDict[-1_x];
   pc[(0|(sum pc=11)&ceiling (sum[pc]-21)%10)#where pc=11]:1;
   dc:first dealerDict .mc.cardDict last x;
-  :first $[(2=count pc)&pc[0]=pc[1];?[.mc.pairBase;enlist(=;`hTotal;pc 0);();dc];?[.mc.hardBase;enlist(=;`hTotal;sum pc);();dc]];
+  :first $[(2=count pc)&pc[0]=pc[1];?[.mc.pair;enlist(=;`hTotal;pc 0);();dc];?[.mc.hard;enlist(=;`hTotal;sum pc);();dc]];
   };
 .mc.recv:{[s]
   .mc.tab:s`tab;.mc.res:s`res;.mc.mh:s`me;
@@ -127,7 +126,7 @@ setCountDict[`basic]; /can be overriden in player script
   r:Help[x];
   if[(r=`SR)&hands>1;r:.mc.noSurrender x];
   if[(r=`SP)&hands>=.mc.maxSplitHands;
-    r:first ?[.mc.hardBase;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]]];
+    r:first ?[.mc.hard;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]]];
   :r;
   };
 
