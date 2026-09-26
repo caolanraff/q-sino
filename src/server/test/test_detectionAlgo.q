@@ -57,7 +57,7 @@ system "l src/server/bin/detectionAlgo.q";
  };
 
 / one result row per hand for .da.getPlayTrend: cards, final count, dealer's hand, and whether it doubled/split
-.tst.daPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:(count c)#`a_5;handle:(count c)#5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;basic_cnt:0.5*1+til count c)};
+.tst.daPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:(count c)#`a_5;handle:(count c)#5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;insurance:(count c)#0f;basic_cnt:0.5*1+til count c)};
 
 .tst.desc[".da.getPlayTrend doubles"]{
   should["flags doubling 18-20 that basic strategy wouldn't"]{
@@ -115,5 +115,28 @@ system "l src/server/bin/detectionAlgo.q";
     .da.res:update round:2 from .tst.daPlays[enlist`9`6;enlist 15i;enlist`A`8;enlist 0b;enlist 0b];
     .da.getPlayTrend[];
     (exec round from .da.stand) musteq 1 2;
+    };
+ };
+
+.tst.desc[".da.getPlayTrend insurance"]{
+  should["flags every insured hand with the count it was taken at, since basic strategy never insures"]{
+    .da.hist:();
+    .da.res:update insurance:5 0 5f from .tst.daPlays[(`9`7;`10`8;`A`K);16 18 21i;(`A`6;`A`6;`A`6);000b;000b];
+    .da.getPlayTrend[];
+    (exec cards from .da.insure) mustmatch (`9`7;`A`K);
+    (exec theCount from .da.insure) musteq 0.5 1.5;
+    (exec insurance from .da.insure) musteq 5 5f;
+    };
+  should["flags nothing when nobody insures"]{
+    .da.hist:();
+    .da.res:.tst.daPlays[(`9`7;`10`8);16 18i;(`A`6;`A`6);00b;00b];
+    .da.getPlayTrend[];
+    (count .da.insure) musteq 0;
+    };
+  should["includes insured hands from earlier shoes"]{
+    .da.hist:update insurance:5f from .tst.daPlays[enlist`9`7;enlist 16i;enlist`A`6;enlist 0b;enlist 0b];
+    .da.res:update round:2,insurance:10f from .tst.daPlays[enlist`10`8;enlist 18i;enlist`A`K;enlist 0b;enlist 0b];
+    .da.getPlayTrend[];
+    (exec round from .da.insure) musteq 1 2;
     };
  };
