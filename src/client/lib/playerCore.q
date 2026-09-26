@@ -8,13 +8,15 @@ bet:25;
 decks:6;
 startCards:decks*52;
 
+// basic strategy for a 4-8 deck shoe, dealer hits soft 17, double after split, no surrender.
+// each column is the dealer up-card; rows run over the table's hTotal. DS = double if allowed, else stand
 // hard hand
 hTotal:3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21;
-TWO:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
+TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;
 THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
 FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
-FIVE:`H`H`H`H`H`D`D`D`D`S`S`S`S`S`S`S`S`S`S;
-SIX:`H`H`H`H`H`D`D`D`D`S`S`S`S`S`S`S`S`S`S;
+FIVE:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
+SIX:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
 SEVEN:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
 NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
@@ -24,29 +26,29 @@ hard:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 // if player has an ACE the hand is considered a soft hand
 hTotal:13 14 15 16 17 18 19 20 21;
-TWO:`H`H`H`H`D`S`S`S`S;
-THREE:`H`H`H`H`D`D`S`S`S;
-FOUR:`D`D`D`D`D`D`S`S`S;
-FIVE:`D`D`D`D`D`D`S`S`S;
-SIX:`D`D`D`D`D`D`D`S`S;
+TWO:`H`H`H`H`H`DS`S`S`S;
+THREE:`H`H`H`H`D`DS`S`S`S;
+FOUR:`H`H`D`D`D`DS`S`S`S;
+FIVE:`D`D`D`D`D`DS`S`S`S;
+SIX:`D`D`D`D`D`DS`DS`S`S;
 SEVEN:`H`H`H`H`H`S`S`S`S;
 EIGHT:`H`H`H`H`H`S`S`S`S;
 NINE:`H`H`H`H`H`H`S`S`S;
 TEN:`H`H`H`H`H`H`S`S`S;
-ACE:`H`H`H`H`H`S`S`S`S;
+ACE:`H`H`H`H`H`H`S`S`S;
 soft:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //if we are dealt pairs
 hTotal:2 3 4 5 6 7 8 9 10 11;
 TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
 THREE:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
-FOUR:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
+FOUR:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
 FIVE:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
 SIX:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
-SEVEN:`SP`SP`H`D`SP`SP`SP`S`S`SP;
-EIGHT:`H`SP`H`D`H`SP`SP`SP`S`SP;
+SEVEN:`SP`SP`H`D`H`SP`SP`S`S`SP;
+EIGHT:`H`H`H`D`H`H`SP`SP`S`SP;
 NINE:`H`H`H`D`H`H`SP`SP`S`SP;
-TEN:`H`H`H`H`H`S`SP`S`S`SP;
+TEN:`H`H`H`H`H`H`SP`S`S`SP;
 ACE:`H`H`H`H`H`H`SP`S`S`SP;
 pair:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
@@ -130,6 +132,7 @@ Help:{
       ?[pair;enlist(=;`hTotal;pc[1]);();first dealerDict[dc]];
       ?[hard;enlist(=;`hTotal;csum);();first dealerDict[dc]]];
   if[(r=`D)&(2<count pc);:`H];
+  if[r=`DS;:$[2<count pc;`S;`D]];
   if[(r=`SP)&(2<count pc);:`S];
   r
   };

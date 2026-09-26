@@ -38,3 +38,31 @@
     theCount musteq 2%(312-7)%52;  / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
     };
  };
+
+.tst.desc["playerCore.Help - 6-deck chart, dealer hits soft 17"]{
+  before{system "l src/client/lib/playerCore.q"};
+  should["doubles the hands that change when the dealer hits soft 17"]{
+    Help[`A`7`2] musteq `D;  / soft 18 vs 2
+    Help[`A`8`6] musteq `D;  / soft 19 vs 6
+    Help[`6`5`A] musteq `D;  / 11 vs ace
+    };
+  should["stands instead on a soft 18 or 19 that can no longer double"]{
+    Help[`A`3`4`4] musteq `S;  / 3-card soft 18 vs 4
+    Help[`A`5`3`6] musteq `S;  / 3-card soft 19 vs 6
+    };
+  should["still hits a soft 17 that can no longer double"]{
+    Help[`A`2`4`5] musteq `H;  / 3-card soft 17 vs 5
+    };
+  should["hits soft 18 against an ace"]{
+    Help[`A`7`A] musteq `H;
+    };
+  should["uses the 6-deck plays, not single-deck ones"]{
+    Help[`5`3`6] musteq `H;    / hard 8 vs 6: no double
+    Help[`5`4`2] musteq `H;    / hard 9 vs 2: no double
+    Help[`A`2`4] musteq `H;    / soft 13 vs 4: no double
+    Help[`A`6`2] musteq `H;    / soft 17 vs 2: no double
+    Help[`7`7`10] musteq `H;   / 7,7 vs 10: hit, not stand
+    Help[`7`7`8] musteq `H;    / 7,7 vs 8: hit, not split
+    Help[`4`4`4] musteq `H;    / 4,4 vs 4: hit, not split
+    };
+ };
