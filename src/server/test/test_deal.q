@@ -388,6 +388,51 @@ system "l src/server/bin/blackjackServer.q";
     };
  };
 
+.tst.desc[".bs.dealerDraws"]{
+  should["draws below 17 and stands on hard 17 under either rule"]{
+    .bs.hitSoft17:0b;
+    (.bs.dealerDraws `K`6) musteq 1b;
+    (.bs.dealerDraws `K`7) musteq 0b;
+    .bs.hitSoft17:1b;
+    (.bs.dealerDraws `K`6) musteq 1b;
+    (.bs.dealerDraws `K`7) musteq 0b;
+    };
+  should["stands on soft 17 when the table stands on all 17s"]{
+    .bs.hitSoft17:0b;
+    (.bs.dealerDraws `A`6) musteq 0b;
+    };
+  should["draws on soft 17 when the table hits soft 17, but stands on soft 18"]{
+    .bs.hitSoft17:1b;
+    (.bs.dealerDraws `A`6) musteq 1b;
+    (.bs.dealerDraws `A`A`5) musteq 1b;
+    (.bs.dealerDraws `A`7) musteq 0b;
+    };
+ };
+
+.tst.desc[".bs.dealer0 soft 17"]{
+  should["stands on A,6 when the table stands on all 17s"]{
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hitSoft17:0b;
+    .bs.dc:`A`6;
+    getCardCalls::0;
+    `.bs.getCard mock {getCardCalls+::1;`2};
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`A;dealerCnt:enlist 11i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.dealer0[];
+    getCardCalls musteq 0;
+    .bs.dealerCount musteq 17i;
+    };
+  should["draws on A,6 when the table hits soft 17"]{
+    `.bs.pubMsg mock {[x;y]};
+    .bs.hitSoft17:1b;
+    .bs.dc:`A`6;
+    `.bs.getCard mock {`2};
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`A;dealerCnt:enlist 11i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.dealer0[];
+    (exec first dealer from .bs.tab) mustmatch `A`6`2;
+    .bs.dealerCount musteq 19i;
+    };
+ };
+
 .tst.desc[".bs.dealer1"]{
   should["pays double the bet when the dealer busts and the player is 21 or under"]{
     `.bs.pubMsg mock {[x;y]};

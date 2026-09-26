@@ -111,6 +111,12 @@ stake:{
 	};
 
 /// Dealer function ///
+/ dealer draws below 17, and on soft 17 too when the table hits soft 17 (.bs.hitSoft17)
+.bs.dealerDraws:{[c]
+	n:.bs.handCount c;
+	:(n<17)|.bs.hitSoft17&(n=17)&.bs.isSoft c;
+	};
+
 .bs.dealerHit:{[s]
 	DH:.bs.getCard[];
 	.bs.pubMsg["Dealers gets a ",(string DH);key .bs.cp];
@@ -128,7 +134,7 @@ stake:{
 	dTotal:.bs.handCount .bs.dc;
 	.bs.pubMsg["Dealers hand count is ",(string dTotal);key .bs.cp];
 	update dealerCnt:dTotal from `.bs.tab;
-	.bs.dealerCount:last .bs.dealerHit/[{x[1]<17};(.bs.dc;dTotal)];
+	.bs.dealerCount:last .bs.dealerHit/[{.bs.dealerDraws x 0};(.bs.dc;dTotal)];
 	};
 
 .bs.dealer1:{[p]

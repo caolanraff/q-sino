@@ -136,3 +136,15 @@ system "l src/server/bin/blackjackServer.q";
     (.bs.isBJ `A`9) musteq 0b;
     };
  };
+
+.tst.desc[".bs.isSoft"]{
+  should["is true while an ace is still counted as 11"]{
+    (.bs.isSoft `A`6) musteq 1b;
+    (.bs.isSoft `A`A`5) musteq 1b;
+    };
+  should["is false once every ace has dropped to 1, or with no ace at all"]{
+    (.bs.isSoft `A`6`10) musteq 0b;
+    (.bs.isSoft `A`5`A`10) musteq 0b;
+    (.bs.isSoft `K`7) musteq 0b;
+    };
+ };
