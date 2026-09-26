@@ -472,3 +472,14 @@ system "l src/server/bin/blackjackServer.q";
     (betCalls,insCalls) musteq 1 1;
     };
  };
+
+.tst.desc[".bs.start mid-hand"]{
+  should["tells the connection that just arrived to wait for the hand to finish"]{
+    sent::();
+    `.bs.sendMsg mock {[x;y] sent,:enlist(x;y)};
+    .bs.hd:0b;
+    .bs.start[];
+    sent mustmatch enlist("Please wait until the hand is over";.z.w);
+    .bs.hd:1b;
+    };
+ };
