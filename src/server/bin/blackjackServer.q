@@ -49,7 +49,7 @@ hist:{.bs.hist,.bs.res};
   .bs.tab:.bs.tab lj .bs.stake;
   unbet:exec handle from .bs.tab where null bet;
   .bs.sendMsg["Please place your bets via the stake[] function"]each unbet;
-  .bs.excFunc[`.mc.stake;`]each unbet;
+  .bs.trigger[`.mc.stake]each unbet;
   };
 
 / a player leaving mid-hand forfeits it: record their hands in .bs.res (settled ones keep their result, the rest lose their bet)

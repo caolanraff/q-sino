@@ -416,3 +416,19 @@ system "l src/server/bin/blackjackServer.q";
     (count .bs.res) musteq 0;
     };
  };
+
+.tst.desc[".bs.start stake trigger"]{
+  should["pushes each unbet player their own state with .mc.stake"]{
+    `.bs.sendMsg mock {[x;y]};
+    sent::();
+    `.bs.excFunc mock {[x;y;z] sent,:enlist(x;y;z)};
+    .bs.hd:1b;
+    .bs.cp:(5i;6i)!`alice`bob;
+    .bs.stake:([name:();handle:()]bet:());
+    .bs.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    .bs.start[];
+    (sent[;0]) mustmatch `.mc.stake`.mc.stake;
+    ({x[1]`me} each sent) musteq 5 6i;
+    ({x[1]`tab} each sent) mustmatch 2#enlist .bs.tab;
+    };
+ };

@@ -9,7 +9,6 @@ Help:{
 
 // bets the profit of previous hand
 getBet:{
-  .mc.getRes[];
   bet:$[(0=count .mc.res)|(not `profit in cols .mc.res);
     10;
     "i"$last exec profit from .mc.res where handle=.mc.mh];

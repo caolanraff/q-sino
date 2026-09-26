@@ -31,8 +31,8 @@
 .tst.desc[".mc.Count"]{
   before{system "l src/client/lib/playerCore.q"};
   should["counts the dealer's cards once per round, not once per player row"]{
-    `.mc.getRes mock {.mc.res::([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8))};
-    `.mc.getTab mock {.mc.tab::([]round:0N 0N;cards:(();());dealer:``)};
+    .mc.res:([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
+    .mc.tab:([]round:0N 0N;cards:(();());dealer:``);
     startCards::312;
     .mc.Count[];
     theCount musteq 2%(312-7)%52;  / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
@@ -64,5 +64,17 @@
     Help[`7`7`10] musteq `H;   / 7,7 vs 10: hit, not stand
     Help[`7`7`8] musteq `H;    / 7,7 vs 8: hit, not split
     Help[`4`4`4] musteq `H;    / 4,4 vs 4: hit, not split
+    };
+ };
+
+.tst.desc[".mc.recv"]{
+  before{system "l src/client/lib/playerCore.q"};
+  should["takes the table, results and this client's handle from the state the server pushed"]{
+    t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
+    r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
+    .mc.recv[`tab`res`me!(t;r;7i)];
+    .mc.tab mustmatch t;
+    .mc.res mustmatch r;
+    .mc.mh musteq 7i;
     };
  };

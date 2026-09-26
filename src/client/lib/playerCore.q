@@ -73,7 +73,6 @@ setCountDict[`basic]; /can be overriden in player script
   };
 
 .mc.Count:{
-  .mc.getTab[];.mc.getRes[];
   seen:.mc.cardsSeen[.mc.res],.mc.cardsSeen .mc.tab;
   runCount:sum countDict seen;
   theCount::runCount%(startCards-count seen)%52;	//true count
@@ -85,7 +84,13 @@ setCountDict[`basic]; /can be overriden in player script
 // strategy file loads this, overriding masterClient.q's log-only defaults
 .mc.handsPlayed:0;
 
-.mc.stake:{
+// the server sends its state with every .mc.stake/.mc.play trigger: `tab`res`me (.bs.tab, .bs.res, and this
+// client's handle on the server). Never pull state back with a sync call from inside a push handler - kdb IPC
+// has no reply correlation, so a message already queued on the connection can take the reply (issue #4)
+.mc.recv:{[s].mc.tab:s`tab;.mc.res:s`res;.mc.mh:s`me};
+
+.mc.stake:{[s]
+  .mc.recv s;
   if[(.mc.handsPlayed+:1)>.mc.toth;
     -1"Played ",string[.mc.toth]," hand",$[.mc.toth=1;"";"s"],", disconnecting";
     hclose .mc.h;
@@ -107,8 +112,8 @@ setCountDict[`basic]; /can be overriden in player script
   :r;
   };
 
-.mc.play:{
-  .mc.getTab[];
+.mc.play:{[s]
+  .mc.recv s;
   .mc.c:(raze exec cards from .mc.tab where turn=1),raze exec dealer from .mc.tab where turn=1;
   dec:.mc.handDict .mc.decide[.mc.c;count select from .mc.tab where handle=.mc.mh];
   .mc.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .mc.tab where handle=.mc.mh;

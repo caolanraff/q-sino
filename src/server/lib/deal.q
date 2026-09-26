@@ -107,7 +107,7 @@ stake:{
     .bs.sendMsg[.bs.turn]each key .bs.cp;
     .bs.lg"The count is ",(string .bs.count);
     h:first exec handle from .bs.tab where turn;
-    .bs.excFunc[`.mc.play;`;h]];
+    .bs.trigger[`.mc.play;h]];
 	};
 
 /// Dealer function ///
@@ -190,6 +190,6 @@ stake:{
 	.bs.bd:0b;.bs.hd:1b;
 	.bs.stake:0#.bs.stake;
 	.bs.pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key .bs.cp];
-	if[not null .bs.da;.bs.excFunc[`.da.gameover;.bs.res;.bs.da]];
+	if[not null .bs.da;.bs.excFunc[`.da.gameover;`res`rnd!(.bs.res;.bs.rnd);.bs.da]];
 	.bs.start[];
 	};

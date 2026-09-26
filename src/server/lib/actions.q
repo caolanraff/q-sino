@@ -18,7 +18,7 @@
 	p:first exec name from .bs.tab where handle=h;
 	.bs.pubMsg["It's ",string[p],"'s turn";h];
 	.bs.sendMsg[.bs.turn]each key .bs.cp;
-	.bs.excFunc[`.mc.play;`;h];
+	.bs.trigger[`.mc.play;h];
 	};
 
 /// Stick function ///
@@ -65,7 +65,7 @@ stick:{
 		$[.bs.double;
 			stick[];
 		  [.bs.sendMsg["Hit or Stick?";h];
-		   .bs.excFunc[`.mc.play;`;h]]]];
+		   .bs.trigger[`.mc.play;h]]]];
 	};
 
 hit:{
