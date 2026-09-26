@@ -84,11 +84,9 @@
   .da.getPlayTrend[];
   };
 
-.da.gameover:{
-  .da.rnd:.z.w`.bs.rnd;
-  / x is the whole shoe's .bs.res so far: only take rounds not already held (held rows carry the
-  / count columns added by .da.getBetTrend, so a distinct over both would keep them twice)
-  .da.res:.da.res uj select from x where not round in exec round from .da.res;
+.da.gameover:{[s]
+  .da.rnd:s`rnd;r:s`res;
+  .da.res:.da.res uj select from r where not round in exec round from .da.res;
   .da.getDetect[];
   };
 

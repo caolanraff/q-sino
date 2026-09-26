@@ -588,6 +588,21 @@ system "l src/server/bin/blackjackServer.q";
     .bs.dealer[];
     excFuncCalls mustmatch enlist(`.da.gameover;99i);
     };
+  should["sends the detection algo the shoe's results and the round just played"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    .bs.wwch:0b; .bs.da:99i; .bs.dc:`K`5; .bs.rnd:4;
+    `.bs.start mock {};
+    sent::();
+    `.bs.excFunc mock {[x;y;z] sent,:enlist(x;y;z)};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+    .bs.tab:([]round:enlist 4;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bs.tab;
+    .bs.cp:enlist[0i]!enlist`p1;
+    .bs.dealer[];
+    (sent[0;1]`rnd) musteq 4;
+    (sent[0;1]`res) mustmatch .bs.res;
+    };
   should["records each hand's net profit - return minus bet - in .bs.res"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.sendMsg mock {[x;y]};

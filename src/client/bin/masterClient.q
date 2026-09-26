@@ -4,9 +4,6 @@
 
 /// Play functions ///
 
-.mc.getTab:{set[`.mc.tab;.mc.h`.bs.tab]};
-.mc.getRes:{set[`.mc.res;.mc.h`.bs.res]};
-
 .mc.handDict:`H`S`D`SP!`hit`stick`double`split;
 
 // log-only defaults for a manual player; -player loads a strategy (which loads playerCore.q),
@@ -38,7 +35,6 @@ hist:{.mc.dispatch[`hist;x]};
   // so a new player file only needs to be dropped in here - it isn't coupled to this loader
   if[not null p;system"l src/client/lib/",string[p],".q"];
   .mc.h:@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
-  .mc.mh:.mc.h`.z.w;
   };
 
 if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;.mc.init[]];
