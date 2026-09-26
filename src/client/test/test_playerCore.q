@@ -27,3 +27,14 @@
     .mc.decide[`5`6`6;4] musteq `D;
     };
  };
+
+.tst.desc[".mc.Count"]{
+  before{system "l src/client/lib/playerCore.q"};
+  should["counts the dealer's cards once per round, not once per player row"]{
+    `.mc.getRes mock {.mc.res::([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8))};
+    `.mc.getTab mock {.mc.tab::([]round:0N 0N;cards:(();());dealer:``)};
+    startCards::312;
+    .mc.Count[];
+    theCount musteq 2%(312-7)%52;  / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
+    };
+ };

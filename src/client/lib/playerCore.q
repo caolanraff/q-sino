@@ -62,12 +62,19 @@ setCountDict:{`countDict set value x};
 setCountDict[`basic]; /can be overriden in player script
 
 // keeps the current count of the cards. This should determine the players bet.
+// every card seen in a set of result rows: each hand's cards, plus the dealer's hand once per round -
+// every player's row carries its own copy of the dealer's cards (a forfeit row only the up-card, so take the longest).
+// keep in sync with .da.cardsSeen (detectionAlgo.q)
+.mc.cardsSeen:{[t]
+  c:raze[t`cards],raze value exec {x first idesc count each x} dealer by round from t;
+  c where not null c
+  };
+
 .mc.Count:{
   .mc.getTab[];.mc.getRes[];
-  acr:(,//)value exec cards,dealer from .mc.res;
-  act:(,//)value exec cards,dealer from .mc.tab;
-  runCount:sum countDict acr,act;
-  theCount::runCount%(startCards-count acr)%52;	//true count
+  seen:.mc.cardsSeen[.mc.res],.mc.cardsSeen .mc.tab;
+  runCount:sum countDict seen;
+  theCount::runCount%(startCards-count seen)%52;	//true count
   };
 
 .mc.shuffle:{theCount::0f};
