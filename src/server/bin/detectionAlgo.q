@@ -6,6 +6,9 @@
 .da.betTrend:flip `Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
 
 /// Count logic ///
+/ a full shoe's card count from the server at h - not count .bs.deck, which is only what's left if we start mid-shoe
+.da.shoeSize:{[h]h"52*.bs.deckCnt"};
+
 .da.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 
 .da.basic:`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 1 1 1 0 0 0 -1 -1 -1 -1 -1;
@@ -87,7 +90,7 @@ init:{
   show "Loading detection algorithm";
   system "p 5556";
   .da.h:@[hopen;`$":localhost:5555:detectionAlgo";{show"Unable to connect to blackJack_server.q";exit 1}];
-  .da.startCards:.da.h"count .bs.deck";
+  .da.startCards:.da.shoeSize .da.h;
   };
 
 if[(not null .z.f) and "detectionAlgo.q"~last "/" vs string .z.f;init[]];

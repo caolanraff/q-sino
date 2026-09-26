@@ -47,3 +47,11 @@ system "l src/server/bin/detectionAlgo.q";
     (exec basic_cnt from .da.res where round=2) musteq 2 2*1%(312-7)%52;
     };
  };
+
+.tst.desc[".da.shoeSize"]{
+  should["reports a full shoe, not the cards left in the deck"]{
+    .bs.deckCnt:6;
+    .bs.deck:10#`2;  / mid-shoe: only 10 cards left
+    .da.shoeSize[0] musteq 312;  / handle 0 evaluates the query in this process
+    };
+ };

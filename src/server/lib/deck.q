@@ -39,5 +39,8 @@
   :"i"$v-10*(sum c=`A)&0|ceiling(v-21)%10;
   };
 
+/ soft hand: an ace is still being counted as 11
+.bs.isSoft:{[c].bs.handCount[c]>sum["I"$string .bs.cardDict c]-10*sum c=`A};
+
 / a two-card 21 - callers must exclude split hands, whose two-card 21 isn't a natural
 .bs.isBJ:{[c](2=count c)&21=.bs.handCount c};
