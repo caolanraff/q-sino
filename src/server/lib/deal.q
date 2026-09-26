@@ -42,7 +42,7 @@ stake:{
 
 	.bs.hd:.bs.wwch:0b;
 	.bs.rnd+:1;num:count .bs.tab;
-	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b from `.bs.tab;
+	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b,insurance:num#0f from `.bs.tab;
 
 	.bs.dealCard each select from .bs.tab where (count each cards)=0;
 
@@ -59,10 +59,41 @@ stake:{
 	.bs.dc:DC1,DC2;
 	update cnt:.bs.handCount each cards from `.bs.tab;
 
+	if[`A=DC1;.bs.offerInsurance[];:()];
+	.bs.settleDeal[];
+	};
+
+.bs.settleDeal:{
 	/ dealer peeks under an ace/10 up-card: a dealer blackjack ends the hand before anyone acts
 	if[.bs.isBJ .bs.dc;.bs.dealerPeek[];:()];
-
 	.bs.deal1 each exec handle from .bs.tab;
+	};
+
+.bs.offerInsurance:{
+	.bs.insuring:1b;
+	.bs.insureDeadline:.z.p+.bs.betTimeout;
+	update insurance:0n from `.bs.tab;
+	.bs.pubMsg["Dealer shows an ace - insurance? insure[amount] up to half your bet, or insure[0] to decline";key .bs.cp];
+	.bs.trigger[`.mc.insure]each exec handle from .bs.tab;
+	};
+
+.bs.closeInsuranceIfDone:{
+	if[.bs.insuring&0=count select from .bs.tab where null insurance;.bs.closeInsurance[]];
+	};
+
+.bs.insureTimer:{
+	if[null .bs.insureDeadline;:()];
+	if[.z.p<.bs.insureDeadline;:()];
+	.bs.closeInsurance[];
+	};
+
+.bs.closeInsurance:{
+	.bs.insuring:0b;
+	.bs.insureDeadline:0Np;
+	update insurance:0f from `.bs.tab where null insurance;
+	.bs.lg"Insurance closed";
+	.bs.settleDeal[];
+	.bs.startTurns[];
 	};
 
 .bs.dealerPeek:{
@@ -100,14 +131,18 @@ stake:{
 		.bs.sendMsg["No bet placed, please wait until the next hand"]each h;
 		delete from `.bs.tab where null bet];
 	.bs.deal0[];
-	if[not .bs.hd;
-    update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b);
-    show .bs.tab;
-    .bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-    .bs.sendMsg[.bs.turn]each key .bs.cp;
-    .bs.lg"The count is ",(string .bs.count);
-    h:first exec handle from .bs.tab where turn;
-    .bs.trigger[`.mc.play;h]];
+	if[not .bs.insuring;.bs.startTurns[]];
+	};
+
+.bs.startTurns:{
+	if[.bs.hd;:()];
+	update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b);
+	show .bs.tab;
+	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
+	.bs.sendMsg[.bs.turn]each key .bs.cp;
+	.bs.lg"The count is ",(string .bs.count);
+	h:first exec handle from .bs.tab where turn;
+	.bs.trigger[`.mc.play;h];
 	};
 
 /// Dealer function ///
@@ -182,7 +217,8 @@ stake:{
 	show .bs.tab;
 	if[.bs.wwch;update dealer:(enlist each dealer) from `.bs.tab];
 	/ return includes the stake; profit is the hand's net result
-	upsert[`.bs.res;update "j"$player,profit:return-bet from delete out, wait, turn from .bs.tab];
+	ins:$[.bs.isBJ .bs.dc;2f;-1f];
+	upsert[`.bs.res;update "j"$player,profit:(return-bet)+ins*0f^insurance from delete out, wait, turn from .bs.tab];
 	.bs.sumtab:select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bs.tab;
 	.bs.sendMsg["Results table for the round;"]each key .bs.cp;
 	.bs.sendMsg[.bs.sumtab]each key .bs.cp;
