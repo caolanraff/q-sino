@@ -1,4 +1,5 @@
 system "l src/server/bin/blackjackServer.q";
+.bs.loadLibs[];
 
 .tst.desc["stake[]"]{
   should["refuses a bet under 1"]{
@@ -47,13 +48,13 @@ system "l src/server/bin/blackjackServer.q";
     msgs::();
     `.bs.sendMsg mock {[x;y] msgs,:enlist(x;y)};
     `.bs.deal mock {};
-    .bs.hd:1b; .bs.bd:0b; .bs.betDeadline:0Np;
+    .bs.hd:1b; .bs.bd:0b; .bs.betDeadline:0Np; .bs.betTimeout:0D00:00:15;
     .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:3#0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:0f);
     .bs.stake:([name:();handle:()]bet:());
     t0:.z.p;
     stake[10];
     (.bs.betDeadline within t0+.bs.betTimeout+0D00:00:00 0D00:00:01) musteq 1b;
-    msgs mustmatch (("Betting closes in 30 seconds";1i);("Betting closes in 30 seconds";2i));
+    msgs mustmatch (("Betting closes in 15 seconds";1i);("Betting closes in 15 seconds";2i));
     };
   should["doesn't restart the clock on later bets"]{
     `.bs.user mock {`p2};

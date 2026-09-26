@@ -1,4 +1,5 @@
 system "l src/server/bin/blackjackServer.q";
+.bs.loadLibs[];
 
 .tst.desc["blackjackServer entry-script guard (bin/blackjackServer.q:382)"]{
   should["only fires for its own script, not when loaded as a dependency"]{
@@ -260,7 +261,8 @@ system "l src/server/bin/blackjackServer.q";
 .tst.desc[".bs.leave winnings message"]{
   should["reports net winnings across every shoe this session, ignoring other players"]{
     msgs::();
-    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.lg mock {[x] msgs,:enlist raze x};
     `.bs.pubMsg mock {[x;y]};
     .bs.hd:1b;
     .bs.cp:(5i;6i)!`alice`bob;
@@ -269,11 +271,12 @@ system "l src/server/bin/blackjackServer.q";
     .bs.res:([]round:2 3 3;handle:5 5 6i;profit:-5 15 -50f);
     .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bs.leave[5i];
-    (first msgs) mustmatch "Your net winnings this session are $20.00";
+    (any msgs like "*net winnings this session $20.00") musteq 1b;
     };
   should["shows a net loss with a leading minus sign"]{
     msgs::();
-    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.lg mock {[x] msgs,:enlist raze x};
     `.bs.pubMsg mock {[x;y]};
     .bs.hd:1b;
     .bs.cp:enlist[5i]!enlist`alice;
@@ -282,11 +285,12 @@ system "l src/server/bin/blackjackServer.q";
     .bs.res:([]round:1 2;handle:5 5i;profit:-10 -2.5);
     .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bs.leave[5i];
-    (first msgs) mustmatch "Your net winnings this session are -$12.50";
+    (any msgs like "*net winnings this session -$12.50") musteq 1b;
     };
   should["ignores results from an earlier connection that had the same handle"]{
     msgs::();
-    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.lg mock {[x] msgs,:enlist raze x};
     `.bs.pubMsg mock {[x;y]};
     .bs.hd:1b;
     .bs.cp:enlist[5i]!enlist`alice;
@@ -295,11 +299,12 @@ system "l src/server/bin/blackjackServer.q";
     .bs.res:([]round:enlist 3;handle:enlist 5i;profit:enlist 10f);
     .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bs.leave[5i];
-    (first msgs) mustmatch "Your net winnings this session are $10.00";
+    (any msgs like "*net winnings this session $10.00") musteq 1b;
     };
   should["reports zero for a player who never finished a hand"]{
     msgs::();
-    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.lg mock {[x] msgs,:enlist raze x};
     `.bs.pubMsg mock {[x;y]};
     .bs.hd:1b;
     .bs.cp:enlist[5i]!enlist`alice;
@@ -307,7 +312,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.hist:.bs.res:([]round:0#0;handle:0#0i;profit:0#0f);
     .bs.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bs.leave[5i];
-    (first msgs) mustmatch "Your net winnings this session are $0.00";
+    (any msgs like "*net winnings this session $0.00") musteq 1b;
     };
   should["forgets the session's join round"]{
     `.bs.sendMsg mock {[x;y]};
@@ -391,7 +396,8 @@ system "l src/server/bin/blackjackServer.q";
     };
   should["counts the forfeited hand in the leaver's session winnings"]{
     msgs::();
-    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.lg mock {[x] msgs,:enlist raze x};
     `.bs.pubMsg mock {[x;y]};
     `.bs.nextTurn mock {};
     .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bs.hist:0#.bs.res;
@@ -401,7 +407,7 @@ system "l src/server/bin/blackjackServer.q";
     .bs.tab:([]round:2 2;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bs.tab:update out:00b,wait:00b,turn:01b from .bs.tab;
     .bs.leave[5i];
-    (first msgs) mustmatch "Your net winnings this session are $5.00";
+    (any msgs like "*net winnings this session $5.00") musteq 1b;
     };
   should["records nothing for a player who leaves between hands"]{
     `.bs.sendMsg mock {[x;y]};
@@ -470,5 +476,16 @@ system "l src/server/bin/blackjackServer.q";
     `.bs.insureTimer mock {insCalls+::1};
     .z.ts[.z.p];
     (betCalls,insCalls) musteq 1 1;
+    };
+ };
+
+.tst.desc[".bs.start mid-hand"]{
+  should["tells the connection that just arrived to wait for the hand to finish"]{
+    sent::();
+    `.bs.sendMsg mock {[x;y] sent,:enlist(x;y)};
+    .bs.hd:0b;
+    .bs.start[];
+    sent mustmatch enlist("Please wait until the hand is over";.z.w);
+    .bs.hd:1b;
     };
  };

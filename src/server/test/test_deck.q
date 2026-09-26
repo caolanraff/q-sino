@@ -1,4 +1,5 @@
 system "l src/server/bin/blackjackServer.q";
+.bs.loadLibs[];
 
 .tst.desc[".bs.buildDeck"]{
   should["builds N decks worth of cards (4 of each rank per deck) when given a count"]{
