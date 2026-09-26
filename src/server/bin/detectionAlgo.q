@@ -2,6 +2,7 @@
 
 .bs.count:0f;
 .da.hist:();
+.da.res:([]round:`long$());
 .da.betTrend:flip `Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
 
 /// Count logic ///
@@ -11,15 +12,24 @@
 .da.omega:`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 2 2 2 1 0 -1 -2 -2 -2 -2 0;
 .da.perfect:`2`3`4`5`6`7`8`9`10`J`Q`K`A!4 5 6 9 6 4 1 -2 -8 -8 -8 -8 -3;
 
-.da.count:{
-  acr:(,//)value exec cards,dealer from .da.res;
-  runCount:sum x acr;
-  runCount%(.da.startCards-count acr)%52
+/ every card seen in a set of result rows: each hand's cards, plus the dealer's hand once per round -
+/ every player's row carries its own copy of the dealer's cards (a forfeit row only the up-card, so take the longest)
+.da.cardsSeen:{[t]
+  c:raze[t`cards],raze value exec {x first idesc count each x} dealer by round from t;
+  c where not null c
+  };
+
+/ true count for point system pts over result rows t
+.da.count:{[pts;t]
+  seen:.da.cardsSeen t;
+  sum[pts seen]%(.da.startCards-count seen)%52
   };
 
 /// Bet trends ///
 .da.getBetTrend:{
-  .da.res:update basic_cnt:.da.count[.da.basic],omega_cnt:.da.count[.da.omega],perfect_cnt:.da.count[.da.perfect] from .da.res where round=.da.rnd;
+  / the count a player could have known when betting this round - earlier rounds only
+  earlier:select from .da.res where round<.da.rnd;
+  .da.res:update basic_cnt:.da.count[.da.basic;earlier],omega_cnt:.da.count[.da.omega;earlier],perfect_cnt:.da.count[.da.perfect;earlier] from .da.res where round=.da.rnd;
   tab:0!select basic_cor:(bet cor basic_cnt),basic_cov:(bet cov basic_cnt),
     omega_cor:(bet cor omega_cnt),omega_cov:(bet cov omega_cnt),
     perfect_cor:(bet cor perfect_cnt),perfect_cov:(bet cov perfect_cnt)
@@ -66,8 +76,9 @@
 
 .da.gameover:{
   .da.rnd:.z.w`.bs.rnd;
-  .da.res,:x;
-  .da.res:distinct .da.res;
+  / x is the whole shoe's .bs.res so far: only take rounds not already held (held rows carry the
+  / count columns added by .da.getBetTrend, so a distinct over both would keep them twice)
+  .da.res:.da.res uj select from x where not round in exec round from .da.res;
   .da.getDetect[];
   };
 
