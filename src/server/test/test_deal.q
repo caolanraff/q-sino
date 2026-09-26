@@ -17,9 +17,10 @@ system "l src/server/bin/blackjackServer.q";
     };
   should["accepts a valid bet and joins it into .bs.tab, but doesn't deal while another player is unbet"]{
     `.bs.user mock {`p1};
+    `.bs.sendMsg mock {[x;y]};
     dealCalls::0;
     `.bs.deal mock {dealCalls+::1};
-    .bs.hd:1b; .bs.bd:0b;
+    .bs.hd:1b; .bs.bd:0b; .bs.betDeadline:0Np;
     .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:2#0N;return:2#0n;profit:2#0n;split:00b;double:00b);
     .bs.stake:([name:();handle:()]bet:());
     stake[10];
@@ -29,13 +30,93 @@ system "l src/server/bin/blackjackServer.q";
     };
   should["deals once the last unbet player places their bet"]{
     `.bs.user mock {`p1};
+    `.bs.sendMsg mock {[x;y]};
     dealCalls::0;
     `.bs.deal mock {dealCalls+::1};
-    .bs.hd:1b; .bs.bd:0b;
+    .bs.hd:1b; .bs.bd:0b; .bs.betDeadline:0Np;
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.stake:([name:();handle:()]bet:());
     stake[10];
     dealCalls musteq 1;
+    };
+ };
+
+.tst.desc["stake[] betting clock"]{
+  should["starts the clock on the round's first bet and tells the players still to bet"]{
+    `.bs.user mock {`p1};
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist(x;y)};
+    `.bs.deal mock {};
+    .bs.hd:1b; .bs.bd:0b; .bs.betDeadline:0Np;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:3#0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.stake:([name:();handle:()]bet:());
+    t0:.z.p;
+    stake[10];
+    (.bs.betDeadline within t0+.bs.betTimeout+0D00:00:00 0D00:00:01) musteq 1b;
+    msgs mustmatch (("Betting closes in 30 seconds";1i);("Betting closes in 30 seconds";2i));
+    };
+  should["doesn't restart the clock on later bets"]{
+    `.bs.user mock {`p2};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.deal mock {};
+    .bs.hd:1b; .bs.bd:1b;
+    deadline:.z.p+0D00:00:05;
+    .bs.betDeadline:deadline;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.stake:([name:enlist`p1;handle:enlist 0i]bet:enlist 10);
+    stake[10];
+    .bs.betDeadline musteq deadline;
+    };
+ };
+
+.tst.desc[".bs.betTimer"]{
+  should["does nothing while no betting clock is running"]{
+    dealCalls::0;
+    `.bs.deal mock {dealCalls+::1};
+    .bs.betDeadline:0Np;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.betTimer[];
+    dealCalls musteq 0;
+    };
+  should["does nothing before betting closes"]{
+    dealCalls::0;
+    `.bs.deal mock {dealCalls+::1};
+    .bs.betDeadline:.z.p+0D00:00:10;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.betTimer[];
+    dealCalls musteq 0;
+    };
+  should["deals once betting has closed"]{
+    dealCalls::0;
+    `.bs.deal mock {dealCalls+::1};
+    .bs.betDeadline:.z.p-0D00:00:01;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.betTimer[];
+    dealCalls musteq 1;
+    };
+  should["stops the clock without dealing when every bettor has since left"]{
+    dealCalls::0;
+    `.bs.deal mock {dealCalls+::1};
+    .bs.betDeadline:.z.p-0D00:00:01;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:3#0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.betTimer[];
+    dealCalls musteq 0;
+    (null .bs.betDeadline) musteq 1b;
+    (count .bs.tab) musteq 3;
+    };
+  should["sits out the players who didn't bet in time and deals the rest"]{
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist(x;y)};
+    deal0Calls::0;
+    `.bs.deal0 mock {deal0Calls+::1;.bs.hd:1b};
+    .bs.hd:1b; .bs.bd:1b;
+    .bs.betDeadline:.z.p-0D00:00:01;
+    .bs.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b);
+    .bs.betTimer[];
+    deal0Calls musteq 1;
+    (exec handle from .bs.tab) musteq enlist 0i;
+    msgs mustmatch (("No bet placed, please wait until the next hand";1i);("No bet placed, please wait until the next hand";2i));
+    (null .bs.betDeadline) musteq 1b;
     };
  };
 
@@ -227,6 +308,15 @@ system "l src/server/bin/blackjackServer.q";
     .bs.deal[];
     (count .bs.tab) musteq 1;
     (exec first name from .bs.tab) musteq `p1;
+    };
+  should["clears the betting clock"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.deal0 mock {.bs.hd:1b};
+    .bs.hd:1b; .bs.bd:1b;
+    .bs.betDeadline:.z.p+0D00:00:10;
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.deal[];
+    (null .bs.betDeadline) musteq 1b;
     };
   should["sets the first player's turn, rebuilds .bs.turn and prompts them, when the hand isn't already decided"]{
     excFuncCalls::();

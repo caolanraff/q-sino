@@ -337,3 +337,12 @@ system "l src/server/bin/blackjackServer.q";
     (count .bs.joined) musteq 0;
     };
  };
+
+.tst.desc[".z.ts"]{
+  should["drives the betting clock"]{
+    timerCalls::0;
+    `.bs.betTimer mock {timerCalls+::1};
+    .z.ts[.z.p];
+    timerCalls musteq 1;
+    };
+ };
