@@ -86,6 +86,17 @@ double:{
   .bs.double:0b;
   };
 
+/// Insurance function ///
+insure:{
+  if[not .bs.insuring;.bs.sendMsg["Insurance isn't on offer right now";.z.w];:()];
+  if[not .z.w in exec handle from .bs.tab where null insurance;.bs.sendMsg["You've no hand waiting on insurance";.z.w];:()];
+  if[(null x)|(x<0)|x>0.5*first exec bet from .bs.tab where handle=.z.w;
+    .bs.sendMsg["Insurance is between 0 and half your bet";.z.w];:()];
+  .bs.pubMsg[(string .z.u),$[x=0;" declines insurance";" insures for $",string x];key .bs.cp];
+  update insurance:`float$x from `.bs.tab where handle=.z.w;
+  .bs.closeInsuranceIfDone[];
+  };
+
 /// Split function ///
 .bs.split0:{
 	update player:`float$player from `.bs.tab;

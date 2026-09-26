@@ -5,6 +5,7 @@ show"Your starting bet should be 25";
 // init
 theCount:0f;
 bet:25;
+insureAt:0w;
 decks:6;
 startCards:decks*52;
 
@@ -95,6 +96,14 @@ setCountDict[`basic]; /can be overriden in player script
   .mc.Count[];
   bet:getBet[];
   neg[.mc.h](`stake;bet);
+  };
+
+.mc.insureAmount:{$[theCount>=insureAt;0.5*first exec bet from .mc.tab where handle=.mc.mh;0f]};
+
+.mc.insure:{[s]
+  .mc.recv s;
+  .mc.Count[];
+  neg[.mc.h](`insure;.mc.insureAmount[]);
   };
 
 // the server caps each player at this many hands (keep in sync with .bs.maxSplitHands, blackjackServer.q)

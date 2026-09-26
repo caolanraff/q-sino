@@ -10,6 +10,7 @@
 // overriding these with the real auto-play logic (see .mc.init[] below)
 .mc.stake:{-1"It's your turn to stake - run stake[bet] when ready"};
 .mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
+.mc.insure:{-1"Dealer shows an ace - run insure[amount] (up to half your bet, or insure[0] to decline) when ready"};
 .mc.shuffle:{-1"Deck reshuffled"};
 
 .mc.dispatch:{[f;x].mc.h(f;x)};
@@ -18,6 +19,7 @@ hit:{.mc.dispatch[`hit;x]};
 stick:{.mc.dispatch[`stick;x]};
 double:{.mc.dispatch[`double;x]};
 split:{.mc.dispatch[`split;x]};
+insure:{.mc.dispatch[`insure;x]};
 hist:{.mc.dispatch[`hist;x]};
 
 /// start ///

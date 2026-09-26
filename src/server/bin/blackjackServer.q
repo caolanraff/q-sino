@@ -14,10 +14,12 @@
 .bs.maxSplitHands:4;   //split up to 3 times, i.e. at most 4 hands per player
 .bs.betTimeout:0D00:00:30;   //once the first bet is down, anyone still unbet after this long sits the hand out
 .bs.betDeadline:0Np;
+.bs.insuring:0b;
+.bs.insureDeadline:0Np;
 
 .bs.cp:()!();
 .bs.joined:(`int$())!`long$();   //handle -> .bs.rnd when that connection joined, so a reused handle doesn't inherit an earlier session's results
-.bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+.bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
@@ -58,7 +60,7 @@ hist:{.bs.hist,.bs.res};
   t:update return:0f from (select from .bs.tab where handle=h) where not out;
   if[0=count t;:()];
   t:update "j"$player,dealer:enlist each dealer,"f"$return from delete out,wait,turn from t;
-  upsert[`.bs.res;update profit:return-bet from t];
+  upsert[`.bs.res;update profit:(return-bet)-0f^insurance from t];
   };
 
 .bs.leave:{[h]
@@ -74,6 +76,7 @@ hist:{.bs.hist,.bs.res};
   delete from `.bs.tab where handle=h;
   delete from `.bs.stake where handle=h;
   / between hands: the leaver may have been the last player the deal was waiting on
+  if[.bs.insuring;:.bs.closeInsuranceIfDone[]];
   if[.bs.hd;.bs.dealIfReady[];:()];
   / mid-hand: pass on the turn if it was theirs, else nobody would ever act again
   if[not hadTurn;:()];
@@ -83,7 +86,7 @@ hist:{.bs.hist,.bs.res};
 
 .z.po:{.bs.regConn[.z.w];if[not .bs.isDA[];.bs.start[];neg[.z.w](.bs.intro;`)]};
 .z.pc:{$[x=.bs.da;.bs.da:0Ni;.bs.leave x]};
-.z.ts:{.bs.betTimer[]};
+.z.ts:{.bs.betTimer[];.bs.insureTimer[]};
 
 /// Deck functions ///
 system "l src/server/lib/deck.q";

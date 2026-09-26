@@ -78,3 +78,30 @@
     .mc.mh musteq 7i;
     };
  };
+
+.tst.desc[".mc.insureAmount"]{
+  before{system "l src/client/lib/playerCore.q"};
+  should["never insures by default"]{
+    .mc.tab:([]handle:enlist 7i;bet:enlist 20); .mc.mh:7i;
+    theCount::10f;
+    .mc.insureAmount[] musteq 0f;
+    };
+  should["insures half the bet once the true count reaches insureAt"]{
+    .mc.tab:([]handle:6 7i;bet:40 20); .mc.mh:7i;
+    insureAt::3;
+    theCount::3f;
+    .mc.insureAmount[] musteq 10f;
+    theCount::2.9;
+    .mc.insureAmount[] musteq 0f;
+    };
+ };
+
+.tst.desc["insureAt per strategy"]{
+  should["is 3 for the Hi-Lo counters and never for the others"]{
+    system "l src/client/lib/basicCardCounter.q"; insureAt musteq 3;
+    system "l src/client/lib/smallSpreadBasicCardCounter.q"; insureAt musteq 3;
+    system "l src/client/lib/omegaCardCounter.q"; insureAt musteq 0w;
+    system "l src/client/lib/perfectCardCounter.q"; insureAt musteq 0w;
+    system "l src/client/lib/avgPlayer1.q"; insureAt musteq 0w;
+    };
+ };
