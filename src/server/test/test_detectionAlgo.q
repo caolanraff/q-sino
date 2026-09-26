@@ -55,3 +55,65 @@ system "l src/server/bin/detectionAlgo.q";
     .da.shoeSize[0] musteq 312;  / handle 0 evaluates the query in this process
     };
  };
+
+/ one result row per hand for .da.getPlayTrend: cards, final count, dealer's hand, and whether it doubled/split
+.tst.daPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:(count c)#`a_5;handle:(count c)#5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;basic_cnt:0.5*1+til count c)};
+
+.tst.desc[".da.getPlayTrend doubles"]{
+  should["flags doubling 18-20 that basic strategy wouldn't"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`A`7`2;`A`8`9;`A`9`3;`10`8`2);21 18 13 20i;(`7`K;`5`K;`4`3;`6`K);1111b;0000b];
+    .da.getPlayTrend[];
+    (exec cards from .da.double) mustmatch (`A`7`2;`A`8`9;`A`9`3;`10`8`2);  / soft 18 vs 7, soft 19 vs 5, soft 20, hard 18
+    };
+  should["leaves out soft 18 vs 2-6 and soft 19 vs 6, which basic strategy doubles"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`A`7`3;`A`7`2;`A`8`2);21 20 21i;(`2`K;`6`K;`6`K);111b;000b];
+    .da.getPlayTrend[];
+    (count .da.double) musteq 0;
+    };
+ };
+
+.tst.desc[".da.getPlayTrend stands"]{
+  should["flags standing on a two-card hard 15/16 against 7-A"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`10`6;`9`6;`10`5);16 15 15i;(`10`8;`7`K;`A`6);000b;000b];
+    .da.getPlayTrend[];
+    (count .da.stand) musteq 3;
+    };
+  should["leaves out standing on hard 15/16 against 2-6, which basic strategy does"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`10`6;`9`6);16 15i;(`6`K;`2`K);00b;00b];
+    .da.getPlayTrend[];
+    (count .da.stand) musteq 0;
+    };
+  should["flags standing on a soft 15/16 against any up-card"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`A`5;`A`4);16 15i;(`6`K;`2`K);00b;00b];
+    .da.getPlayTrend[];
+    (count .da.stand) musteq 2;
+    };
+  should["leaves out split aces, which stand by rule"]{
+    .da.hist:(); .da.res:.tst.daPlays[enlist`A`5;enlist 16i;enlist`9`K;enlist 0b;enlist 1b];
+    .da.getPlayTrend[];
+    (count .da.stand) musteq 0;
+    };
+ };
+
+.tst.desc[".da.getPlayTrend splits"]{
+  should["flags splitting tens, and not other splits"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`K`5;`10`9;`8`3);15 19 11i;(`6`K;`6`K;`6`K);000b;111b];
+    .da.getPlayTrend[];
+    (exec cards from .da.split) mustmatch (`K`5;`10`9);
+    };
+ };
+
+.tst.desc[".da.getPlayTrend theCount"]{
+  should["reports the basic count the round was played at, not a constant"]{
+    .da.hist:(); .da.res:.tst.daPlays[(`A`9`3;`10`6);13 16i;(`4`3;`10`8);10b;00b];
+    .da.getPlayTrend[];
+    (exec theCount from .da.double) musteq enlist 0.5;
+    (exec theCount from .da.stand) musteq enlist 1f;
+    };
+  should["includes earlier shoes from .da.hist"]{
+    .da.hist:.tst.daPlays[enlist`10`6;enlist 16i;enlist`10`8;enlist 0b;enlist 0b];
+    .da.res:update round:2 from .tst.daPlays[enlist`9`6;enlist 15i;enlist`A`8;enlist 0b;enlist 0b];
+    .da.getPlayTrend[];
+    (exec round from .da.stand) musteq 1 2;
+    };
+ };

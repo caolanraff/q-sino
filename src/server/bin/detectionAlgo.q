@@ -1,6 +1,5 @@
 \c 20 200
 
-.bs.count:0f;
 .da.hist:();
 .da.res:([]round:`long$());
 .da.betTrend:flip `Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
@@ -42,15 +41,24 @@
   };
 
 /// Play trends ///
+/ basic strategy is the baseline (6-deck, dealer hits soft 17 - the chart in playerCore.q): only plays that
+/ depart from it are counter tells, so each flag leaves out hands that basic strategy plays the same way
+.da.handFacts:{[t]
+  update up:"I"$string .da.cardDict first each dealer,
+    two:{sum "I"$string .da.cardDict 2#x} each cards,
+    soft:{`A in 2#x} each cards,
+    theCount:basic_cnt
+    from t
+  };
+
 .da.getPlayTrend:{
-  tab:.da.hist,.da.res;
-  / doubling soft 18/19/20
-  t:update orgcnt:{sum "I"$string .da.cardDict[2#x]}'[cards] from select from tab where double=1b;
-  .da.double:select round,name,handle,cards,cnt,dealer,theCount:.bs.count from t where orgcnt in (18;19;20);
-  / splitting tens
-  .da.split:select round,name,handle,cards,cnt,dealer,theCount:.bs.count from tab where split=1b, (raze 1#'cards) in (`10`J`Q`K);
-  / standing on 15/16
-  .da.stand:select from tab where (count each cards)=2,cnt in (15;16);
+  tab:.da.handFacts .da.hist,.da.res;
+  / doubling a first-two-card 18-20, except soft 18 vs 2-6 and soft 19 vs 6, which basic strategy doubles
+  .da.double:select round,name,handle,cards,cnt,dealer,theCount from tab where double,two within 18 20,not soft&((two=18)&up within 2 6)|((two=19)&up=6);
+  / splitting tens - basic strategy never does
+  .da.split:select round,name,handle,cards,cnt,dealer,theCount from tab where split,(first each cards) in `10`J`Q`K;
+  / standing on a two-card 15/16 against 7-A, or on a soft 15/16 at all (basic strategy hits both); split aces stand by rule
+  .da.stand:select round,name,handle,cards,cnt,dealer,theCount from tab where 2=count each cards,cnt in 15 16,not split&`A=first each cards,soft|up>=7;
   };
 
 /// Charting ///
@@ -67,7 +75,6 @@
 
 /// Main ///
 .da.shuffle:{
-  .bs.count:0f;
   .da.hist,:.da.res;
   .da.res:0#.da.res;
   };
