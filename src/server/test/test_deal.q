@@ -430,7 +430,6 @@ system "l src/server/bin/blackjackServer.q";
     .bs.dealer0[];
     (exec first dealer from .bs.tab) mustmatch `A`6`2;
     .bs.dealerCount musteq 19i;
-    .bs.hitSoft17:0b;
     };
  };
 
