@@ -51,7 +51,17 @@ hist:{.bs.hist,.bs.res};
   .bs.excFunc[`.mc.stake;`]each unbet;
   };
 
+/ a player leaving mid-hand forfeits it: record their hands in .bs.res (settled ones keep their result, the rest lose their bet)
+/ so hist[], their session total and the detection algo all see them
+.bs.forfeit:{[h]
+  t:update return:0f from (select from .bs.tab where handle=h) where not out;
+  if[0=count t;:()];
+  t:update "j"$player,dealer:enlist each dealer,"f"$return from delete out,wait,turn from t;
+  upsert[`.bs.res;update profit:return-bet from t];
+  };
+
 .bs.leave:{[h]
+  if[not .bs.hd;.bs.forfeit h];
   won:sum 0f,exec profit from hist[] where handle=h,round>.bs.joined h;
   .[.bs.sendMsg;("Your net winnings this session are ",$[won<0;"-$";"$"],.Q.f[2;abs won];h);{}];
   .[.bs.sendMsg;("Thanks for playing Qasino Blackjack";h);{}];

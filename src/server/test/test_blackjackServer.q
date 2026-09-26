@@ -346,3 +346,73 @@ system "l src/server/bin/blackjackServer.q";
     timerCalls musteq 1;
     };
  };
+
+.tst.desc[".bs.leave records a mid-hand leaver's hands"]{
+  should["records an unfinished hand as a loss of its bet"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.nextTurn mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();()); .bs.hist:0#.bs.res;
+    .bs.hd:0b;
+    .bs.cp:(5i;6i)!`alice`bob; .bs.joined:(5 6i)!0 0;
+    .bs.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:01b from .bs.tab;
+    .bs.leave[5i];
+    (exec handle from .bs.res) musteq enlist 5i;
+    (exec return from .bs.res) musteq enlist 0f;
+    (exec profit from .bs.res) musteq enlist -10f;
+    (exec round from .bs.res) musteq enlist 3;
+    (exec first dealer from .bs.res) mustmatch enlist`9;
+    };
+  should["keeps the result of a hand that was already settled, like a paid blackjack"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.nextTurn mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();()); .bs.hist:0#.bs.res;
+    .bs.hd:0b;
+    .bs.cp:(5i;6i)!`alice`bob; .bs.joined:(5 6i)!0 0;
+    .bs.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`A`K;`9`7);cnt:21 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(25f;());profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:10b,wait:00b,turn:01b from .bs.tab;
+    .bs.leave[5i];
+    (exec profit from .bs.res) musteq enlist 15f;
+    };
+  should["records every split hand, forfeiting a doubled stake in full"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.nextTurn mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();()); .bs.hist:0#.bs.res;
+    .bs.hd:0b;
+    .bs.cp:(5i;6i)!`alice`bob; .bs.joined:(5 6i)!0 0;
+    .bs.tab:([]round:3 3 3;player:1.01 1.02 2;name:`alice`alice`bob;handle:5 5 6i;cards:(`8`3`K;`8`K`5;`9`7);cnt:21 23 16i;dealer:`9`9`9;dealerCnt:9 9 9i;bet:20 10 10;return:(();0f;());profit:3#0n;split:110b;double:100b);
+    .bs.tab:update out:010b,wait:100b,turn:001b from .bs.tab;
+    .bs.leave[5i];
+    (exec player from .bs.res) musteq 1 1;
+    (exec profit from .bs.res) musteq -20 -10f;
+    };
+  should["counts the forfeited hand in the leaver's session winnings"]{
+    msgs::();
+    `.bs.sendMsg mock {[x;y] msgs,:enlist x};
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.nextTurn mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();()); .bs.hist:0#.bs.res;
+    .bs.res:([]round:enlist 1;player:enlist 1;name:enlist`alice;handle:enlist 5i;cards:enlist`K`9;cnt:enlist 19i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 25f;profit:enlist 15f;split:enlist 0b;double:enlist 0b);
+    .bs.hd:0b;
+    .bs.cp:(5i;6i)!`alice`bob; .bs.joined:(5 6i)!0 0;
+    .bs.tab:([]round:2 2;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:01b from .bs.tab;
+    .bs.leave[5i];
+    (first msgs) mustmatch "Your net winnings this session are $5.00";
+    };
+  should["records nothing for a player who leaves between hands"]{
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.deal mock {};
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();()); .bs.hist:0#.bs.res;
+    .bs.hd:1b;
+    .bs.cp:(5i;6i)!`alice`bob; .bs.joined:(5 6i)!0 0;
+    .bs.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
+    .bs.tab:([]round:0N 0N;player:1 2f;name:`alice`bob;handle:5 6i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 0N;return:(();());profit:0n 0n;split:00b;double:00b);
+    .bs.leave[5i];
+    (count .bs.res) musteq 0;
+    };
+ };
