@@ -3,9 +3,6 @@
 .bs.sendMsg:{neg[first y]($[10h=type x;.bs.lg;show];x)};
 .bs.pubMsg:{.bs.lg x;.bs.sendMsg[x]each y};
 .bs.excFunc:{neg[first z](x;y)};
-/ a client's view of the table, sent with every .mc.stake/.mc.play trigger so the client never has to pull it
-/ back with a sync call from inside the push handler - kdb IPC has no reply correlation, so a message already
-/ queued on the connection could take that reply (issue #4)
 .bs.clientState:{[h]`tab`res`me!(.bs.tab;.bs.res;h)};
 .bs.trigger:{[f;h].bs.excFunc[f;.bs.clientState h;h]};
 .bs.user:{`$string[.z.u],"_",string[.z.w]};

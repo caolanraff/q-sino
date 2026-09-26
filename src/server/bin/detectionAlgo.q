@@ -84,13 +84,8 @@
   .da.getPlayTrend[];
   };
 
-/ s is `res`rnd - the whole shoe's .bs.res so far and the round just played, pushed by the server rather than
-/ pulled back with a sync call from inside this handler (issue #4)
 .da.gameover:{[s]
-  .da.rnd:s`rnd;
-  / only take rounds not already held (held rows carry the count columns added by .da.getBetTrend,
-  / so a distinct over both would keep them twice)
-  r:s`res;
+  .da.rnd:s`rnd;r:s`res;
   .da.res:.da.res uj select from r where not round in exec round from .da.res;
   .da.getDetect[];
   };

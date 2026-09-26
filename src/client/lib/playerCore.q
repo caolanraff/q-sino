@@ -84,9 +84,6 @@ setCountDict[`basic]; /can be overriden in player script
 // strategy file loads this, overriding masterClient.q's log-only defaults
 .mc.handsPlayed:0;
 
-// the server sends its state with every .mc.stake/.mc.play trigger: `tab`res`me (.bs.tab, .bs.res, and this
-// client's handle on the server). Never pull state back with a sync call from inside a push handler - kdb IPC
-// has no reply correlation, so a message already queued on the connection can take the reply (issue #4)
 .mc.recv:{[s].mc.tab:s`tab;.mc.res:s`res;.mc.mh:s`me};
 
 .mc.stake:{[s]
