@@ -42,7 +42,7 @@ stake:{
 
 	.bs.hd:.bs.wwch:0b;
 	.bs.rnd+:1;num:count .bs.tab;
-	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b from `.bs.tab;
+	update round:.bs.rnd,cnt:num#0Ni,out:num#0b,wait:num#0b,turn:num#0b,split:num#0b,double:num#0b,surrender:num#0b from `.bs.tab;
 
 	.bs.dealCard each select from .bs.tab where (count each cards)=0;
 

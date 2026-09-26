@@ -4,7 +4,7 @@
 
 /// Play functions ///
 
-.mc.handDict:`H`S`D`SP!`hit`stick`double`split;
+.mc.handDict:`H`S`D`SP`R!`hit`stick`double`split`surrender;
 
 // log-only defaults for a manual player; -player loads a strategy (which loads playerCore.q),
 // overriding these with the real auto-play logic (see .mc.init[] below)
@@ -18,6 +18,7 @@ hit:{.mc.dispatch[`hit;x]};
 stick:{.mc.dispatch[`stick;x]};
 double:{.mc.dispatch[`double;x]};
 split:{.mc.dispatch[`split;x]};
+surrender:{.mc.dispatch[`surrender;x]};
 hist:{.mc.dispatch[`hist;x]};
 
 /// start ///

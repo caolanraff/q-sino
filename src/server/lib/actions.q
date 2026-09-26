@@ -86,6 +86,21 @@ double:{
   .bs.double:0b;
   };
 
+/// Surrender function ///
+surrender:{
+  if[not .bs.checks[];:()];
+  if[not .bs.surrender;
+    .bs.sendMsg["This table doesn't offer surrender ",(string .z.u);.z.w];:()];
+  if[not 2=first exec count each cards from .bs.tab where turn;
+    .bs.sendMsg["You can only surrender your first two cards ",(string .z.u);.z.w];:()];
+  if[first exec split from .bs.tab where turn;
+    .bs.sendMsg["You can't surrender a split hand ",(string .z.u);.z.w];:()];
+  .bs.pubMsg[(string .z.u)," surrenders half their bet";key .bs.cp];
+  update return:bet%2,out:1b,turn:0b,surrender:1b from `.bs.tab where turn;
+  update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b);
+  .bs.nextTurn[];
+  };
+
 /// Split function ///
 .bs.split0:{
 	update player:`float$player from `.bs.tab;

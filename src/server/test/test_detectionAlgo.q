@@ -57,7 +57,7 @@ system "l src/server/bin/detectionAlgo.q";
  };
 
 / one result row per hand for .da.getPlayTrend: cards, final count, dealer's hand, and whether it doubled/split
-.tst.daPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:(count c)#`a_5;handle:(count c)#5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;basic_cnt:0.5*1+til count c)};
+.tst.daPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:(count c)#`a_5;handle:(count c)#5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;surrender:(count c)#0b;basic_cnt:0.5*1+til count c)};
 
 .tst.desc[".da.getPlayTrend doubles"]{
   should["flags doubling 18-20 that basic strategy wouldn't"]{
@@ -115,5 +115,13 @@ system "l src/server/bin/detectionAlgo.q";
     .da.res:update round:2 from .tst.daPlays[enlist`9`6;enlist 15i;enlist`A`8;enlist 0b;enlist 0b];
     .da.getPlayTrend[];
     (exec round from .da.stand) musteq 1 2;
+    };
+ };
+
+.tst.desc[".da.getPlayTrend surrenders"]{
+  should["doesn't read a surrendered two-card 15/16 as standing on it"]{
+    .da.hist:(); .da.res:update surrender:1b from .tst.daPlays[enlist`10`6;enlist 16i;enlist`10`8;enlist 0b;enlist 0b];
+    .da.getPlayTrend[];
+    (count .da.stand) musteq 0;
     };
  };

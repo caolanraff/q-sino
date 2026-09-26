@@ -354,3 +354,62 @@ system "l src/server/bin/blackjackServer.q";
     (exec first cards from .bs.tab where player=2) mustmatch `9`7;
     };
  };
+
+.tst.desc["surrender[]"]{
+  should["gives back half the bet, ends the hand and passes the turn on"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    sent::();
+    `.bs.excFunc mock {[x;y;z] sent,:enlist(x;z)};
+    .bs.surrender:1b;
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`10`6;`9`7);cnt:16 16i;dealer:(`10;`10);dealerCnt:10 10i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    surrender[];
+    (exec first return from .bs.tab where player=1) musteq 5f;
+    (exec first out from .bs.tab where player=1) musteq 1b;
+    (exec first surrender from .bs.tab where player=1) musteq 1b;
+    (exec first turn from .bs.tab where player=2) musteq 1b;
+    sent mustmatch enlist(`.mc.play;1i);
+    };
+  should["goes to the dealer when nobody else is left to act"]{
+    `.bs.pubMsg mock {[x;y]};
+    dealerCalls::0;
+    `.bs.dealer mock {dealerCalls+::1};
+    .bs.surrender:1b;
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`10`6;cnt:enlist 16i;dealer:enlist`10;dealerCnt:enlist 10i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
+    .bs.cp:enlist[0i]!enlist`p1;
+    surrender[];
+    dealerCalls musteq 1;
+    };
+  should["refuses after a third card"]{
+    `.bs.sendMsg mock {[x;y]};
+    .bs.surrender:1b;
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`10`3`3;`9`7);cnt:16 16i;dealer:(`10;`10);dealerCnt:10 10i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    surrender[];
+    (exec first out from .bs.tab where player=1) musteq 0b;
+    (exec first turn from .bs.tab where player=1) musteq 1b;
+    };
+  should["refuses on a split hand"]{
+    `.bs.sendMsg mock {[x;y]};
+    .bs.surrender:1b;
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`10`6;`9`7);cnt:16 16i;dealer:(`10;`10);dealerCnt:10 10i;bet:10 10f;return:0n 0n;profit:0n 0n;split:10b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    surrender[];
+    (exec first out from .bs.tab where player=1) musteq 0b;
+    };
+  should["refuses when the table doesn't offer surrender"]{
+    `.bs.sendMsg mock {[x;y]};
+    .bs.surrender:0b;
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`10`6;`9`7);cnt:16 16i;dealer:(`10;`10);dealerCnt:10 10i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
+    .bs.cp:0 1i!`p1`p2;
+    surrender[];
+    (exec first out from .bs.tab where player=1) musteq 0b;
+    .bs.surrender:1b;
+    };
+ };

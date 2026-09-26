@@ -628,6 +628,19 @@ system "l src/server/bin/blackjackServer.q";
     .bs.dealer[];
     (exec profit from .bs.res) musteq 10 -10f;
     };
+  should["records a surrendered hand as losing half its bet"]{
+    `.bs.pubMsg mock {[x;y]};
+    `.bs.sendMsg mock {[x;y]};
+    `.bs.start mock {};
+    .bs.wwch:0b; .bs.da:0Ni; .bs.dc:`K`5;
+    .bs.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`surrender!(();();();();();();();();`long$();();();();();());
+    .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`10`6;cnt:enlist 16i;dealer:enlist`K;dealerCnt:enlist 10i;bet:enlist 10;return:enlist 5f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;surrender:enlist 1b);
+    .bs.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bs.tab;
+    .bs.cp:enlist[0i]!enlist`p1;
+    .bs.dealer[];
+    (exec profit from .bs.res) musteq enlist -5f;
+    (exec surrender from .bs.res) musteq enlist 1b;
+    };
   should["clears the round's bets before starting the next hand"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.sendMsg mock {[x;y]};

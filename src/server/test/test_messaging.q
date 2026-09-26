@@ -77,3 +77,14 @@ system "l src/server/lib/messaging.q";
     (sent[0;1]`me) musteq 7i;
     };
  };
+
+.tst.desc[".bs.clientState rules"]{
+  should["tells the client whether the table offers surrender"]{
+    .bs.tab:([]round:enlist 1;handle:enlist 7i); .bs.res:([]round:0#0);
+    .bs.surrender:1b;
+    ((.bs.clientState 7i)[`rules]`surrender) musteq 1b;
+    .bs.surrender:0b;
+    ((.bs.clientState 7i)[`rules]`surrender) musteq 0b;
+    .bs.surrender:1b;
+    };
+ };

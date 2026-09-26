@@ -11,13 +11,14 @@
 .bs.deckCnt:6;
 .bs.shuffleCnt:0;
 .bs.hitSoft17:1b;   //1b: dealer hits soft 17 (H17, as on the Las Vegas Strip); 0b: stands on all 17s (S17)
+.bs.surrender:1b;
 .bs.maxSplitHands:4;   //split up to 3 times, i.e. at most 4 hands per player
 .bs.betTimeout:0D00:00:30;   //once the first bet is down, anyone still unbet after this long sits the hand out
 .bs.betDeadline:0Np;
 
 .bs.cp:()!();
 .bs.joined:(`int$())!`long$();   //handle -> .bs.rnd when that connection joined, so a reused handle doesn't inherit an earlier session's results
-.bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double!(();();();();();();();();`long$();();();();());
+.bs.res:.bs.tab:.bs.hist:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`surrender!(();();();();();();();();`long$();();();();();());
 .bs.stake:([name:();handle:()]bet:());
 
 /// Start up functions ///
