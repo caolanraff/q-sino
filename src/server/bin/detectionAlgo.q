@@ -59,6 +59,7 @@
   .da.split:select round,name,handle,cards,cnt,dealer,theCount from tab where split,(first each cards) in `10`J`Q`K;
   / standing on a two-card 15/16 against 7-A, or on a soft 15/16 at all (basic strategy hits both); split aces stand by rule
   .da.stand:select round,name,handle,cards,cnt,dealer,theCount from tab where 2=count each cards,cnt in 15 16,not split&`A=first each cards,soft|up>=7;
+  .da.insure:select round,name,handle,cards,cnt,dealer,theCount,insurance from tab where insurance>0;
   };
 
 /// Charting ///
