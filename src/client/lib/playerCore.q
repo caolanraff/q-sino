@@ -36,7 +36,7 @@ EIGHT:`H`H`H`H`H`S`S`S`S;
 NINE:`H`H`H`H`H`H`S`S`S;
 TEN:`H`H`H`H`H`H`S`S`S;
 ACE:`H`H`H`H`H`H`S`S`S;
-soft:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
+.mc.soft:([hTotal]TWO;THREE;FOUR;FIVE;SIX;SEVEN;EIGHT;NINE;TEN;ACE);
 
 //if we are dealt pairs
 hTotal:2 3 4 5 6 7 8 9 10 11;
@@ -86,20 +86,16 @@ setCountDict[`basic]; /can be overriden in player script
 
 .mc.rules:enlist[`surrender]!enlist 0b;
 .mc.applyRules:{
-  hard::.mc.hard;
-  pair::.mc.pair;
   if[.mc.rules`surrender;
-    hard::update NINE:`SR from hard where hTotal=16;
-    hard::update TEN:`SR from hard where hTotal in 15 16;
-    hard::update ACE:`SR from hard where hTotal in 15 16 17;
-    pair::update ACE:`SR from pair where hTotal=8];
+    update NINE:`SR from `.mc.hard where hTotal=16;
+    update TEN:`SR from `.mc.hard where hTotal in 15 16;
+    update ACE:`SR from `.mc.hard where hTotal in 15 16 17;
+    update ACE:`SR from `.mc.pair where hTotal=8];
   };
-.mc.applyRules[];
-.mc.noSurrender:{[x]
+.mc.noSurrender:{
   pc:"I"$string .mc.cardDict[-1_x];
   pc[(0|(sum pc=11)&ceiling (sum[pc]-21)%10)#where pc=11]:1;
-  dc:first dealerDict .mc.cardDict last x;
-  :first $[(2=count pc)&pc[0]=pc[1];?[.mc.pair;enlist(=;`hTotal;pc 0);();dc];?[.mc.hard;enlist(=;`hTotal;sum pc);();dc]];
+  :$[(2=count pc)&all 8=pc;`SP;17=sum pc;`S;`H];
   };
 .mc.recv:{[s]
   .mc.tab:s`tab;.mc.res:s`res;.mc.mh:s`me;
@@ -124,9 +120,10 @@ setCountDict[`basic]; /can be overriden in player script
 // would refuse (at the hand cap) never gets another .mc.play push, so play the pair as a hard total instead
 .mc.decide:{[x;hands]
   r:Help[x];
-  if[(r=`SR)&hands>1;r:.mc.noSurrender x];
+  if[(r=`SR)&(hands>1)|not .mc.rules`surrender;r:.mc.noSurrender x];
   if[(r=`SP)&hands>=.mc.maxSplitHands;
-    r:first ?[.mc.hard;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]]];
+    r:first ?[.mc.hard;enlist(=;`hTotal;sum "I"$string .mc.cardDict[-1_x]);();first dealerDict[.mc.cardDict[last x]]];
+    if[r=`SR;r:`H]];
   :r;
   };
 
@@ -150,10 +147,10 @@ Help:{
   pc[(0|(sum pc=11)&ceiling (csum-21)%10)#where pc=11]:1;
   csum:sum pc;
   r:first $[any 11 in pc;
-      ?[soft;enlist(=;`hTotal;csum);();first dealerDict[dc]];
+      ?[.mc.soft;enlist(=;`hTotal;csum);();first dealerDict[dc]];
     (pc[0]~pc[1])&(3>count pc);  //lost chance to split if count x>3 as we must have already hit
-      ?[pair;enlist(=;`hTotal;pc[1]);();first dealerDict[dc]];
-      ?[hard;enlist(=;`hTotal;csum);();first dealerDict[dc]]];
+      ?[.mc.pair;enlist(=;`hTotal;pc[1]);();first dealerDict[dc]];
+      ?[.mc.hard;enlist(=;`hTotal;csum);();first dealerDict[dc]]];
   if[(r=`D)&(2<count pc);:`H];
   if[r=`DS;:$[2<count pc;`S;`D]];
   if[(r=`SP)&(2<count pc);:`S];

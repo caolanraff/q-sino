@@ -111,11 +111,12 @@
     .mc.decide[`8`8`A;2] musteq `SP;
     .mc.decide[`8`8`A;4] musteq `H;
     };
-  should["goes back to the usual plays if the table stops offering surrender"]{
+  should["plays the usual hands if the table stops offering surrender mid-session"]{
     .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 1b)];
     .mc.recv[`tab`res`me`rules!(([]a:0#0);([]a:0#0);7i;enlist[`surrender]!enlist 0b)];
-    Help[`10`6`9] musteq `H;
-    Help[`8`8`A] musteq `SP;
+    .mc.decide[`10`6`9;1] musteq `H;
+    .mc.decide[`10`7`A;1] musteq `S;
+    .mc.decide[`8`8`A;1] musteq `SP;
     .mc.rules[`surrender] musteq 0b;
     };
  };
