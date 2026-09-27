@@ -15,7 +15,7 @@
  };
 
 .tst.desc[".stg.decide"]{
-  before{system"l src/client/lib/strategy.q"};
+  before{system"l src/client/lib/strategy.q";.stg.rules:`maxSplitHands`deckCnt!4 6};
   should["passes .stg.help's split through while the player is under the hand cap"]{
     .stg.decide[`8`8`10;3] musteq`SP;
   };
@@ -33,7 +33,7 @@
   should["counts the dealer's cards once per round, not once per player row"]{
     .stg.res:([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
     .stg.tab:([]round:0N 0N;cards:(();());dealer:``);
-    .stg.startCards:312;
+    .stg.rules:`maxSplitHands`deckCnt!4 6;
     .stg.count[];
     .stg.trueCount musteq 2%(312-7)%52;                                                            / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
   };
@@ -69,13 +69,20 @@
 
 .tst.desc[".stg.recv"]{
   before{system"l src/client/lib/strategy.q"};
-  should["takes the table, results and this client's handle from the state the server pushed"]{
+  should["takes the table, results, this client's handle and the table rules from the state the server pushed"]{
     t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
     r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
-    .stg.recv[`tab`res`me!(t;r;7i)];
+    .stg.recv[`tab`res`me`rules!(t;r;7i;`maxSplitHands`deckCnt!4 6)];
     .stg.tab mustmatch t;
     .stg.res mustmatch r;
     .stg.mh musteq 7i;
+    .stg.rules mustmatch`maxSplitHands`deckCnt!4 6;
+  };
+  should["uses the pushed split cap and deck count, not fixed ones"]{
+    .stg.recv[`tab`res`me`rules!(([]round:0#0;cards:();dealer:0#`);([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2)];
+    .stg.decide[`8`8`10;2] musteq`H;
+    .stg.count[];
+    .stg.trueCount musteq -1%(104-4)%52;
   };
  };
 

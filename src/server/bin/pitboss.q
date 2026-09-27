@@ -3,7 +3,7 @@
 .pit.betTrend:flip`Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
 
 .pit.lg:{-1 ssr[string .z.p;"D";" "]," ",raze x};
-.pit.shoeSize:{[h]h"52*.bjk.deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
+.pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
 
 .pit.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 

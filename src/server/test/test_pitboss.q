@@ -54,7 +54,7 @@ system"l src/server/bin/pitboss.q";
 
 .tst.desc[".pit.shoeSize"]{
   should["reports a full shoe, not the cards left in the deck"]{
-    .bjk.deckCnt:6;
+    .bjk.rules:`maxSplitHands`deckCnt!4 6;
     .bjk.deck:10#`2;                                                                                / mid-shoe: only 10 cards left
     .pit.shoeSize[0] musteq 312;                                                                    / handle 0 evaluates the query in this process
   };

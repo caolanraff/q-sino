@@ -1,8 +1,6 @@
 .stg.trueCount:0f;
 .stg.insureAt:0w;
-.stg.startCards:6*52;
 .stg.handsPlayed:0;
-.stg.maxSplitHands:4;
 
 .stg.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 .stg.dealerDict:`2`3`4`5`6`7`8`9`10`J`Q`K`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
@@ -52,13 +50,14 @@
 
 .stg.count:{
   seen:.stg.cardsSeen[.stg.res],.stg.cardsSeen .stg.tab;
-  .stg.trueCount:sum[.stg.countDict seen]%(.stg.startCards-count seen)%52;
+  .stg.trueCount:sum[.stg.countDict seen]%((52*.stg.rules`deckCnt)-count seen)%52;
  };
 
 .stg.recv:{[s]
   .stg.tab:s`tab;
   .stg.res:s`res;
   .stg.mh:s`me;
+  .stg.rules:s`rules;
  };
 
 .stg.values:{[cards]
@@ -90,7 +89,7 @@
 
 .stg.decide:{[cards;hands]
   r:.stg.help cards;
-  if[(r=`SP)&hands>=.stg.maxSplitHands;
+  if[(r=`SP)&hands>=.stg.rules`maxSplitHands;
     r:.stg.lookup[.stg.hard;sum"I"$string .stg.cardDict[-1_cards];.stg.cardDict last cards];
   ];
   :r;

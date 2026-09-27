@@ -5,10 +5,9 @@
 
 .bjk.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 .bjk.deckTemplate:raze 4#enlist key .bjk.cardDict;
-.bjk.deckCnt:6;
 .bjk.shuffleCnt:0;
 .bjk.hitSoft17:1b;
-.bjk.maxSplitHands:4;
+.bjk.rules:`maxSplitHands`deckCnt!4 6;
 .bjk.betTimeout:0D00:00:15;
 .bjk.betDeadline:0Np;
 .bjk.insuring:0b;
