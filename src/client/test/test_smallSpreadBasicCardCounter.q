@@ -20,7 +20,7 @@
     .stg.trueCount:5;
     .stg.getBet[] musteq 30;
   };
-  should["uses the default basic point-count system - never calls .stg.setCountDict"]{
-    .stg.countDict mustmatch .stg.basic;
+  should["uses the default Hi-Lo point-count system"]{
+    .stg.countDict mustmatch`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 1 1 1 0 0 0 -1 -1 -1 -1 -1;
   };
  };
