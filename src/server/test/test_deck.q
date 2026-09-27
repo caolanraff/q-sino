@@ -8,10 +8,10 @@ system"l src/server/bin/blackjack.q";
     count[distinct .bjk.deck] musteq 13;
     all[8=value count each group .bjk.deck] musteq 1b;
   };
-  should["defaults to .bjk.deckCnt decks when no count is given"]{
+  should["defaults to the table's deckCnt decks when no count is given"]{
     .bjk.buildDeck[];
-    count[.bjk.deck] musteq .bjk.deckCnt*52;
-    all[(.bjk.deckCnt*4)=value count each group .bjk.deck] musteq 1b;
+    count[.bjk.deck] musteq 52*.bjk.rules`deckCnt;
+    all[(4*.bjk.rules`deckCnt)=value count each group .bjk.deck] musteq 1b;
   };
  };
 

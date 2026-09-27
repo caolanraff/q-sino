@@ -1,5 +1,5 @@
 .bjk.buildDeck:{[n]
-  dc:$[null n;.bjk.deckCnt;n];
+  dc:$[null n;.bjk.rules`deckCnt;n];
   .bjk.deck:(-52*dc)?raze dc#enlist .bjk.deckTemplate;
  };
 

@@ -50,7 +50,7 @@
 
 .stg.count:{
   seen:.stg.cardsSeen[.stg.res],.stg.cardsSeen .stg.tab;
-  .stg.trueCount:sum[.stg.countDict seen]%(.stg.rules[`shoeSize]-count seen)%52;
+  .stg.trueCount:sum[.stg.countDict seen]%((52*.stg.rules`deckCnt)-count seen)%52;
  };
 
 .stg.recv:{[s]
