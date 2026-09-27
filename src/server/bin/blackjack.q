@@ -1,0 +1,113 @@
+.bjk.hd:1b;
+.bjk.bd:.bjk.double:0b;
+.bjk.rnd:0;
+.bjk.pit:0Ni;
+
+.bjk.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
+.bjk.deckTemplate:raze 4#enlist key .bjk.cardDict;
+.bjk.deckCnt:6;
+.bjk.shuffleCnt:0;
+.bjk.hitSoft17:1b;
+.bjk.maxSplitHands:4;
+.bjk.betTimeout:0D00:00:15;
+.bjk.betDeadline:0Np;
+.bjk.insuring:0b;
+.bjk.insureDeadline:0Np;
+
+.bjk.cp:()!();
+.bjk.joined:(`int$())!`long$();                                                                     / kdb reuses handle numbers
+.bjk.res:.bjk.tab:.bjk.hist:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+.bjk.stake:([name:();handle:()]bet:());
+
+.bjk.intro:{
+  show"Welcome to Qsino Blackjack!";
+  show"Functions;";
+  show" stake     - How much you want to bet. Default is no bet";
+  show" hit       - Gives you another card";
+  show" stick     - Stay with your current hand";
+  show" split     - Split your hand";
+  show" double    - Double your hand.";
+  show" insure    - Take insurance when the dealer shows an ace";
+  show" hist      - Hand results so far";
+ };
+
+hist:{.bjk.hist,.bjk.res};
+
+.bjk.start:{
+  if[not .bjk.hd;:.bjk.sendMsg["Please wait until the hand is over";.z.w]];
+  if[0=count .bjk.cp;:.bjk.lg"No users are connected"];
+  .bjk.lg $[.bjk.seated[]~.bjk.cp;"No new users have joined the table";"New users have joined the table"];
+  .bjk.seat[];
+  unbet:exec handle from .bjk.tab where null bet;
+  .bjk.sendMsg["Please place your bets via the stake[] function"]each unbet;
+  .bjk.trigger[`.plr.stake]each unbet;
+ };
+
+.bjk.seated:{exec first name by handle from .bjk.tab};
+
+.bjk.seat:{
+  .bjk.tab:0#.bjk.tab;
+  `.bjk.tab upsert([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);
+  .bjk.tab:.bjk.tab lj .bjk.stake;
+ };
+
+.bjk.forfeit:{[h]
+  t:update return:0f from(select from .bjk.tab where handle=h)where not out;
+  if[0=count t;:()];
+  t:update"j"$player,dealer:enlist each dealer,"f"$return from delete out,wait,turn from t;
+  upsert[`.bjk.res;update profit:(return-bet)-0f^insurance from t];
+ };
+
+.bjk.logLeaver:{[h]
+  won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;
+  .bjk.lg string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won];
+ };
+
+.bjk.unseat:{[h]
+  .bjk.cp:.bjk.cp _ h;
+  .bjk.joined:.bjk.joined _ h;
+  delete from`.bjk.tab where handle=h;
+  delete from`.bjk.stake where handle=h;
+ };
+
+.bjk.leave:{[h]
+  if[not .bjk.hd;.bjk.forfeit h];
+  .bjk.logLeaver h;
+  hadTurn:$[.bjk.hd;0b;h in exec handle from .bjk.tab where turn];
+  .bjk.unseat h;
+  if[.bjk.insuring;:.bjk.closeInsuranceIfDone[]];
+  if[.bjk.hd;:.bjk.dealIfReady[]];
+  if[not hadTurn;:()];
+  .bjk.nextTurn[];
+ };
+
+.z.po:{
+  .bjk.regConn .z.w;
+  if[.bjk.isPit[];:()];
+  .bjk.start[];
+  neg[.z.w](.bjk.intro;`);
+ };
+
+.z.pc:{$[x=.bjk.pit;.bjk.pit:0Ni;.bjk.leave x]};
+.z.ts:{.bjk.betTimer[];.bjk.insureTimer[]};
+
+.bjk.loadLibs:{
+  system"l src/server/lib/messaging.q";
+  system"l src/server/lib/deck.q";
+  system"l src/server/lib/deal.q";
+  system"l src/server/lib/actions.q";
+ };
+
+.bjk.init:{
+  args:.Q.opt .z.x;
+  system"c 100 200";
+  system"S ",string $[`seed in key args;"I"$raze args`seed;"i"$.z.i+.z.t];
+  system"p 5555";
+  system"t 1000";
+  .bjk.loadLibs[];
+  .bjk.lg"Welcome to Qsino Blackjack!";
+  .bjk.buildDeck[];
+  .bjk.shuffle[];
+ };
+
+if[not[null .z.f]&"blackjack.q"~last"/"vs string .z.f;.bjk.init[]];

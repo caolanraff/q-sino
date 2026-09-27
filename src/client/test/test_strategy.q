@@ -1,5 +1,5 @@
-.tst.desc["playerCore.Help"]{
-  before{system "l src/client/lib/playerCore.q"};
+.tst.desc["strategy Help"]{
+  before{system "l src/client/lib/strategy.q"};
   should["A,A,9 vs dealer 6 is a made soft 21 and should Stand"]{
     Help[`A`A`9`6] musteq `S;
     };
@@ -14,33 +14,33 @@
     };
  };
 
-.tst.desc[".mc.decide"]{
-  before{system "l src/client/lib/playerCore.q"};
+.tst.desc[".stg.decide"]{
+  before{system "l src/client/lib/strategy.q"};
   should["passes Help's split through while the player is under the hand cap"]{
-    .mc.decide[`8`8`10;3] musteq `SP;
+    .stg.decide[`8`8`10;3] musteq `SP;
     };
   should["plays a pair as its hard total once the player is at the hand cap"]{
-    .mc.decide[`8`8`10;4] musteq `H;   / hard 16 vs 10
-    .mc.decide[`10`10`6;4] musteq `S;  / hard 20 vs 6
+    .stg.decide[`8`8`10;4] musteq `H;   / hard 16 vs 10
+    .stg.decide[`10`10`6;4] musteq `S;  / hard 20 vs 6
     };
   should["leaves non-split decisions alone at the hand cap"]{
-    .mc.decide[`5`6`6;4] musteq `D;
+    .stg.decide[`5`6`6;4] musteq `D;
     };
  };
 
-.tst.desc[".mc.Count"]{
-  before{system "l src/client/lib/playerCore.q"};
+.tst.desc[".stg.Count"]{
+  before{system "l src/client/lib/strategy.q"};
   should["counts the dealer's cards once per round, not once per player row"]{
-    .mc.res:([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
-    .mc.tab:([]round:0N 0N;cards:(();());dealer:``);
+    .stg.res:([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
+    .stg.tab:([]round:0N 0N;cards:(();());dealer:``);
     startCards::312;
-    .mc.Count[];
+    .stg.Count[];
     theCount musteq 2%(312-7)%52;  / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
     };
  };
 
-.tst.desc["playerCore.Help - 6-deck chart, dealer hits soft 17"]{
-  before{system "l src/client/lib/playerCore.q"};
+.tst.desc["strategy Help - 6-deck chart, dealer hits soft 17"]{
+  before{system "l src/client/lib/strategy.q"};
   should["doubles the hands that change when the dealer hits soft 17"]{
     Help[`A`7`2] musteq `D;  / soft 18 vs 2
     Help[`A`8`6] musteq `D;  / soft 19 vs 6
@@ -67,32 +67,32 @@
     };
  };
 
-.tst.desc[".mc.recv"]{
-  before{system "l src/client/lib/playerCore.q"};
+.tst.desc[".stg.recv"]{
+  before{system "l src/client/lib/strategy.q"};
   should["takes the table, results and this client's handle from the state the server pushed"]{
     t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
     r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
-    .mc.recv[`tab`res`me!(t;r;7i)];
-    .mc.tab mustmatch t;
-    .mc.res mustmatch r;
-    .mc.mh musteq 7i;
+    .stg.recv[`tab`res`me!(t;r;7i)];
+    .stg.tab mustmatch t;
+    .stg.res mustmatch r;
+    .stg.mh musteq 7i;
     };
  };
 
-.tst.desc[".mc.insureAmount"]{
-  before{system "l src/client/lib/playerCore.q"};
+.tst.desc[".stg.insureAmount"]{
+  before{system "l src/client/lib/strategy.q"};
   should["never insures by default"]{
-    .mc.tab:([]handle:enlist 7i;bet:enlist 20); .mc.mh:7i;
+    .stg.tab:([]handle:enlist 7i;bet:enlist 20); .stg.mh:7i;
     theCount::10f;
-    .mc.insureAmount[] musteq 0f;
+    .stg.insureAmount[] musteq 0f;
     };
   should["insures half the bet once the true count reaches insureAt"]{
-    .mc.tab:([]handle:6 7i;bet:40 20); .mc.mh:7i;
+    .stg.tab:([]handle:6 7i;bet:40 20); .stg.mh:7i;
     insureAt::3;
     theCount::3f;
-    .mc.insureAmount[] musteq 10f;
+    .stg.insureAmount[] musteq 10f;
     theCount::2.9;
-    .mc.insureAmount[] musteq 0f;
+    .stg.insureAmount[] musteq 0f;
     };
  };
 

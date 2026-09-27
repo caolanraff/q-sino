@@ -1,4 +1,4 @@
-system"l src/client/lib/playerCore.q";
+system"l src/client/lib/strategy.q";
 insureAt:3;
 
 // recommended value that tells the user what to bet. uses theCount function to determine this value
