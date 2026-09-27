@@ -24,12 +24,11 @@
 .pit.getBetTrend:{
   earlier:select from .pit.res where round<.pit.rnd;                                                 / the count a player could have known when betting
   .pit.res:update basic_cnt:.pit.count[.pit.basic;earlier],omega_cnt:.pit.count[.pit.omega;earlier],perfect_cnt:.pit.count[.pit.perfect;earlier] from .pit.res where round=.pit.rnd;
-  tab:0!select basic_cor:bet cor basic_cnt,basic_cov:bet cov basic_cnt,
-    omega_cor:bet cor omega_cnt,omega_cov:bet cov omega_cnt,
-    perfect_cor:bet cor perfect_cnt,perfect_cov:bet cov perfect_cnt
+  tab:0!select basic_cor:0f^bet cor basic_cnt,basic_cov:bet cov basic_cnt,                         / cor is null when bets or the count don't vary
+    omega_cor:0f^bet cor omega_cnt,omega_cov:bet cov omega_cnt,
+    perfect_cor:0f^bet cor perfect_cnt,perfect_cov:bet cov perfect_cnt
     by Player:name,Handle:handle from .pit.res;
   upsert[`.pit.betTrend;`Round xcols update Round:.pit.rnd from tab];
-  update basic_cor:0f from`.pit.betTrend where null basic_cor;
  };
 
 .pit.handFacts:{[t]                                                                                 / tells: plays 6-deck H17 basic strategy wouldn't make

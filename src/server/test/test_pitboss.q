@@ -52,6 +52,33 @@ system"l src/server/bin/pitboss.q";
   };
  };
 
+.tst.desc[".pit.getBetTrend"]{
+  should["scores a flat bettor's correlation as 0 on every count, not just basic"]{
+    `.pit.getPlayTrend mock {};
+    .pit.startCards:312;
+    .pit.res:([]round:`long$());
+    .pit.betTrend:0#.pit.betTrend;
+    r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
+    .pit.gameover[`res`rnd!(r1;1)];
+    .pit.gameover[`res`rnd!(r1,.tst.pitRound[2;`A`9;`6`6;`7`K];2)];
+    (exec basic_cor from .pit.betTrend where Round=2) musteq 0 0f;
+    (exec omega_cor from .pit.betTrend where Round=2) musteq 0 0f;
+    (exec perfect_cor from .pit.betTrend where Round=2) musteq 0 0f;
+  };
+  should["keeps a real correlation"]{
+    `.pit.getPlayTrend mock {};
+    .pit.startCards:312;
+    .pit.res:([]round:`long$());
+    .pit.betTrend:0#.pit.betTrend;
+    r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
+    .pit.gameover[`res`rnd!(r1;1)];
+    .pit.gameover[`res`rnd!(r1,update bet:30 20 from .tst.pitRound[2;`A`9;`6`6;`7`K];2)];
+    (exec basic_cor from .pit.betTrend where Round=2,Player=`a_5) musteq 1f;
+    (exec omega_cor from .pit.betTrend where Round=2,Player=`a_5) musteq 1f;
+    (exec perfect_cor from .pit.betTrend where Round=2,Player=`a_5) musteq 1f;
+  };
+ };
+
 .tst.desc[".pit.shoeSize"]{
   should["reports a full shoe, not the cards left in the deck"]{
     .bjk.rules:`maxSplitHands`deckCnt!4 6;
