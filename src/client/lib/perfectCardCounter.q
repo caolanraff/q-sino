@@ -1,4 +1,4 @@
-system"l src/client/lib/playerCore.q";
+system"l src/client/lib/strategy.q";
 
 setCountDict[`perfect];
 

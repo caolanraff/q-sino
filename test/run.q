@@ -8,7 +8,7 @@
 / built-in q system command).
 root:first system "dirname $(dirname $(realpath ",(1_string hsym .z.f),"))";
 
-/ blackjackServer.q and masterClient.q both define root-scope stake/hit/
+/ blackjack.q and player.q both define root-scope stake/hit/
 / stick/double/split/shuffle/buildDeck/hist with different meanings; a single
 / spec.q run loads every given test path's dependencies into one process, so
 / passing both src/server/test and src/client/test together would let

@@ -1,0 +1,154 @@
+system"l src/server/bin/pitboss.q";
+
+/ .tst.pitRound[1;`K`5;`2`3`4;`10`8]
+.tst.pitRound:{[r;c1;c2;d]([]round:r,r;player:1 2;name:`a_5`b_6;handle:5 6i;cards:(c1;c2);cnt:0 0i;dealer:(d;d);dealerCnt:0 0i;bet:10 20;return:0 0f;profit:0 0f;split:00b;double:00b)};
+
+.tst.desc[".pit.cardsSeen"]{
+  should["counts the dealer's cards once per round, however many player rows repeat them"]{
+    t:.tst.pitRound[1;`K`5;`2`3`4;`10`8],.tst.pitRound[2;`A`9;`6`6;`7`K];
+    asc[.pit.cardsSeen t] mustmatch asc `K`5`2`3`4`10`8`A`9`6`6`7`K;
+  };
+  should["takes the longest dealer hand in a round, since a forfeit row only holds the up-card"]{
+    t:([]round:3 3;cards:(`K`6;`9`10);dealer:(enlist`9;`9`8));
+    asc[.pit.cardsSeen t] mustmatch asc `K`6`9`10`9`8;
+  };
+  should["ignores seats with no cards dealt yet"]{
+    t:([]round:0N 0N;cards:(();());dealer:``);
+    count[.pit.cardsSeen t] musteq 0;
+  };
+ };
+
+.tst.desc[".pit.count"]{
+  should["gives the true count with each card seen counted once"]{
+    .pit.startCards:312;
+    t:.tst.pitRound[1;`K`5;`2`3`4;`10`8];                                                           / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
+    .pit.count[.pit.basic;t] musteq 2%(312-7)%52;
+  };
+ };
+
+.tst.desc[".pit.gameover"]{
+  should["holds each round once, though the server re-sends the whole shoe every round"]{
+    `.pit.getPlayTrend mock {};
+    .pit.startCards:312;
+    .pit.res:([]round:`long$());
+    .pit.betTrend:0#.pit.betTrend;
+    r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
+    r2:r1,.tst.pitRound[2;`A`9;`6`6;`7`K];
+    .pit.gameover[`res`rnd!(r1;1)];
+    .pit.gameover[`res`rnd!(r2;2)];
+    (exec round from .pit.res) musteq 1 1 2 2;
+  };
+  should["scores each round's bets against the count from earlier rounds only"]{
+    `.pit.getPlayTrend mock {};
+    .pit.startCards:312;
+    .pit.res:([]round:`long$());
+    .pit.betTrend:0#.pit.betTrend;
+    r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
+    r2:r1,.tst.pitRound[2;`A`9;`6`6;`7`K];
+    .pit.gameover[`res`rnd!(r1;1)];
+    .pit.gameover[`res`rnd!(r2;2)];
+    (exec basic_cnt from .pit.res where round=1) musteq 0 0f;
+    (exec basic_cnt from .pit.res where round=2) musteq 2 2*1%(312-7)%52;
+  };
+ };
+
+.tst.desc[".pit.shoeSize"]{
+  should["reports a full shoe, not the cards left in the deck"]{
+    .bjk.deckCnt:6;
+    .bjk.deck:10#`2;                                                                                / mid-shoe: only 10 cards left
+    .pit.shoeSize[0] musteq 312;                                                                    / handle 0 evaluates the query in this process
+  };
+ };
+
+/ .tst.pitPlays[(`A`7`2;`10`6);21 16i;(`7`K;`10`8);10b;00b]
+.tst.pitPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:(count c)#`a_5;handle:(count c)#5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;insurance:(count c)#0f;basic_cnt:0.5*1+til count c)};
+
+.tst.desc[".pit.getPlayTrend doubles"]{
+  should["flags doubling 18-20 that basic strategy wouldn't"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`A`7`2;`A`8`9;`A`9`3;`10`8`2);21 18 13 20i;(`7`K;`5`K;`4`3;`6`K);1111b;0000b];
+    .pit.getPlayTrend[];
+    (exec cards from .pit.double) mustmatch (`A`7`2;`A`8`9;`A`9`3;`10`8`2);                         / soft 18 vs 7, soft 19 vs 5, soft 20, hard 18
+  };
+  should["leaves out soft 18 vs 2-6 and soft 19 vs 6, which basic strategy doubles"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`A`7`3;`A`7`2;`A`8`2);21 20 21i;(`2`K;`6`K;`6`K);111b;000b];
+    .pit.getPlayTrend[];
+    count[.pit.double] musteq 0;
+  };
+ };
+
+.tst.desc[".pit.getPlayTrend stands"]{
+  should["flags standing on a two-card hard 15/16 against 7-A"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`10`6;`9`6;`10`5);16 15 15i;(`10`8;`7`K;`A`6);000b;000b];
+    .pit.getPlayTrend[];
+    count[.pit.stand] musteq 3;
+  };
+  should["leaves out standing on hard 15/16 against 2-6, which basic strategy does"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`10`6;`9`6);16 15i;(`6`K;`2`K);00b;00b];
+    .pit.getPlayTrend[];
+    count[.pit.stand] musteq 0;
+  };
+  should["flags standing on a soft 15/16 against any up-card"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`A`5;`A`4);16 15i;(`6`K;`2`K);00b;00b];
+    .pit.getPlayTrend[];
+    count[.pit.stand] musteq 2;
+  };
+  should["leaves out split aces, which stand by rule"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[enlist`A`5;enlist 16i;enlist`9`K;enlist 0b;enlist 1b];
+    .pit.getPlayTrend[];
+    count[.pit.stand] musteq 0;
+  };
+ };
+
+.tst.desc[".pit.getPlayTrend splits"]{
+  should["flags splitting tens, and not other splits"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`K`5;`10`9;`8`3);15 19 11i;(`6`K;`6`K;`6`K);000b;111b];
+    .pit.getPlayTrend[];
+    (exec cards from .pit.split) mustmatch (`K`5;`10`9);
+  };
+ };
+
+.tst.desc[".pit.getPlayTrend theCount"]{
+  should["reports the basic count the round was played at, not a constant"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`A`9`3;`10`6);13 16i;(`4`3;`10`8);10b;00b];
+    .pit.getPlayTrend[];
+    (exec theCount from .pit.double) musteq enlist 0.5;
+    (exec theCount from .pit.stand) musteq enlist 1f;
+  };
+  should["includes earlier shoes from .pit.hist"]{
+    .pit.hist:.tst.pitPlays[enlist`10`6;enlist 16i;enlist`10`8;enlist 0b;enlist 0b];
+    .pit.res:update round:2 from .tst.pitPlays[enlist`9`6;enlist 15i;enlist`A`8;enlist 0b;enlist 0b];
+    .pit.getPlayTrend[];
+    (exec round from .pit.stand) musteq 1 2;
+  };
+ };
+
+.tst.desc[".pit.getPlayTrend insurance"]{
+  should["flags every insured hand with the count it was taken at, since basic strategy never insures"]{
+    .pit.hist:();
+    .pit.res:update insurance:5 0 5f from .tst.pitPlays[(`9`7;`10`8;`A`K);16 18 21i;(`A`6;`A`6;`A`6);000b;000b];
+    .pit.getPlayTrend[];
+    (exec cards from .pit.insure) mustmatch (`9`7;`A`K);
+    (exec theCount from .pit.insure) musteq 0.5 1.5;
+    (exec insurance from .pit.insure) musteq 5 5f;
+  };
+  should["flags nothing when nobody insures"]{
+    .pit.hist:();
+    .pit.res:.tst.pitPlays[(`9`7;`10`8);16 18i;(`A`6;`A`6);00b;00b];
+    .pit.getPlayTrend[];
+    count[.pit.insure] musteq 0;
+  };
+  should["includes insured hands from earlier shoes"]{
+    .pit.hist:update insurance:5f from .tst.pitPlays[enlist`9`7;enlist 16i;enlist`A`6;enlist 0b;enlist 0b];
+    .pit.res:update round:2,insurance:10f from .tst.pitPlays[enlist`10`8;enlist 18i;enlist`A`K;enlist 0b;enlist 0b];
+    .pit.getPlayTrend[];
+    (exec round from .pit.insure) musteq 1 2;
+  };
+ };
