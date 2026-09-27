@@ -5,7 +5,7 @@
 .stg.maxSplitHands:4;
 
 .stg.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
-.stg.dealerDict:(`2`3`4`5`6`7`8`9`10`J`Q`K`11)!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
+.stg.dealerDict:`2`3`4`5`6`7`8`9`10`J`Q`K`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
 
 .stg.hard:([hTotal:3+til 19]                                                                       / 6-deck H17 DAS basic strategy; DS = double if allowed, else stand
   TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;
@@ -71,7 +71,7 @@
   :v;
  };
 
-.stg.lookup:{[t;k;dc]first ?[t;enlist(=;`hTotal;k);();first .stg.dealerDict dc]};
+.stg.lookup:{[t;k;dc]first?[t;enlist(=;`hTotal;k);();first .stg.dealerDict dc]};
 
 .stg.chartPlay:{[v;dc]
   if[any 11 in v;:.stg.lookup[.stg.soft;sum v;dc]];
@@ -102,6 +102,8 @@
 
 .stg.insureAmount:{$[.stg.trueCount>=.stg.insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f]};
 
+/ real auto-play hooks the server pushes to every connected handle; loaded whenever a
+/ strategy file loads this, overriding player.q's log-only defaults
 .plr.stake:{[s]
   .stg.recv s;
   if[.plr.toth<.stg.handsPlayed+:1;
