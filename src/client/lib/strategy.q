@@ -67,7 +67,6 @@ setCountDict[`basic]; /can be overriden in player script
 // keeps the current count of the cards. This should determine the players bet.
 // every card seen in a set of result rows: each hand's cards, plus the dealer's hand once per round -
 // every player's row carries its own copy of the dealer's cards (a forfeit row only the up-card, so take the longest).
-// keep in sync with .pit.cardsSeen (pitboss.q)
 .stg.cardsSeen:{[t]
   c:raze[t`cards],raze value exec {x first idesc count each x} dealer by round from t;
   c where not null c
@@ -79,32 +78,11 @@ setCountDict[`basic]; /can be overriden in player script
   theCount::runCount%(startCards-count seen)%52;	//true count
   };
 
-.plr.shuffle:{theCount::0f};
-
-// real auto-play hooks the server pushes to every connected handle; loaded whenever a
-// strategy file loads this, overriding player.q's log-only defaults
 .stg.handsPlayed:0;
 
 .stg.recv:{[s].stg.tab:s`tab;.stg.res:s`res;.stg.mh:s`me};
 
-.plr.stake:{[s]
-  .stg.recv s;
-  if[(.stg.handsPlayed+:1)>.plr.toth;
-    -1"Played ",string[.plr.toth]," hand",$[.plr.toth=1;"";"s"],", disconnecting";
-    hclose .plr.h;
-    exit 0];
-  .stg.Count[];
-  bet:getBet[];
-  neg[.plr.h](`stake;bet);
-  };
-
 .stg.insureAmount:{$[theCount>=insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f]};
-
-.plr.insure:{[s]
-  .stg.recv s;
-  .stg.Count[];
-  neg[.plr.h](`insure;.stg.insureAmount[]);
-  };
 
 // the server caps each player at this many hands (keep in sync with .bjk.maxSplitHands, blackjack.q)
 .stg.maxSplitHands:4;
@@ -116,14 +94,6 @@ setCountDict[`basic]; /can be overriden in player script
   if[(r=`SP)&hands>=.stg.maxSplitHands;
     r:first ?[hard;enlist(=;`hTotal;sum "I"$string .stg.cardDict[-1_x]);();first dealerDict[.stg.cardDict[last x]]]];
   :r;
-  };
-
-.plr.play:{[s]
-  .stg.recv s;
-  .stg.c:(raze exec cards from .stg.tab where turn=1),raze exec dealer from .stg.tab where turn=1;
-  dec:.plr.handDict .stg.decide[.stg.c;count select from .stg.tab where handle=.stg.mh];
-  .stg.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .stg.tab where handle=.stg.mh;
-  neg[.plr.h](dec;`);
   };
 
 // links www.blackjackinfo.com - lesson 14 part 2
@@ -147,3 +117,32 @@ Help:{
   if[(r=`SP)&(2<count pc);:`S];
   r
   };
+
+// real auto-play hooks the server pushes to every connected handle; loaded whenever a
+// strategy file loads this, overriding player.q's log-only defaults
+.plr.stake:{[s]
+  .stg.recv s;
+  if[(.stg.handsPlayed+:1)>.plr.toth;
+    -1"Played ",string[.plr.toth]," hand",$[.plr.toth=1;"";"s"],", disconnecting";
+    hclose .plr.h;
+    exit 0];
+  .stg.Count[];
+  bet:getBet[];
+  neg[.plr.h](`stake;bet);
+  };
+
+.plr.insure:{[s]
+  .stg.recv s;
+  .stg.Count[];
+  neg[.plr.h](`insure;.stg.insureAmount[]);
+  };
+
+.plr.play:{[s]
+  .stg.recv s;
+  .stg.c:(raze exec cards from .stg.tab where turn=1),raze exec dealer from .stg.tab where turn=1;
+  dec:.plr.handDict .stg.decide[.stg.c;count select from .stg.tab where handle=.stg.mh];
+  .stg.dec,:select round,cards,cnt,enlist each dealer,dealerCnt,decision:dec from .stg.tab where handle=.stg.mh;
+  neg[.plr.h](dec;`);
+  };
+
+.plr.shuffle:{theCount::0f};
