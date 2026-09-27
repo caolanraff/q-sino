@@ -38,15 +38,13 @@ stick:{
   update cnt:total from`.bs.tab where player=p;
  };
 
-.bs.hit0:{.bs.dealTo first exec player from .bs.tab where turn};
-
 .bs.hit1:{
   d:first select handle,cnt from .bs.tab where turn;
-  if[d[`cnt]=21;
+  if[21=d`cnt;
     .bs.pubMsg[string[.z.u]," is on 21";key .bs.cp];
     :stick[];
   ];
-  if[d[`cnt]>21;
+  if[21<d`cnt;
     .bs.pubMsg[string[.z.u]," is now bust!";key .bs.cp];
     update return:0f,out:1b,turn:0b from`.bs.tab where turn;
     :.bs.nextTurn[];
@@ -56,7 +54,7 @@ stick:{
   .bs.trigger[`.mc.play;d`handle];
  };
 
-hit:{if[.bs.checks[];.bs.hit0[];.bs.hit1[]]};
+hit:{if[.bs.checks[];.bs.dealTo first exec player from .bs.tab where turn;.bs.hit1[]]};
 
 double:{
   if[not .bs.checks[];:()];
@@ -74,7 +72,7 @@ double:{
 insure:{[amt]
   if[not .bs.insuring;.bs.sendMsg["Insurance isn't on offer right now";.z.w];:()];
   if[not .z.w in exec handle from .bs.tab where null insurance;.bs.sendMsg["You've no hand waiting on insurance";.z.w];:()];
-  if[null[amt]|(amt<0)|amt>0.5*first exec bet from .bs.tab where handle=.z.w;
+  if[any(null amt;amt<0;amt>0.5*first exec bet from .bs.tab where handle=.z.w);
     .bs.sendMsg["Insurance is between 0 and half your bet";.z.w];
     :();
   ];
@@ -92,9 +90,9 @@ insure:{[amt]
   :q;
  };
 
-.bs.standSplitAces:{
+.bs.standSplitAces:{[p;q]
   .bs.pubMsg["Split aces get one card each - both hands stand";key .bs.cp];
-  update wait:1b,turn:0b from`.bs.tab where handle=.z.w,split,not out,`A=first each cards;
+  update wait:1b,turn:0b from`.bs.tab where player in(p;q);
   .bs.nextTurn[];
  };
 
@@ -104,7 +102,9 @@ insure:{[amt]
   c:first exec cards from .bs.tab where turn;
   if[2<>count c;:.bs.refuseSplit"You can only split your first two cards"];
   if[1<count distinct .bs.cardDict c;:.bs.refuseSplit"You can't split this hand"];
-  if[.bs.maxSplitHands<=count select from .bs.tab where handle=.z.w;:.bs.refuseSplit"You can't split more than ",string[.bs.maxSplitHands-1]," times"];
+  if[.bs.maxSplitHands<=count select from .bs.tab where handle=.z.w;
+    :.bs.refuseSplit"You can't split more than ",string[.bs.maxSplitHands-1]," times";
+  ];
   :1b;
  };
 
@@ -115,6 +115,7 @@ split:{
   p:"f"$first exec player from .bs.tab where turn;
   aces:`A`A~first exec cards from .bs.tab where player=p;
   update split:1b from`.bs.tab where player=p;
-  .bs.dealTo each p,.bs.split0 p;
-  $[aces;.bs.standSplitAces[];.bs.hit1[]];
+  q:.bs.split0 p;
+  .bs.dealTo each p,q;
+  $[aces;.bs.standSplitAces[p;q];.bs.hit1[]];
  };

@@ -78,7 +78,7 @@ system"l src/server/bin/blackjackServer.q";
   };
  };
 
-.tst.desc["hit[] / .bs.hit0 / .bs.hit1"]{
+.tst.desc["hit[] / .bs.dealTo / .bs.hit1"]{
   should["does nothing when checks[] fails"]{
     `.bs.checks mock {0b};
     .tst.getCardCalls:0;
@@ -154,7 +154,7 @@ system"l src/server/bin/blackjackServer.q";
     `.bs.getCard mock {`A};
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`10`9;cnt:enlist 19i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
-    .bs.hit0[];
+    .bs.dealTo 1f;
     (exec first cnt from .bs.tab) musteq 20i;
   };
   should["reduces the count by 10 for an existing ace when a later card busts the hand"]{
@@ -162,7 +162,7 @@ system"l src/server/bin/blackjackServer.q";
     `.bs.getCard mock {`5};
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`9;cnt:enlist 20i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bs.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bs.tab;
-    .bs.hit0[];
+    .bs.dealTo 1f;
     (exec first cnt from .bs.tab) musteq 15i;
   };
  };
