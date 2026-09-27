@@ -114,7 +114,7 @@ insure:{[amt]
  };
 
 split:{
-  if[not $[.bs.checks[];.bs.canSplit[];0b];:()];
+  if[not$[.bs.checks[];.bs.canSplit[];0b];:()];
   .bs.pubMsg[string[.z.u]," is splitting";key .bs.cp];
   p:"f"$first exec player from .bs.tab where turn;
   aces:`A`A~first exec cards from .bs.tab where player=p;
