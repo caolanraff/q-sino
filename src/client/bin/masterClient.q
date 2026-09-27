@@ -1,19 +1,13 @@
-\c 20 200
-
 .mc.pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;
-
-/// Play functions ///
-
 .mc.handDict:`H`S`D`SP!`hit`stick`double`split;
 
-// log-only defaults for a manual player; -player loads a strategy (which loads playerCore.q),
-// overriding these with the real auto-play logic (see .mc.init[] below)
-.mc.stake:{-1"It's your turn to stake - run stake[bet] when ready"};
-.mc.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
-.mc.insure:{-1"Dealer shows an ace - run insure[amount] (up to half your bet, or insure[0] to decline) when ready"};
-.mc.shuffle:{-1"Deck reshuffled"};
+.mc.lg:{-1 ssr[string .z.p;"D";" "]," ",raze x};
+.mc.stake:{.mc.lg"It's your turn to stake - run stake[bet] when ready"};                           / manual-play default; a strategy's playerCore.q replaces it
+.mc.play:{.mc.lg"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};
+.mc.insure:{.mc.lg"Dealer shows an ace - run insure[amount] (up to half your bet, or insure[0] to decline) when ready"};
+.mc.shuffle:{.mc.lg"Deck reshuffled"};
 
-.mc.dispatch:{[f;x].mc.h(f;x)};
+.mc.dispatch:{[f;arg].mc.h(f;arg)};
 stake:{.mc.dispatch[`stake;x]};
 hit:{.mc.dispatch[`hit;x]};
 stick:{.mc.dispatch[`stick;x]};
@@ -22,21 +16,18 @@ split:{.mc.dispatch[`split;x]};
 insure:{.mc.dispatch[`insure;x]};
 hist:{.mc.dispatch[`hist;x]};
 
-/// start ///
-
 .mc.init:{
+  system"c 20 200";
   args:.Q.opt .z.x;
   p:`;
   if[`player in key args;
-    p:$[count py:`$raze args[`player];py;`];
-    if[(null p)|(not p in .mc.pt);show"[ERROR] Unknown player, options - ",","sv string .mc.pt;exit 1]];
-  // number of hands this client plays before disconnecting; only meaningful in auto mode
-  // (playerCore.q's .mc.stake counts them) - a manual player just disconnects themselves
-  .mc.toth:$[`hands in key args;"I"$raze args[`hands];1000i];
-  // each strategy file in src/client/lib/ loads its own playerCore.q dependency at its top,
-  // so a new player file only needs to be dropped in here - it isn't coupled to this loader
+    p:$[count py:`$raze args`player;py;`];
+    if[not p in .mc.pt;.mc.lg"[ERROR] Unknown player, options - ",","sv string .mc.pt;exit 1];
+  ];
+  .mc.toth:$[`hands in key args;"I"$raze args`hands;1000i];                                        / auto mode only: playerCore.q's .mc.stake counts hands
   if[not null p;system"l src/client/lib/",string[p],".q"];
-  .mc.h:@[hopen;5555;{show"Sorry, no tables currently available";exit 1}];
-  };
+  .mc.h:@[hopen;5555;{.mc.lg"Sorry, no tables currently available: ",x;exit 1}];
+ };
 
-if[(not null .z.f) and "masterClient.q"~last "/" vs string .z.f;.mc.init[]];
+if[not[null .z.f]&"masterClient.q"~last"/"vs string .z.f;.mc.init[]];
+
