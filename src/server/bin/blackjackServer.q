@@ -78,7 +78,6 @@ hist:{.bs.hist,.bs.res};
   if[.bs.insuring;:.bs.closeInsuranceIfDone[]];
   if[.bs.hd;:.bs.dealIfReady[]];
   if[not hadTurn;:()];
-  update turn:1b from`.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b);
   .bs.nextTurn[];
  };
 

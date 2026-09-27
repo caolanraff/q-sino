@@ -1,149 +1,125 @@
-/// Checks function ///
 .bs.checks:{
-  if[not .z.w=first exec handle from .bs.tab where turn,out=0;
-    .bs.pubMsg[string[.z.u]," is trying to play ahead of his turn";.z.w];:0b];
-  if[(first exec cnt from .bs.tab where turn)>21;
-    .bs.pubMsg["Too late, games already over. Please wait until next hand ",(string .z.u);.z.w];:0b];
-  1b
-  };
+  if[.z.w<>first exec handle from .bs.tab where turn,not out;
+    .bs.pubMsg[string[.z.u]," is trying to play ahead of their turn";.z.w];
+    :0b;
+  ];
+  if[21<first exec cnt from .bs.tab where turn;
+    .bs.pubMsg["Too late, the game's already over. Please wait until next hand ",string .z.u;.z.w];
+    :0b;
+  ];
+  :1b;
+ };
 
-/// Turn-advance helper (shared by .bs.stick0 and .bs.hit1's bust branch) ///
 .bs.nextTurn:{
-	.bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
-	if[0=count select from .bs.tab where turn;
-		.bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
-		.bs.dealer[];
-		:()];
-	h:first exec handle from .bs.tab where turn;
-	p:first exec name from .bs.tab where handle=h;
-	.bs.pubMsg["It's ",string[p],"'s turn";h];
-	.bs.sendMsg[.bs.turn]each key .bs.cp;
-	.bs.trigger[`.mc.play;h];
-	};
-
-/// Stick function ///
-.bs.stick0:{
-	.bs.pubMsg[(string .z.u)," has decided to stick";key .bs.cp];
-	update wait:1b, turn:0b from `.bs.tab where turn;
-	update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b,not turn);
-	.bs.nextTurn[];
-	};
+  update turn:1b from`.bs.tab where player=(exec first player from .bs.tab where not out,not wait);
+  .bs.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bs.tab;
+  if[not any exec turn from .bs.tab;
+    .bs.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bs.cp];
+    :.bs.dealer[];
+  ];
+  h:first exec handle from .bs.tab where turn;
+  .bs.pubMsg["It's ",string[first exec name from .bs.tab where handle=h],"'s turn";h];
+  .bs.sendMsg[.bs.turn]each key .bs.cp;
+  .bs.trigger[`.mc.play;h];
+ };
 
 stick:{
-	if[not .bs.checks[];:()];
-	.bs.stick0[];
-	};
+  if[not .bs.checks[];:()];
+  .bs.pubMsg[string[.z.u]," has decided to stick";key .bs.cp];
+  update wait:1b,turn:0b from`.bs.tab where turn;
+  .bs.nextTurn[];
+ };
 
-/// Hit function ///
-.bs.hit0:{
-	UH:.bs.getCard[];
-	.bs.pubMsg["Hit by ",(string .z.u);key .bs.cp];
-	.bs.pubMsg[(string .z.u)," got a ",(string UH);key .bs.cp];
-	update cards:(cards,'UH) from `.bs.tab where handle=.z.w,turn;
-	ucnt:.bs.handCount first exec cards from .bs.tab where turn;
-
-	.bs.pubMsg[(string .z.u),"'s count is now ",(string ucnt);key .bs.cp];
-	update cnt:ucnt from `.bs.tab where handle=.z.w,turn;
-	};
+.bs.dealTo:{[p]
+  c:.bs.getCard[];
+  update cards:(cards,'c)from`.bs.tab where player=p;
+  total:.bs.handCount first exec cards from .bs.tab where player=p;
+  .bs.pubMsg[string[.z.u]," hits and gets a ",string[c],", count now ",string total;key .bs.cp];
+  update cnt:total from`.bs.tab where player=p;
+ };
 
 .bs.hit1:{
-	h:first exec handle from .bs.tab where turn;
-	ucnt:first exec cnt from .bs.tab where handle=.z.w,turn;
-
-	if[ucnt=21;
-		.bs.pubMsg[(string .z.u)," is on 21";key .bs.cp];
-		stick[]];
-
-	if[ucnt>21;
-		.bs.pubMsg[(string .z.u)," is now bust!";key .bs.cp];
-		update return:0f, out:1b, turn:0b from `.bs.tab where turn;
-		update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b, wait=0b);
-		.bs.nextTurn[];
-		DT:.bs.dc];
-
-	if[ucnt<21;
-		$[.bs.double;
-			stick[];
-		  [.bs.sendMsg["Hit or Stick?";h];
-		   .bs.trigger[`.mc.play;h]]]];
-	};
+  d:first select handle,cnt from .bs.tab where turn;
+  if[21=d`cnt;
+    .bs.pubMsg[string[.z.u]," is on 21";key .bs.cp];
+    :stick[];
+  ];
+  if[21<d`cnt;
+    .bs.pubMsg[string[.z.u]," is now bust!";key .bs.cp];
+    update return:0f,out:1b,turn:0b from`.bs.tab where turn;
+    :.bs.nextTurn[];
+  ];
+  if[.bs.double;:stick[]];
+  .bs.sendMsg["Hit or Stick?";d`handle];
+  .bs.trigger[`.mc.play;d`handle];
+ };
 
 hit:{
-  if[not .bs.checks[];:()];
-  .bs.hit0[];
-  .bs.hit1[];
-  };
+  if[.bs.checks[];
+    .bs.dealTo first exec player from .bs.tab where turn;
+    .bs.hit1[];
+  ];
+ };
 
-/// Double function ///
 double:{
   if[not .bs.checks[];:()];
-  if[not 2=first exec count each cards from .bs.tab where turn;
-    .bs.pubMsg["You can't double after getting a third card ",(string .z.u);.z.w];:()];
-  .bs.pubMsg["Bet doubled by ",(string .z.u);key .bs.cp];
-  update bet:bet*2,double:1b from `.bs.tab where turn;
+  if[2<>first exec count each cards from .bs.tab where turn;
+    .bs.pubMsg["You can't double after getting a third card ",string .z.u;.z.w];
+    :();
+  ];
+  .bs.pubMsg["Bet doubled by ",string .z.u;key .bs.cp];
+  update bet:bet*2,double:1b from`.bs.tab where turn;
   .bs.double:1b;
   hit[];
   .bs.double:0b;
-  };
+ };
 
-/// Insurance function ///
-insure:{
+insure:{[amt]
   if[not .bs.insuring;.bs.sendMsg["Insurance isn't on offer right now";.z.w];:()];
   if[not .z.w in exec handle from .bs.tab where null insurance;.bs.sendMsg["You've no hand waiting on insurance";.z.w];:()];
-  if[(null x)|(x<0)|x>0.5*first exec bet from .bs.tab where handle=.z.w;
-    .bs.sendMsg["Insurance is between 0 and half your bet";.z.w];:()];
-  .bs.pubMsg[(string .z.u),$[x=0;" declines insurance";" insures for $",string x];key .bs.cp];
-  update insurance:`float$x from `.bs.tab where handle=.z.w;
+  if[any(null amt;amt<0;amt>0.5*first exec bet from .bs.tab where handle=.z.w);
+    .bs.sendMsg["Insurance is between 0 and half your bet";.z.w];
+    :();
+  ];
+  .bs.pubMsg[string[.z.u],$[amt=0;" declines insurance";" insures for $",string amt];key .bs.cp];
+  update insurance:`float$amt from`.bs.tab where handle=.z.w;
   .bs.closeInsuranceIfDone[];
-  };
+ };
 
-/// Split function ///
-.bs.split0:{
-	update player:`float$player from `.bs.tab;
-	if[((first exec player from .bs.tab where turn)=1)|((first exec player from .bs.tab where turn)=2);
-		update player:player+.01 from `.bs.tab where turn];
-	current:select from .bs.tab where turn;
-	pnum:(exec max player from .bs.tab where handle=.z.w)+.01;
-	current:update player:pnum from current;
-	upsert[`.bs.tab;enlist value exec from current];
-	update cards:1#'cards,cnt:`int$(cnt%2) from `.bs.tab where turn;
-	update turn:0b from `.bs.tab where turn,player=last player;
-	update splithand:(1 2) from `.bs.tab where (count each cards)=1;
-	`player xasc `.bs.tab;
-	show .bs.tab;
-	};
+.bs.split0:{[p]
+  update player:`float$player from`.bs.tab;
+  q:.01+exec max player from .bs.tab where handle=.z.w;
+  `.bs.tab upsert update player:q,turn:0b from select from .bs.tab where player=p;
+  update cards:1#'cards from`.bs.tab where player in(p;q);
+  `player xasc`.bs.tab;
+  :q;
+ };
 
-.bs.splitHit:{
-  .bs.hit0[];
-  update turn:0b from `.bs.tab where turn,splithand=1;
-  update turn:1b from `.bs.tab where not turn,splithand=2;
-  .bs.hit0[];
-  update turn:1b from `.bs.tab where not turn,splithand=1;
-  update turn:0b from `.bs.tab where turn,splithand=2;
-  delete splithand from `.bs.tab;
-  };
-
-/ split aces get one card each and both hands stand
-.bs.standSplitAces:{
+.bs.standSplitAces:{[p;q]
   .bs.pubMsg["Split aces get one card each - both hands stand";key .bs.cp];
-  update wait:1b,turn:0b from `.bs.tab where handle=.z.w,split,not out,`A=first each cards;
-  update turn:1b from `.bs.tab where player=(exec first player from .bs.tab where out=0b,wait=0b);
+  update wait:1b,turn:0b from`.bs.tab where player in(p;q);
   .bs.nextTurn[];
-  };
+ };
+
+.bs.refuseSplit:{.bs.sendMsg[x," ",string .z.u;.z.w];0b};
+
+.bs.canSplit:{
+  c:first exec cards from .bs.tab where turn;
+  if[2<>count c;:.bs.refuseSplit"You can only split your first two cards"];
+  if[1<count distinct .bs.cardDict c;:.bs.refuseSplit"You can't split this hand"];
+  if[.bs.maxSplitHands<=count select from .bs.tab where handle=.z.w;
+    :.bs.refuseSplit"You can't split more than ",string[.bs.maxSplitHands-1]," times";
+  ];
+  :1b;
+ };
 
 split:{
-  if[not .bs.checks[];:()];
-  if[not 2=first exec count each cards from .bs.tab where turn;
-    .bs.sendMsg["You can only split your first two cards ",(string .z.u);.z.w];:()];
-  if[not 1=count distinct crds:.bs.cardDict[first exec cards from .bs.tab where turn];
-    .bs.sendMsg["You can't split this hand ",(string .z.u);.z.w];:()];
-  if[.bs.maxSplitHands<=count select from .bs.tab where handle=.z.w;
-    .bs.sendMsg["You can't split more than ",string[.bs.maxSplitHands-1]," times ",(string .z.u);.z.w];:()];
-  .bs.pubMsg[(string .z.u)," is splitting";key .bs.cp];
-  aces:all crds=`11`11;
-  if[aces;update cnt:22i from `.bs.tab where turn];
-  update split:1b from `.bs.tab where turn;
-  .bs.split0[];
-  .bs.splitHit[];
-  $[aces;.bs.standSplitAces[];.bs.hit1[]];
-  };
+  if[not$[.bs.checks[];.bs.canSplit[];0b];:()];
+  .bs.pubMsg[string[.z.u]," is splitting";key .bs.cp];
+  p:"f"$first exec player from .bs.tab where turn;
+  aces:`A`A~first exec cards from .bs.tab where player=p;
+  update split:1b from`.bs.tab where player=p;
+  q:.bs.split0 p;
+  .bs.dealTo each p,q;
+  $[aces;.bs.standSplitAces[p;q];.bs.hit1[]];
+ };
