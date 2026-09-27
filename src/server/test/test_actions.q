@@ -28,7 +28,7 @@ system"l src/server/bin/blackjackServer.q";
   };
  };
 
-.tst.desc["stick[] / .bs.stick0"]{
+.tst.desc["stick[]"]{
   should["does nothing when checks[] fails"]{
     `.bs.checks mock {0b};
     `.bs.pubMsg mock {[x;y]};
@@ -198,9 +198,9 @@ system"l src/server/bin/blackjackServer.q";
     .bs.double:0b;
     split[];
     hit[];
-    (exec first cards from .bs.tab where player=1.01) mustmatch`A`5;
-    (exec first cnt from .bs.tab where player=1.01) musteq 16i;
-    (exec first cnt from .bs.tab where player=1.02) musteq 12i;
+    (exec first cards from .bs.tab where player=1) mustmatch`A`5;
+    (exec first cnt from .bs.tab where player=1) musteq 16i;
+    (exec first cnt from .bs.tab where player=1.01) musteq 12i;
     .tst.cardseq mustmatch enlist`10;
   };
  };
@@ -241,7 +241,7 @@ system"l src/server/bin/blackjackServer.q";
   };
  };
 
-.tst.desc["split[] / .bs.split0 / .bs.splitHit"]{
+.tst.desc["split[] / .bs.split0 / .bs.dealTo"]{
   should["does nothing when checks[] fails"]{
     `.bs.checks mock {0b};
     .bs.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`10`9;cnt:enlist 19i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
@@ -258,7 +258,7 @@ system"l src/server/bin/blackjackServer.q";
     count[.bs.tab] musteq 2;
     (exec first split from .bs.tab where player=1) musteq 0b;
   };
-  should["forces the count to 22 before splitting a pair of aces"]{
+  should["scores each split ace hand from its ace and new card"]{
     `.bs.pubMsg mock {[x;y]};
     `.bs.excFunc mock {[x;y;z]};
     `.bs.getCard mock {`2};
@@ -267,8 +267,8 @@ system"l src/server/bin/blackjackServer.q";
     .bs.cp:enlist[0i]!enlist`p1;
     split[];
     count[.bs.tab] musteq 3;
-    asc[exec cnt from .bs.tab where player in 1.01 1.02] musteq 13 13i;
-    (exec cards from .bs.tab where player=1.01) mustmatch enlist`A`2;
+    asc[exec cnt from .bs.tab where player in 1 1.01] musteq 13 13i;
+    (exec cards from .bs.tab where player=1) mustmatch enlist`A`2;
   };
   should["refuses to split a hand of more than two cards, even if every card matches"]{
     `.bs.sendMsg mock {[x;y]};
@@ -313,10 +313,10 @@ system"l src/server/bin/blackjackServer.q";
     .bs.tab:update out:00b,wait:00b,turn:10b from .bs.tab;
     .bs.cp:0 1i!`p1`p2;
     split[];
-    (exec cards from .bs.tab where player in 1.01 1.02) mustmatch (`A`K;`A`7);
-    (exec cnt from .bs.tab where player in 1.01 1.02) musteq 21 18i;
-    (exec wait from .bs.tab where player in 1.01 1.02) musteq 11b;
-    (exec turn from .bs.tab where player in 1.01 1.02) musteq 00b;
+    (exec cards from .bs.tab where player in 1 1.01) mustmatch (`A`K;`A`7);
+    (exec cnt from .bs.tab where player in 1 1.01) musteq 21 18i;
+    (exec wait from .bs.tab where player in 1 1.01) musteq 11b;
+    (exec turn from .bs.tab where player in 1 1.01) musteq 00b;
     (exec first turn from .bs.tab where player=2) musteq 1b;
     .tst.excFuncCalls mustmatch enlist(`.mc.play;1i);
   };
@@ -344,12 +344,12 @@ system"l src/server/bin/blackjackServer.q";
     split[];
     count[.bs.tab] musteq 3;
     `splithand mustnin cols .bs.tab;
-    (exec first cards from .bs.tab where player=1.01) mustmatch`8`3;
-    (exec first cnt from .bs.tab where player=1.01) musteq 11i;
-    (exec first cards from .bs.tab where player=1.02) mustmatch`8`4;
-    (exec first cnt from .bs.tab where player=1.02) musteq 12i;
-    (exec first turn from .bs.tab where player=1.01) musteq 1b;
-    (exec first turn from .bs.tab where player=1.02) musteq 0b;
+    (exec first cards from .bs.tab where player=1) mustmatch`8`3;
+    (exec first cnt from .bs.tab where player=1) musteq 11i;
+    (exec first cards from .bs.tab where player=1.01) mustmatch`8`4;
+    (exec first cnt from .bs.tab where player=1.01) musteq 12i;
+    (exec first turn from .bs.tab where player=1) musteq 1b;
+    (exec first turn from .bs.tab where player=1.01) musteq 0b;
     (exec first cards from .bs.tab where player=2) mustmatch`9`7;
   };
  };
