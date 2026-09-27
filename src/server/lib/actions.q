@@ -11,8 +11,8 @@
  };
 
 .bjk.nextTurn:{
-  update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out,not wait);
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
+  update turn:1b from`.bjk.tab where hand=(exec first hand from .bjk.tab where not out,not wait);
+  .bjk.turn:select hand,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
   if[not any exec turn from .bjk.tab;
     .bjk.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bjk.cp];
     :.bjk.dealer[];
@@ -32,10 +32,10 @@ stick:{
 
 .bjk.dealTo:{[p]
   c:.bjk.getCard[];
-  update cards:(cards,'c)from`.bjk.tab where player=p;
-  total:.bjk.handCount first exec cards from .bjk.tab where player=p;
+  update cards:(cards,'c)from`.bjk.tab where hand=p;
+  total:.bjk.handCount first exec cards from .bjk.tab where hand=p;
   .bjk.pubMsg[string[.z.u]," hits and gets a ",string[c],", count now ",string total;key .bjk.cp];
-  update cnt:total from`.bjk.tab where player=p;
+  update cnt:total from`.bjk.tab where hand=p;
  };
 
 .bjk.hit1:{
@@ -56,7 +56,7 @@ stick:{
 
 hit:{
   if[.bjk.checks[];
-    .bjk.dealTo first exec player from .bjk.tab where turn;
+    .bjk.dealTo first exec hand from .bjk.tab where turn;
     .bjk.hit1[];
   ];
  };
@@ -87,17 +87,17 @@ insure:{[amt]
  };
 
 .bjk.split0:{[p]
-  update player:`float$player from`.bjk.tab;
-  q:.01+exec max player from .bjk.tab where handle=.z.w;
-  `.bjk.tab upsert update player:q,turn:0b from select from .bjk.tab where player=p;
-  update cards:1#'cards from`.bjk.tab where player in(p;q);
-  `player xasc`.bjk.tab;
+  update hand:`float$hand from`.bjk.tab;
+  q:.01+exec max hand from .bjk.tab where handle=.z.w;
+  `.bjk.tab upsert update hand:q,turn:0b from select from .bjk.tab where hand=p;
+  update cards:1#'cards from`.bjk.tab where hand in(p;q);
+  `hand xasc`.bjk.tab;
   :q;
  };
 
 .bjk.standSplitAces:{[p;q]
   .bjk.pubMsg["Split aces get one card each - both hands stand";key .bjk.cp];
-  update wait:1b,turn:0b from`.bjk.tab where player in(p;q);
+  update wait:1b,turn:0b from`.bjk.tab where hand in(p;q);
   .bjk.nextTurn[];
  };
 
@@ -116,9 +116,9 @@ insure:{[amt]
 split:{
   if[not$[.bjk.checks[];.bjk.canSplit[];0b];:()];
   .bjk.pubMsg[string[.z.u]," is splitting";key .bjk.cp];
-  p:"f"$first exec player from .bjk.tab where turn;
-  aces:`A`A~first exec cards from .bjk.tab where player=p;
-  update split:1b from`.bjk.tab where player=p;
+  p:"f"$first exec hand from .bjk.tab where turn;
+  aces:`A`A~first exec cards from .bjk.tab where hand=p;
+  update split:1b from`.bjk.tab where hand=p;
   q:.bjk.split0 p;
   .bjk.dealTo each p,q;
   $[aces;.bjk.standSplitAces[p;q];.bjk.hit1[]];

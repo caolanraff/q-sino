@@ -18,7 +18,7 @@
     .stg.getBet[] musteq 10;
   };
   should["bets 10 before any hand has been played, when the pushed results are still untyped"]{
-    .stg.res:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .stg.res:flip`round`hand`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
     .stg.mh:5i;
     .stg.getBet[] musteq 10;
   };

@@ -130,9 +130,9 @@ stake:{[bet]
 
 .bjk.startTurns:{
   if[.bjk.hd;:()];
-  update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out);
+  update turn:1b from`.bjk.tab where hand=(exec first hand from .bjk.tab where not out);
   .bjk.lg .Q.s .bjk.tab;
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
+  .bjk.turn:select hand,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
   .bjk.sendMsg[.bjk.turn]each key .bjk.cp;
   .bjk.trigger[`.plr.play;first exec handle from .bjk.tab where turn];
  };
@@ -163,11 +163,11 @@ stake:{[bet]
 
 .bjk.settleHand:{[p;h;msg;ret]
   .bjk.pubMsg[msg;h];
-  update return:ret from`.bjk.tab where player=p;
+  update return:ret from`.bjk.tab where hand=p;
  };
 
 .bjk.dealer1:{[p]
-  d:first select from .bjk.tab where player=p;
+  d:first select from .bjk.tab where hand=p;
   s:.bjk.settleHand[p;d`handle];
   dBJ:.bjk.isBJ d`dealer;
   pBJ:not[d`split]&.bjk.isBJ d`cards;
@@ -184,7 +184,7 @@ stake:{[bet]
 
 .bjk.settleWaiting:{[p]
   .bjk.dealer1 p;
-  update wait:0b,out:1b from`.bjk.tab where player=p;
+  update wait:0b,out:1b from`.bjk.tab where hand=p;
  };
 
 .bjk.resolveHands:{
@@ -195,18 +195,18 @@ stake:{[bet]
     :update dealer:(dealer,'last .bjk.dc)from`.bjk.tab;
   ];
   .bjk.dealer0[];
-  .bjk.settleWaiting each exec player from .bjk.tab where wait;
+  .bjk.settleWaiting each exec hand from .bjk.tab where wait;
  };
 
 .bjk.recordRound:{
   .bjk.lg"Hand stats;\n",.Q.s .bjk.tab;
   if[.bjk.wwch;update dealer:enlist each dealer from`.bjk.tab];
-  upsert[`.bjk.res;update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from delete out,wait,turn from .bjk.tab];
-  .bjk.sendMsg["Results table for the round;\n",.Q.s select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab]each key .bjk.cp;
+  upsert[`.bjk.res;update"j"$hand,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from delete out,wait,turn from .bjk.tab];
+  .bjk.sendMsg["Results table for the round;\n",.Q.s select hand,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab]each key .bjk.cp;
  };
 
 .bjk.endHand:{
-  update player:`int$player from`.bjk.tab;
+  update hand:`int$hand from`.bjk.tab;
   .bjk.bd:0b;
   .bjk.hd:1b;
   .bjk.stake:0#.bjk.stake;

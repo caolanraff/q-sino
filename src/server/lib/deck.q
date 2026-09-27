@@ -24,7 +24,7 @@
 .bjk.dealCard:{[r]
   c:.bjk.getCard[];
   .bjk.sendMsg["Your card is ",string c;r`handle];
-  update cards:(cards,'c)from`.bjk.tab where player=r`player;
+  update cards:(cards,'c)from`.bjk.tab where hand=r`hand;
  };
 
 .bjk.handCount:{[c]

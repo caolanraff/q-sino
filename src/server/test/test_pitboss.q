@@ -1,7 +1,7 @@
 system"l src/server/bin/pitboss.q";
 
 / .tst.pitRound[1;`K`5;`2`3`4;`10`8]
-.tst.pitRound:{[r;c1;c2;d]([]round:r,r;player:1 2;name:`a_5`b_6;handle:5 6i;cards:(c1;c2);cnt:0 0i;dealer:(d;d);dealerCnt:0 0i;bet:10 20;return:0 0f;profit:0 0f;split:00b;double:00b)};
+.tst.pitRound:{[r;c1;c2;d]([]round:r,r;hand:1 2;name:`a_5`b_6;handle:5 6i;cards:(c1;c2);cnt:0 0i;dealer:(d;d);dealerCnt:0 0i;bet:10 20;return:0 0f;profit:0 0f;split:00b;double:00b)};
 
 .tst.desc[".pit.cardsSeen"]{
   should["counts the dealer's cards once per round, however many player rows repeat them"]{

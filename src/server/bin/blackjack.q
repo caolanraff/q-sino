@@ -16,7 +16,7 @@
 
 .bjk.cp:()!();
 .bjk.joined:(`int$())!`long$();                                                                     / kdb reuses handle numbers
-.bjk.res:.bjk.tab:.bjk.hist:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+.bjk.res:.bjk.tab:.bjk.hist:flip`round`hand`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
 .bjk.stake:([name:();handle:()]bet:`long$());
 
 .bjk.intro:{
@@ -47,14 +47,14 @@ hist:{.bjk.hist,.bjk.res};
 
 .bjk.seat:{
   .bjk.tab:0#.bjk.tab;
-  `.bjk.tab upsert([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);
+  `.bjk.tab upsert([]hand:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);
   .bjk.tab:.bjk.tab lj .bjk.stake;
  };
 
 .bjk.forfeit:{[h]
   t:update return:0f from(select from .bjk.tab where handle=h)where not out;
   if[0=count t;:()];
-  t:update"j"$player,dealer:enlist each dealer,"f"$return from delete out,wait,turn from t;
+  t:update"j"$hand,dealer:enlist each dealer,"f"$return from delete out,wait,turn from t;
   upsert[`.bjk.res;update profit:(return-bet)-0f^insurance from t];
  };
 

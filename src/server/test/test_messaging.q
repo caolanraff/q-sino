@@ -80,7 +80,7 @@ system"l src/server/lib/messaging.q";
   should["sends the client its table, the shoe's results and its own handle with the trigger"]{
     .tst.sent:();
     `.bjk.excFunc mock {[x;y;z].tst.sent,:enlist(x;y;z)};
-    .bjk.tab:([]round:enlist 3;player:enlist 1f;handle:enlist 7i;cards:enlist`K`5);
+    .bjk.tab:([]round:enlist 3;hand:enlist 1f;handle:enlist 7i;cards:enlist`K`5);
     .bjk.res:([]round:1 2;handle:7 7i;profit:10 -10f);
     .bjk.rules:`maxSplitHands`deckCnt!4 6;
     .bjk.trigger[`.plr.play;7i];

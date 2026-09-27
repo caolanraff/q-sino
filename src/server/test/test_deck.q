@@ -98,11 +98,11 @@ system"l src/server/bin/blackjack.q";
     `.bjk.sendMsg mock {[x;y]};
     .tst.getCardCalls:0;
     `.bjk.getCard mock {.tst.getCardCalls+:1;`7};
-    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
-    .bjk.dealCard first select from .bjk.tab where player=1;
+    .bjk.tab:([]round:1 1;hand:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
+    .bjk.dealCard first select from .bjk.tab where hand=1;
     .tst.getCardCalls musteq 1;
-    (exec first cards from .bjk.tab where player=1) mustmatch enlist`7;
-    (exec first cards from .bjk.tab where player=2) mustmatch();
+    (exec first cards from .bjk.tab where hand=1) mustmatch enlist`7;
+    (exec first cards from .bjk.tab where hand=2) mustmatch();
   };
  };
 
