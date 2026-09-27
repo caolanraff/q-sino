@@ -353,3 +353,17 @@ system"l src/server/bin/blackjackServer.q";
     (exec first cards from .bs.tab where player=2) mustmatch`9`7;
   };
  };
+
+.tst.desc["split[] out of turn"]{
+  should["only reports the turn problem, without checking the turn hand for a split"]{
+    .tst.msgs:();
+    `.bs.pubMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bs.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bs.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`9`7;`K`9);cnt:16 19i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bs.tab:update out:00b,wait:00b,turn:01b from .bs.tab;
+    split[];
+    count[.tst.msgs] musteq 1;
+    first[.tst.msgs] mustlike "*trying to play ahead of their turn";
+    count[.bs.tab] musteq 2;
+  };
+ };
