@@ -89,16 +89,15 @@ hist:{.bjk.hist,.bjk.res};
  };
 
 / .bjk.command"stake 10"
-.bjk.command:{[x]
+.bjk.command:{
   c:$[10h=type x;parse x;x];
   if[not(type[c]in 0 11h)&2=count c;'"Send a command, e.g. stake[10] or hit[]"];
   if[not$[-11h=type first c;first[c]in .bjk.public;0b];'"Only ",(", "sv string .bjk.public)," can be called"];
-  a:last c;
-  if[not(a~(::))|(a~`)|type[a]in -5 -6 -7 -8 -9h;'"A command takes a single number, or nothing"];
+  if[not(a~(::))|(a~`)|type[a:last c]in -5 -6 -7 -8 -9h;'"A command takes a single number, or nothing"];
   :c;
  };
 
-.bjk.run:{[x]:value $[.bjk.isPit[];x;.bjk.command x]};
+.bjk.run:{value$[.bjk.isPit[];x;.bjk.command x]};
 .bjk.logFailure:{[e].bjk.lg string[.z.u],"'s request failed: ",e};
 
 .bjk.pg:{@[.bjk.run;x;{.bjk.logFailure x;'x}]};
