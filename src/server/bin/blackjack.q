@@ -2,6 +2,7 @@
 .bjk.bd:.bjk.double:0b;
 .bjk.rnd:0;
 .bjk.pit:0Ni;
+.bjk.public:`stake`hit`stick`double`split`insure`hist;
 
 .bjk.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 .bjk.deckTemplate:raze 4#enlist key .bjk.cardDict;
@@ -16,7 +17,7 @@
 .bjk.cp:()!();
 .bjk.joined:(`int$())!`long$();                                                                     / kdb reuses handle numbers
 .bjk.res:.bjk.tab:.bjk.hist:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
-.bjk.stake:([name:();handle:()]bet:());
+.bjk.stake:([name:();handle:()]bet:`long$());
 
 .bjk.intro:{
   show"Welcome to Qsino Blackjack!";
@@ -87,6 +88,21 @@ hist:{.bjk.hist,.bjk.res};
   neg[.z.w](.bjk.intro;`);
  };
 
+/ .bjk.command"stake 10"
+.bjk.command:{
+  c:$[10h=type x;parse x;x];
+  if[not(type[c]in 0 11h)&2=count c;'"Send a command, e.g. stake[10] or hit[]"];
+  if[not$[-11h=type first c;first[c]in .bjk.public;0b];'"Only ",(", "sv string .bjk.public)," can be called"];
+  if[not(a~(::))|(a~`)|type[a:last c]in -5 -6 -7 -8 -9h;'"A command takes a single number, or nothing"];
+  :c;
+ };
+
+.bjk.run:{value$[.bjk.isPit[];x;.bjk.command x]};
+.bjk.logFailure:{[e].bjk.lg string[.z.u],"'s request failed: ",e};
+
+.bjk.pg:{@[.bjk.run;x;{.bjk.logFailure x;'x}]};
+.bjk.ps:{@[.bjk.run;x;{.bjk.logFailure x;.bjk.sendMsg["That didn't work: ",x;.z.w]}]};
+
 .z.pc:{$[x=.bjk.pit;.bjk.pit:0Ni;.bjk.leave x]};
 .z.ts:{.bjk.betTimer[];.bjk.insureTimer[]};
 
@@ -104,6 +120,8 @@ hist:{.bjk.hist,.bjk.res};
   system"p 5555";
   system"t 1000";
   .bjk.loadLibs[];
+  .z.pg:.bjk.pg;
+  .z.ps:.bjk.ps;
   .bjk.lg"Welcome to Qsino Blackjack!";
   .bjk.buildDeck[];
   .bjk.shuffle[];

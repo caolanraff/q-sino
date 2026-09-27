@@ -489,3 +489,69 @@ system "l src/server/bin/blackjack.q";
     .bjk.hd:1b;
     };
  };
+
+.tst.desc[".bjk.command"]{
+  should["accepts the manual string form and the forms the clients send"]{
+    .bjk.command["stake 10"] mustmatch(`stake;10);
+    .bjk.command["hit[]"] mustmatch(`hit;::);
+    .bjk.command[(`hit;`)] mustmatch`hit`;
+    .bjk.command[(`insure;2.5)] mustmatch(`insure;2.5);
+    .bjk.command[(`stake;10i)] mustmatch(`stake;10i);
+  };
+  should["rejects anything that isn't a single public command"]{
+    "Send a command*" mustthrow(.bjk.command;".bjk.getCard:{`A}");
+    "Send a command*" mustthrow(.bjk.command;"select from .bjk.dc");
+    "Send a command*" mustthrow(.bjk.command;"stake 10;.bjk.hd:1b");
+    "Send a command*" mustthrow(.bjk.command;`hit);
+    "Only *" mustthrow(.bjk.command;".bjk.deal[]");
+    "Only *" mustthrow(.bjk.command;({x};1));
+  };
+  should["rejects an argument that isn't a single number, so it can't read or run server code"]{
+    "A command takes*" mustthrow(.bjk.command;"stake x");
+    "A command takes*" mustthrow(.bjk.command;"stake .bjk.hd");
+    "A command takes*" mustthrow(.bjk.command;"stake[.bjk.hd:0b]");
+    "A command takes*" mustthrow(.bjk.command;"stake 10 20");
+    "A command takes*" mustthrow(.bjk.command;(`stake;`a));
+  };
+ };
+
+.tst.desc[".bjk.run"]{
+  should["runs a player's public command"]{
+    `.bjk.isPit mock {0b};
+    `stake mock {.tst.staked:x};
+    .bjk.run(`stake;10);
+    .tst.staked musteq 10;
+  };
+  should["doesn't run anything else a player sends"]{
+    `.bjk.isPit mock {0b};
+    .tst.x:0;
+    @[.bjk.run;".tst.x:1";{}];
+    .tst.x musteq 0;
+  };
+  should["runs any query from the pitboss"]{
+    `.bjk.isPit mock {1b};
+    .bjk.run["52*.bjk.rules`deckCnt"] musteq 52*.bjk.rules`deckCnt;
+  };
+ };
+
+.tst.desc[".bjk.pg"]{
+  should["logs a failed request and returns the error to the caller"]{
+    .tst.logged:();
+    `.bjk.lg mock {.tst.logged,:enlist x};
+    `.bjk.isPit mock {0b};
+    @[.bjk.pg;".tst.x:1";{x}] mustlike"Send a command*";
+    first[.tst.logged] mustlike string[.z.u],"'s request failed: Send a command*";
+  };
+ };
+
+.tst.desc[".bjk.ps"]{
+  should["logs a failed request and messages the player instead of throwing"]{
+    .tst.logged:.tst.sent:();
+    `.bjk.lg mock {.tst.logged,:enlist x};
+    `.bjk.sendMsg mock {[x;y].tst.sent,:enlist x};
+    `.bjk.isPit mock {0b};
+    .bjk.ps".tst.x:1";
+    first[.tst.logged] mustlike string[.z.u],"'s request failed: Send a command*";
+    first[.tst.sent] mustlike"That didn't work: Send a command*";
+  };
+ };

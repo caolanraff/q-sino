@@ -17,9 +17,13 @@ q src/server/bin/blackjack.q
 ```
 
 The server has no notion of "gameplay mode" - it just deals the game and
-exposes `stake`/`hit`/`stick`/`double`/`split`/`hist` to every connection the
-same way (`shuffle`/`buildDeck` are server-internal only - reshuffling happens
-automatically once the deck runs low, not on player request). It also
+exposes `stake`/`hit`/`stick`/`double`/`split`/`insure`/`hist` to every
+connection the same way. Those are the only calls a player can make: anything
+else sent to the server (a query, an assignment, a command with an expression
+for its argument) is refused and logged, so players can't read the dealer's
+hole card or change the game (`shuffle`/`buildDeck` are server-internal -
+reshuffling happens automatically once the deck runs low, not on player
+request). Bets are whole dollars. It also
 unconditionally pushes `.plr.stake`/`.plr.play`/
 `.plr.shuffle` to every connected handle at the relevant point in play.
 `player.q` defines those three names itself, as simple log-only
@@ -92,4 +96,3 @@ pushes just print a harmless error to the session's own console, since
 
 ## Enhancements
 - use qprof to check speed of functions
-- protected eval function
