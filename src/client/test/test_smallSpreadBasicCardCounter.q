@@ -1,26 +1,26 @@
-.tst.desc["smallSpreadBasicCardCounter.getBet"]{
-  before{system "l src/client/lib/smallSpreadBasicCardCounter.q"};
+.tst.desc["smallSpreadBasicCardCounter .stg.getBet"]{
+  before{system"l src/client/lib/smallSpreadBasicCardCounter.q"};
   should["bets the table minimum below a true count of 2"]{
-    theCount::1;
-    getBet[] musteq 10;
-    };
+    .stg.trueCount:1;
+    .stg.getBet[] musteq 10;
+  };
   should["bets 15 from a true count of 2 up to (not including) 3"]{
-    theCount::2;
-    getBet[] musteq 15;
-    };
+    .stg.trueCount:2;
+    .stg.getBet[] musteq 15;
+  };
   should["bets 20 from a true count of 3 up to (not including) 4"]{
-    theCount::3;
-    getBet[] musteq 20;
-    };
+    .stg.trueCount:3;
+    .stg.getBet[] musteq 20;
+  };
   should["bets 25 from a true count of 4 up to (not including) 5"]{
-    theCount::4;
-    getBet[] musteq 25;
-    };
+    .stg.trueCount:4;
+    .stg.getBet[] musteq 25;
+  };
   should["bets the max 30 once the true count reaches 5 or more"]{
-    theCount::5;
-    getBet[] musteq 30;
-    };
-  should["uses the default basic point-count system - never calls setCountDict"]{
-    countDict mustmatch basic;
-    };
+    .stg.trueCount:5;
+    .stg.getBet[] musteq 30;
+  };
+  should["uses the default Hi-Lo point-count system"]{
+    .stg.countDict mustmatch`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 1 1 1 0 0 0 -1 -1 -1 -1 -1;
+  };
  };
