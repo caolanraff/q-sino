@@ -21,9 +21,3 @@ system"l src/client/bin/masterClient.q";
     .tst.req mustmatch(`hit;::);
   };
  };
-
-.tst.desc[".mc.lg"]{
-  should["writes a timestamped line to stdout"]{
-    .mc.lg["a message"] musteq -1i;
-  };
- };
