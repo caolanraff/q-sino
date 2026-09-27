@@ -1,8 +1,9 @@
 stake:{[bet]
+  if[not type[bet]in -5 -6 -7h;.bjk.sendMsg["Bets are whole dollars";.z.w];:()];
   if[1>bet;.bjk.sendMsg["Put some money down on the table or move on";.z.w];:()];
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];
   .bjk.lg string[.z.u]," bets $",string bet;
-  upsert[`.bjk.stake;(.bjk.user[];.z.w;bet)];
+  upsert[`.bjk.stake;(.bjk.user[];.z.w;"j"$bet)];
   .bjk.bd:1b;
   .bjk.tab:.bjk.tab lj .bjk.stake;
   if[null .bjk.betDeadline;.bjk.armBetTimer[]];

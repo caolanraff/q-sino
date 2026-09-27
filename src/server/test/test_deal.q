@@ -44,6 +44,28 @@ system"l src/server/bin/blackjack.q";
     stake[10];
     .tst.dealCalls musteq 1;
   };
+  should["refuses a fractional bet, which would stop the round from being recorded"]{
+    .tst.sent:();
+    `.bjk.sendMsg mock {[x;y].tst.sent,:enlist x};
+    .bjk.hd:1b;
+    .bjk.stake:([name:();handle:()]bet:`long$());
+    stake[10.5];
+    count[.bjk.stake] musteq 0;
+    .tst.sent mustmatch enlist"Bets are whole dollars";
+  };
+  should["stores an int or short bet as a long, so it fits the bet column"]{
+    `.bjk.user mock {`p1};
+    `.bjk.sendMsg mock {[x;y]};
+    `.bjk.dealIfReady mock {};
+    .bjk.hd:1b;
+    .bjk.betDeadline:.z.p;
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+    .bjk.stake:([name:();handle:()]bet:`long$());
+    stake[10i];
+    (exec bet from .bjk.stake) mustmatch enlist 10;
+    stake[5h];
+    (exec bet from .bjk.stake) mustmatch enlist 5;
+  };
  };
 
 .tst.desc["stake[] betting clock"]{
