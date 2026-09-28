@@ -103,7 +103,12 @@ hist:{.bjk.hist,.bjk.res};
 .bjk.pg:{@[.bjk.run;x;{.bjk.logFailure x;'x}]};
 .bjk.ps:{@[.bjk.run;x;{.bjk.logFailure x;.bjk.sendMsg["That didn't work: ",x;.z.w]}]};
 
-.z.pc:{$[x=.bjk.pit;.bjk.pit:0Ni;.bjk.leave x]};
+.z.pc:{
+  if[x=.bjk.pit;:.bjk.pit:0Ni];
+  if[not x in key .bjk.cp;:()];                                                                    / e.g. handle 0, when the console's stdin closes
+  .bjk.leave x;
+ };
+
 .z.ts:{.bjk.betTimer[];.bjk.insureTimer[]};
 
 .bjk.loadLibs:{

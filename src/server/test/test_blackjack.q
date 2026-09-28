@@ -242,20 +242,29 @@ system "l src/server/bin/blackjack.q";
 .tst.desc[".z.pc"]{
   should["resets .bjk.pit to null for the pitboss handle, without calling leave"]{
     .bjk.pit:7i;
-    leaveCalls::0;
-    `.bjk.leave mock {leaveCalls::leaveCalls+1};
+    .tst.leaveCalls:0;
+    `.bjk.leave mock {.tst.leaveCalls+:1};
     .z.pc[7i];
     .bjk.pit musteq 0Ni;
-    leaveCalls musteq 0;
-    };
-  should["calls leave for a non-pitboss disconnect, leaving .bjk.pit untouched"]{
+    .tst.leaveCalls musteq 0;
+  };
+  should["calls leave for a seated player's disconnect, leaving .bjk.pit untouched"]{
     .bjk.pit:7i;
-    leaveArg::0Ni;
-    `.bjk.leave mock {leaveArg::x};
+    .bjk.cp:enlist[3i]!enlist`bob_3;
+    .tst.leaveArg:0Ni;
+    `.bjk.leave mock {.tst.leaveArg:x};
     .z.pc[3i];
     .bjk.pit musteq 7i;
-    leaveArg musteq 3i;
-    };
+    .tst.leaveArg musteq 3i;
+  };
+  should["ignores a handle that never joined, such as the console closing"]{
+    .bjk.pit:7i;
+    .bjk.cp:enlist[3i]!enlist`bob_3;
+    .tst.leaveCalls:0;
+    `.bjk.leave mock {.tst.leaveCalls+:1};
+    .z.pc[0i];
+    .tst.leaveCalls musteq 0;
+  };
  };
 
 .tst.desc[".bjk.leave winnings message"]{
