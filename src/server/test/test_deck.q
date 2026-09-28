@@ -1,5 +1,5 @@
-system"l src/server/bin/blackjack.q";
-.bjk.loadLibs[];
+.utl.load`:src/server/bin/blackjack.q;
+.utl.load each .bjk.libs;
 
 .tst.desc[".bjk.buildDeck"]{
   should["builds N decks worth of cards (4 of each rank per deck) when given a count"]{

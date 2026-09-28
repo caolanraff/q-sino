@@ -16,7 +16,7 @@ Run everything from the repo root. Start the server first:
 
 ```bash
 q src/server/bin/blackjack.q             # random shuffle
-q src/server/bin/blackjack.q -seed 42    # repeatable shuffle
+q src/server/bin/blackjack.q --seed 42    # repeatable shuffle
 ```
 
 Optionally start the pitboss once the server is up:
@@ -30,15 +30,15 @@ freely:
 
 ```bash
 q src/client/bin/player.q                                # manual - you play by hand
-q src/client/bin/player.q -player basicCardCounter       # automated - plays 1000 hands, then leaves
-q src/client/bin/player.q -player avgPlayer1 -hands 100  # automated - plays 100 hands, then leaves
+q src/client/bin/player.q --player basicCardCounter       # automated - plays 1000 hands, then leaves
+q src/client/bin/player.q --player avgPlayer1 --hands 100  # automated - plays 100 hands, then leaves
 ```
 
 The server deals a new hand as soon as everyone at the table has bet, and
 keeps going for as long as players are connected.
 
 ### Playing by hand
-Without `-player`, the client prompts you when it's your turn and you answer
+Without `--player`, the client prompts you when it's your turn and you answer
 in its console:
 
 | Command | |
@@ -71,7 +71,7 @@ Standard Las Vegas Strip rules:
 - Betting closes 15 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
 
 ## Strategies
-Pass one of these to `-player`:
+Pass one of these to `--player`:
 
 | Strategy | Play | Betting |
 |---|---|---|
@@ -83,7 +83,7 @@ Pass one of these to `-player`:
 | `omegaCardCounter` | Basic strategy | $10-$80 on the Omega II true count. |
 | `perfectCardCounter` | Basic strategy | $10-$80 on a level-9 "perfect" count. |
 
-`-hands` (default `1000`) sets how many hands the client plays before it
+`--hands` (default `1000`) sets how many hands the client plays before it
 disconnects.
 
 ## Pitboss

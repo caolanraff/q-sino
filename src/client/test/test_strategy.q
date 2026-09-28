@@ -1,5 +1,5 @@
 .tst.desc[".stg.help"]{
-  before{system"l src/client/lib/strategy.q"};
+  before{.utl.load`:src/client/lib/strategy.q};
   should["A,A,9 vs dealer 6 is a made soft 21 and should Stand"]{
     .stg.help[`A`A`9`6] musteq`S;
   };
@@ -15,7 +15,7 @@
  };
 
 .tst.desc[".stg.decide"]{
-  before{system"l src/client/lib/strategy.q";.stg.rules:`maxSplitHands`deckCnt!4 6};
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt!4 6};
   should["passes .stg.help's split through while the player is under the hand cap"]{
     .stg.decide[`8`8`10;3] musteq`SP;
   };
@@ -29,7 +29,7 @@
  };
 
 .tst.desc[".stg.count"]{
-  before{system"l src/client/lib/strategy.q"};
+  before{.utl.load`:src/client/lib/strategy.q};
   should["counts the dealer's cards once per round, not once per player row"]{
     .stg.res:([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
     .stg.tab:([]round:0N 0N;cards:(();());dealer:``);
@@ -40,7 +40,7 @@
  };
 
 .tst.desc[".stg.help - 6-deck chart, dealer hits soft 17"]{
-  before{system"l src/client/lib/strategy.q"};
+  before{.utl.load`:src/client/lib/strategy.q};
   should["doubles the hands that change when the dealer hits soft 17"]{
     .stg.help[`A`7`2] musteq`D;                                                                    / soft 18 vs 2
     .stg.help[`A`8`6] musteq`D;                                                                    / soft 19 vs 6
@@ -68,7 +68,7 @@
  };
 
 .tst.desc[".stg.recv"]{
-  before{system"l src/client/lib/strategy.q"};
+  before{.utl.load`:src/client/lib/strategy.q};
   should["takes the table, results, this client's handle and the table rules from the state the server pushed"]{
     t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
     r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
@@ -87,7 +87,7 @@
  };
 
 .tst.desc[".stg.insureAmount"]{
-  before{system"l src/client/lib/strategy.q"};
+  before{.utl.load`:src/client/lib/strategy.q};
   should["never insures by default"]{
     .stg.tab:([]handle:enlist 7i;bet:enlist 20);
     .stg.mh:7i;
@@ -107,15 +107,15 @@
 
 .tst.desc[".stg.insureAt per strategy"]{
   should["is 3 for the Hi-Lo counters and never for the others"]{
-    system"l src/client/lib/basicCardCounter.q";
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/basicCardCounter.q;
     .stg.insureAt musteq 3;
-    system"l src/client/lib/smallSpreadBasicCardCounter.q";
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/smallSpreadBasicCardCounter.q;
     .stg.insureAt musteq 3;
-    system"l src/client/lib/omegaCardCounter.q";
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/omegaCardCounter.q;
     .stg.insureAt musteq 0w;
-    system"l src/client/lib/perfectCardCounter.q";
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/perfectCardCounter.q;
     .stg.insureAt musteq 0w;
-    system"l src/client/lib/avgPlayer1.q";
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer1.q;
     .stg.insureAt musteq 0w;
   };
  };

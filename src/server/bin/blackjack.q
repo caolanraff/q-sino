@@ -111,17 +111,17 @@ hist:{.bjk.hist,.bjk.res};
 
 .z.ts:{.bjk.betTimer[];.bjk.insureTimer[]};
 
-.bjk.loadLibs:{
-  system"l src/server/lib/messaging.q";
-  system"l src/server/lib/deck.q";
-  system"l src/server/lib/deal.q";
-  system"l src/server/lib/actions.q";
- };
+.bjk.libs:`:src/server/lib/messaging.q`:src/server/lib/deck.q`:src/server/lib/deal.q`:src/server/lib/actions.q;
+.bjk.loadLibs:{.utl.require each .bjk.libs};
 
 .bjk.init:{
-  args:.Q.opt .z.x;
+  system"l vendor/qutil/bootstrap.q";
+  .utl.QPATH:enlist`:vendor;
+  .utl.require"qutil/opts.q";
+  .utl.addOptDef["seed";"I";"i"$.z.i+.z.t;`.bjk.seed];
+  .utl.parseArgs[];
   system"c 100 200";
-  system"S ",string $[`seed in key args;"I"$raze args`seed;"i"$.z.i+.z.t];
+  system"S ",string .bjk.seed;
   system"p 5555";
   system"t 1000";
   .bjk.loadLibs[];

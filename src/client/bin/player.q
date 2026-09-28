@@ -17,12 +17,15 @@ hist:{.plr.dispatch[`hist;x]};
 
 .plr.init:{
   system"c 20 200";
-  args:.Q.opt .z.x;
-  .plr.toth:$[`hands in key args;"I"$raze args`hands;1000i];                                        / auto mode only: strategy.q's .plr.stake counts hands
-  if[`player in key args;
-    p:$[count py:`$raze args`player;py;`];
-    if[not p in .plr.pt;-1"[ERROR] Unknown player, options - ",","sv string .plr.pt;exit 1];
-    system"l src/client/lib/",string[p],".q";
+  system"l vendor/qutil/bootstrap.q";
+  .utl.QPATH:enlist`:vendor;
+  .utl.require"qutil/opts.q";
+  .utl.addOptDef["player";"S";`;`.plr.player];
+  .utl.addOptDef["hands";"I";1000i;`.plr.toth];                                                    / auto mode only: strategy.q's .plr.stake counts hands
+  .utl.parseArgs[];
+  if[not null .plr.player;
+    if[not .plr.player in .plr.pt;-1"[ERROR] Unknown player, options - ",","sv string .plr.pt;exit 1];
+    .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
   .plr.h:@[hopen;5555;{-1"Sorry, no tables currently available: ",x;exit 1}];
  };

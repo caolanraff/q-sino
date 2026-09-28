@@ -1,4 +1,4 @@
-system"l src/client/bin/player.q";
+.utl.load`:src/client/bin/player.q;
 
 .tst.desc["player allow-list matches the players in lib/"]{
   should["every player strategy in lib/ is listed, spelled correctly, in player.q's .plr.pt"]{
