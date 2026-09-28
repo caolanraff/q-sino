@@ -1,98 +1,113 @@
 # q-sino
-KDB+ blackjack game
+A multiplayer blackjack game in kdb+/q. A server deals the game over IPC,
+players connect to it and play by hand or with an automated strategy, and
+an optional pitboss process watches the table for card counters.
 
-## Scripts
-- `src/server/bin/blackjack.q` - the dealer/game engine. Listens on port `5555`. Loads shared code from `src/server/lib/`.
-- `src/server/bin/pitboss.q` - watches for card-counting behavior. Connects to the server; listens on port `5556`.
-- `src/client/bin/player.q` - generic player client, one script for both modes. With `-player <name>` it loads that strategy and plays automatically; without it, it connects with just its own log-only prompts and you play manually (see below).
-- `src/client/lib/strategy.q` - shared basic-strategy tables, card-counting helpers, and the real auto-play logic; each strategy script loads this itself, so it's never loaded for manual play.
-- `src/client/lib/*.q` (all except `strategy.q`) - pluggable per-player strategies, each self-contained (loads `strategy.q` itself) - see below.
+## Layout
+- `src/server/bin/blackjack.q` - the dealer and game engine. Listens on port `5555`; loads the rest of the game from `src/server/lib/`.
+- `src/server/bin/pitboss.q` - card-counting detection. Connects to the server and listens on port `5556`.
+- `src/client/bin/player.q` - the player client, for both manual and automated play.
+- `src/client/lib/strategy.q` - shared basic-strategy charts, card counting and the auto-play logic used by every strategy.
+- `src/client/lib/*.q` (the rest) - one file per strategy (see [Strategies](#strategies)).
+- `src/*/test/` - qspec specs; `test/run.q` runs them.
 
-## Usage
-
-Start the server first, from the repo root:
+## Running
+Run everything from the repo root. Start the server first:
 
 ```bash
-q src/server/bin/blackjack.q
+q src/server/bin/blackjack.q             # random shuffle
+q src/server/bin/blackjack.q -seed 42    # repeatable shuffle
 ```
 
-The server has no notion of "gameplay mode" - it just deals the game and
-exposes `stake`/`hit`/`stick`/`double`/`split`/`insure`/`hist` to every
-connection the same way. Those are the only calls a player can make: anything
-else sent to the server (a query, an assignment, a command with an expression
-for its argument) is refused and logged, so players can't read the dealer's
-hole card or change the game (`shuffle`/`buildDeck` are server-internal -
-reshuffling happens automatically once the deck runs low, not on player
-request). Bets are whole dollars. It also
-unconditionally pushes `.plr.stake`/`.plr.play`/
-`.plr.shuffle` to every connected handle at the relevant point in play.
-`player.q` defines those three names itself, as simple log-only
-prompts ("it's your turn - run ... when ready"); loading a strategy via
-`-player <name>` also pulls in `strategy.q` (each `src/client/lib/*.q`
-strategy file loads it itself, at its own top), which redefines the same
-three names with the real auto-play logic, so a bot reacts to the pushes
-automatically instead. The server itself has no notion of "how many hands"
-either - it always deals the next hand once everyone's bet; each
-`player.q` decides for itself, via its own `-hands`, how many it
-plays before disconnecting (see below).
-
-- `-seed` - RNG seed for the shuffle. Optional, default derived from the current time.
-
-Optionally start the detection process (after the server is up):
+Optionally start the pitboss once the server is up:
 
 ```bash
 q src/server/bin/pitboss.q
 ```
 
-### Running a player
-
-Each player connects with `player.q`, from the repo root:
+Then connect one `player.q` per player, mixing manual and automated players
+freely:
 
 ```bash
-q src/client/bin/player.q                          # manual - play by hand, prompted each turn
-q src/client/bin/player.q -player <name> -hands 100 # auto - <name> plays 100 hands, then disconnects
+q src/client/bin/player.q                                # manual - you play by hand
+q src/client/bin/player.q -player basicCardCounter       # automated - plays 1000 hands, then leaves
+q src/client/bin/player.q -player avgPlayer1 -hands 100  # automated - plays 100 hands, then leaves
 ```
 
-**Manual mode** (no `-player`): connects without touching `strategy.q` or
-any strategy file, so you get `player.q`'s own log-only prompt each
-time it's your turn (`It's your turn to stake - run stake[bet] when ready`,
-etc.) instead of auto-playing. You then call `stake[bet]`, `hit[]`,
-`stick[]`, `double[]`, `split[]`, `hist[]` directly in your console,
-whenever you're ready, for as long as you want -
-`player.q` defines each of these itself, forwarding it to the server
-over the connection it opened, so you never have to touch the handle
-yourself. `-hands` only applies to auto mode.
+The server deals a new hand as soon as everyone at the table has bet, and
+keeps going for as long as players are connected.
 
-**Auto mode** (`-player <name>`): loads that strategy from `src/client/lib/`
-(which pulls in `strategy.q` itself) and plays every hand automatically.
-`-hands` (optional, default `1000`) caps how many hands *this client*
-plays before it disconnects on its own - other players at the table, auto
-or manual, aren't affected and the server keeps dealing regardless:
+### Playing by hand
+Without `-player`, the client prompts you when it's your turn and you answer
+in its console:
 
-| `-player` value | Strategy |
+| Command | |
 |---|---|
-| `avgPlayer1` | Basic hit-below-17 play; flat $20 bet every hand. |
-| `avgPlayer2` | Basic hit-below-17 play; bets the previous hand's profit (falls back to $10). |
-| `avgPlayer3` | Basic hit-below-17 play; bets $20 on every 5th hand, $10 otherwise. |
-| `basicCardCounter` | Full basic-strategy play; sizes bets off the Hi-Lo ("basic") running count. |
-| `smallSpreadBasicCardCounter` | Same as `basicCardCounter`, but with a smaller bet spread (less swingy bets). |
-| `omegaCardCounter` | Full basic-strategy play; sizes bets off the Omega II running count. |
-| `perfectCardCounter` | Full basic-strategy play; sizes bets off a "perfect" (level-9) running count. |
+| `stake[bet]` | Bet on the next hand, in whole dollars. |
+| `hit[]` | Take another card. |
+| `stick[]` | Stand on your hand. |
+| `double[]` | Double your bet and take exactly one more card (first two cards only). |
+| `split[]` | Split a pair into two hands. |
+| `insure[amount]` | When the dealer shows an ace: insure for up to half your bet, or `insure[0]` to decline. |
+| `hist[]` | Results of every hand so far. |
 
-Run one `player.q` per player you want at the table, mixing manual and
-auto freely - for example:
+You can also play from a plain `q` session, with
+`` h:hopen`:localhost:5555 `` and then `h"stake 10"`, `h"hit[]"` and so on.
+You won't get the turn prompts, and the server's pushes print a harmless
+error in that session.
 
-```bash
-q src/server/bin/blackjack.q                                 # terminal 1
-q src/client/bin/player.q                                    # terminal 2 (manual)
-q src/client/bin/player.q -player avgPlayer1 -hands 100      # terminal 3 (auto, 100 hands)
+These commands are all a player can run on the server: any other query or
+code sent to it is refused and logged.
+
+## Table rules
+Standard Las Vegas Strip rules:
+- 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
+- Blackjack pays 3:2; other wins pay 1:1.
+- The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.
+- Double on any first two cards, including after a split.
+- Split any two cards of equal value (so K,Q splits), up to 4 hands. Split aces get one card each, and a two-card 21 after a split isn't a blackjack.
+- Insurance (even money on a blackjack) is offered whenever the dealer shows an ace.
+- No surrender.
+- Betting closes 15 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
+
+## Strategies
+Pass one of these to `-player`:
+
+| Strategy | Play | Betting |
+|---|---|---|
+| `avgPlayer1` | Hits below 17 | Flat $20. |
+| `avgPlayer2` | Hits below 17 | Bets the previous hand's profit, or $10 if it didn't win. |
+| `avgPlayer3` | Hits below 17 | $20 after every 5th round, $10 otherwise. |
+| `basicCardCounter` | Basic strategy | $10-$80 on the Hi-Lo true count; insures at a true count of 3+. |
+| `smallSpreadBasicCardCounter` | Basic strategy | Like `basicCardCounter`, but $10-$30. |
+| `omegaCardCounter` | Basic strategy | $10-$80 on the Omega II true count. |
+| `perfectCardCounter` | Basic strategy | $10-$80 on a level-9 "perfect" count. |
+
+`-hands` (default `1000`) sets how many hands the client plays before it
+disconnects.
+
+## Pitboss
+The pitboss records every hand and looks for two signs of counting:
+- **Bets that follow the count** - per player and round, the correlation and
+  covariance of their bets against the Hi-Lo, Omega II and perfect counts,
+  in `.pit.betTrend`.
+- **Plays basic strategy wouldn't make** - doubling 18-20, splitting tens,
+  standing on 15/16 against a strong dealer card, and taking insurance, each
+  with the count it was made at, in `.pit.double`, `.pit.split`,
+  `.pit.stand` and `.pit.insure`.
+
+Query them on its port from another `q` session:
+
+```q
+h:hopen 5556
+h".pit.betTrend"
 ```
 
-A human can also join directly with a plain `q` session connected to the
-server (`` h:hopen`:localhost:5555 ``) instead of running `player.q` -
-same manual commands, but without the friendly prompts (the server's
-pushes just print a harmless error to the session's own console, since
-`.plr.stake`/`.plr.play`/`.plr.shuffle` are undefined there).
+## Tests
+```bash
+q test/run.q src/server/test src/client/test -q
+```
 
-## Enhancements
-- use qprof to check speed of functions
+No test starts a real server or client: each entry script only opens ports
+and connections when it's run directly, so the specs load the files and call
+their functions.
