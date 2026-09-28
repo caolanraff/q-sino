@@ -1,5 +1,5 @@
-.pit.hist:();
 .pit.res:([]round:`long$());
+.pit.double:.pit.split:.pit.stand:.pit.insure:();
 .pit.betTrend:flip`Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
 
 .pit.lg:{-1 ssr[string .z.p;"D";" "]," ",raze x};
@@ -44,12 +44,13 @@
     from t;
  };
 
-.pit.getPlayTrend:{
-  t:.pit.handFacts .pit.hist,.pit.res;
-  .pit.double:select round,name,handle,cards,cnt,dealer,theCount from t where doubleTell;
-  .pit.split:select round,name,handle,cards,cnt,dealer,theCount from t where splitTell;
-  .pit.stand:select round,name,handle,cards,cnt,dealer,theCount from t where standTell;
-  .pit.insure:select round,name,handle,cards,cnt,dealer,theCount,insurance from t where insureTell;
+.pit.getPlayTrend:{[t]
+  if[0=count t;:()];
+  t:.pit.handFacts t;
+  .pit.double,:select round,name,handle,cards,cnt,dealer,theCount from t where doubleTell;
+  .pit.split,:select round,name,handle,cards,cnt,dealer,theCount from t where splitTell;
+  .pit.stand,:select round,name,handle,cards,cnt,dealer,theCount from t where standTell;
+  .pit.insure,:select round,name,handle,cards,cnt,dealer,theCount,insurance from t where insureTell;
  };
 
 .pit.gcol:{`Round,`$string[x except`Round],\:"_",string y};
@@ -63,20 +64,18 @@
   :update alert1:10,alert2:-10 from 0!(lj/)(b;o;p);
  };
 
-.pit.shuffle:{
-  .pit.hist,:.pit.res;
-  .pit.res:0#.pit.res;
- };
+.pit.shuffle:{.pit.res:0#.pit.res};
 
-.pit.getDetect:{
+.pit.getDetect:{[rs]
   .pit.getBetTrend[];
-  .pit.getPlayTrend[];
+  .pit.getPlayTrend select from .pit.res where round in rs;                                        / a finished round's tells never change
  };
 
 .pit.gameover:{[s]
-  .pit.rnd:s`rnd;r:s`res;
-  .pit.res:.pit.res uj select from r where not round in exec round from .pit.res;
-  .pit.getDetect[];
+  .pit.rnd:s`rnd;
+  new:select from s[`res]where not round in exec round from .pit.res;
+  .pit.res:.pit.res uj new;
+  .pit.getDetect exec distinct round from new;
  };
 
 .pit.init:{
