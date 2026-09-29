@@ -1,5 +1,5 @@
 .tst.desc["basicCardCounter .stg.getBet"]{
-  before{system"l src/client/lib/basicCardCounter.q"};
+  before{.utl.load each`:src/client/lib/strategy.q`:src/client/lib/basicCardCounter.q};
   should["bets the table minimum below a true count of 2"]{
     .stg.trueCount:1;
     .stg.getBet[] musteq 10;

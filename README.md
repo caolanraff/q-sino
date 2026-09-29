@@ -4,8 +4,8 @@ players connect to it and play by hand or with an automated strategy, and
 an optional pitboss process watches the table for card counters.
 
 ## Layout
-- `src/server/bin/blackjack.q` - the dealer and game engine. Listens on port `5555`; loads the rest of the game from `src/server/lib/`.
-- `src/server/bin/pitboss.q` - card-counting detection. Connects to the server and listens on port `5556`.
+- `src/server/bin/blackjack.q` - the dealer and game engine. Listens on port `5555` by default; loads the rest of the game from `src/server/lib/`.
+- `src/server/bin/pitboss.q` - card-counting detection. Connects to the server and listens on port `5556` by default.
 - `src/client/bin/player.q` - the player client, for both manual and automated play.
 - `src/client/lib/strategy.q` - shared basic-strategy charts, card counting and the auto-play logic used by every strategy.
 - `src/client/lib/*.q` (the rest) - one file per strategy (see [Strategies](#strategies)).
@@ -15,14 +15,17 @@ an optional pitboss process watches the table for card counters.
 Run everything from the repo root. Start the server first:
 
 ```bash
-q src/server/bin/blackjack.q             # random shuffle
-q src/server/bin/blackjack.q -seed 42    # repeatable shuffle
+q src/server/bin/blackjack.q                     # port 5555, random shuffle
+q src/server/bin/blackjack.q -p 6000 --seed 42   # port 6000, repeatable shuffle
 ```
+
+`-p` (q's own listening-port flag) defaults to `5555`.
 
 Optionally start the pitboss once the server is up:
 
 ```bash
-q src/server/bin/pitboss.q
+q src/server/bin/pitboss.q                                  # port 5556, server on localhost:5555
+q src/server/bin/pitboss.q -p 6001 --server localhost:6000
 ```
 
 Then connect one `player.q` per player, mixing manual and automated players
@@ -30,15 +33,18 @@ freely:
 
 ```bash
 q src/client/bin/player.q                                # manual - you play by hand
-q src/client/bin/player.q -player basicCardCounter       # automated - plays 1000 hands, then leaves
-q src/client/bin/player.q -player avgPlayer1 -hands 100  # automated - plays 100 hands, then leaves
+q src/client/bin/player.q --player basicCardCounter       # automated - plays 1000 hands, then leaves
+q src/client/bin/player.q --player avgPlayer1 --hands 100  # automated - plays 100 hands, then leaves
+q src/client/bin/player.q --server otherhost:6000          # a server on another machine or port
 ```
+
+`--server` is the server's `host:port`, `localhost:5555` by default.
 
 The server deals a new hand as soon as everyone at the table has bet, and
 keeps going for as long as players are connected.
 
 ### Playing by hand
-Without `-player`, the client prompts you when it's your turn and you answer
+Without `--player`, the client prompts you when it's your turn and you answer
 in its console:
 
 | Command | |
@@ -71,7 +77,7 @@ Standard Las Vegas Strip rules:
 - Betting closes 15 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
 
 ## Strategies
-Pass one of these to `-player`:
+Pass one of these to `--player`:
 
 | Strategy | Play | Betting |
 |---|---|---|
@@ -83,7 +89,7 @@ Pass one of these to `-player`:
 | `omegaCardCounter` | Basic strategy | $10-$80 on the Omega II true count. |
 | `perfectCardCounter` | Basic strategy | $10-$80 on a level-9 "perfect" count. |
 
-`-hands` (default `1000`) sets how many hands the client plays before it
+`--hands` (default `1000`) sets how many hands the client plays before it
 disconnects.
 
 ## Pitboss

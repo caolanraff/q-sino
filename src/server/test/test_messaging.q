@@ -1,4 +1,4 @@
-system"l src/server/lib/messaging.q";
+.utl.load`:src/server/lib/messaging.q;
 
 .tst.desc[".bjk.lg"]{
   should["writes a single string to stdout without throwing"]{

@@ -79,10 +79,15 @@
  };
 
 .pit.init:{
-  system"c 20 200";
+  system"c 100 200";
+  system"l vendor/qutil/bootstrap.q";
+  .utl.QPATH:enlist`:vendor;
+  .utl.require"qutil/opts.q";
+  .utl.addOptDef["server";"S";`:localhost:5555;{`.pit.server set hsym x}];
+  .utl.parseArgs[];
   .pit.lg"Loading detection algorithm";
-  system"p 5556";
-  .pit.h:@[hopen;`:localhost:5555:pitboss;{.pit.lg"Unable to connect to blackjack.q: ",x;exit 1}];
+  if[not system"p";system"p 5556"];
+  .pit.h:@[hopen;`$string[.pit.server],":pitboss";{.pit.lg"Unable to connect to blackjack.q: ",x;exit 1}];
   .pit.startCards:.pit.shoeSize .pit.h;
  };
 

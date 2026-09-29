@@ -1,5 +1,5 @@
-system "l src/server/bin/blackjack.q";
-.bjk.loadLibs[];
+.utl.load`:src/server/bin/blackjack.q;
+.utl.load each .bjk.libs;
 
 .tst.desc["blackjack entry-script guard"]{
   should["only fires for its own script, not when loaded as a dependency"]{

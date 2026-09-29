@@ -1,5 +1,5 @@
-system"l src/server/bin/blackjack.q";
-.bjk.loadLibs[];
+.utl.load`:src/server/bin/blackjack.q;
+.utl.load each .bjk.libs;
 
 .tst.desc["checks[]"]{
   should["returns 0b and does not act when it isn't the caller's turn"]{
