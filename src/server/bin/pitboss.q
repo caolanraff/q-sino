@@ -83,11 +83,11 @@
   system"l vendor/qutil/bootstrap.q";
   .utl.QPATH:enlist`:vendor;
   .utl.require"qutil/opts.q";
-  .utl.addOptDef["server";"S";`localhost:5555;`.pit.server];
+  .utl.addOptDef["server";"S";`:localhost:5555;{`.pit.server set hsym x}];
   .utl.parseArgs[];
   .pit.lg"Loading detection algorithm";
   if[not system"p";system"p 5556"];
-  .pit.h:@[hopen;hsym`$string[.pit.server],":pitboss";{.pit.lg"Unable to connect to blackjack.q: ",x;exit 1}];
+  .pit.h:@[hopen;`$string[.pit.server],":pitboss";{.pit.lg"Unable to connect to blackjack.q: ",x;exit 1}];
   .pit.startCards:.pit.shoeSize .pit.h;
  };
 
