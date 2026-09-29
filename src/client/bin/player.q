@@ -16,6 +16,7 @@ insure:{.plr.dispatch[`insure;x]};
 hist:{.plr.dispatch[`hist;x]};
 
 .plr.init:{
+  system"c 100 200";
   system"l vendor/qutil/bootstrap.q";
   .utl.QPATH:enlist`:vendor;
   .utl.require"qutil/opts.q";

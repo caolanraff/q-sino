@@ -15,13 +15,11 @@ an optional pitboss process watches the table for card counters.
 Run everything from the repo root. Start the server first:
 
 ```bash
-q src/server/bin/blackjack.q -c 100 200                     # port 5555, random shuffle
-q src/server/bin/blackjack.q -c 100 200 -p 6000 --seed 42   # port 6000, repeatable shuffle
+q src/server/bin/blackjack.q                     # port 5555, random shuffle
+q src/server/bin/blackjack.q -p 6000 --seed 42   # port 6000, repeatable shuffle
 ```
 
-`-p` (q's own listening-port flag) defaults to `5555`. `-c 100 200` is q's
-console size: the server formats the tables it logs and sends to players to
-fit it, and q's default of 80 columns cuts them off.
+`-p` (q's own listening-port flag) defaults to `5555`.
 
 Optionally start the pitboss once the server is up:
 

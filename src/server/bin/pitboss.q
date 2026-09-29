@@ -79,6 +79,7 @@
  };
 
 .pit.init:{
+  system"c 100 200";
   system"l vendor/qutil/bootstrap.q";
   .utl.QPATH:enlist`:vendor;
   .utl.require"qutil/opts.q";
