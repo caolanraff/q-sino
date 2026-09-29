@@ -106,7 +106,7 @@ insure:{[amt]
 .bjk.canSplit:{
   c:first exec cards from .bjk.tab where turn;
   if[2<>count c;:.bjk.refuseSplit"You can only split your first two cards"];
-  if[1<count distinct .bjk.cardDict c;:.bjk.refuseSplit"You can't split this hand"];
+  if[1<count distinct .crd.cardDict c;:.bjk.refuseSplit"You can't split this hand"];
   if[.bjk.rules[`maxSplitHands]<=count select from .bjk.tab where handle=.z.w;
     :.bjk.refuseSplit"You can't split more than ",string[.bjk.rules[`maxSplitHands]-1]," times";
   ];

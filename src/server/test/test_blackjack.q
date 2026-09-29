@@ -271,7 +271,7 @@
   should["reports net winnings across every shoe this session, ignoring other players"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.bjk.lg mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x] msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
@@ -285,7 +285,7 @@
   should["shows a net loss with a leading minus sign"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.bjk.lg mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x] msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -299,7 +299,7 @@
   should["ignores results from an earlier connection that had the same handle"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.bjk.lg mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x] msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -313,7 +313,7 @@
   should["reports zero for a player who never finished a hand"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.bjk.lg mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x] msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -406,7 +406,7 @@
   should["counts the forfeited hand in the leaver's session winnings"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.bjk.lg mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x] msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
     .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
@@ -546,7 +546,7 @@
 .tst.desc[".bjk.pg"]{
   should["logs a failed request and returns the error to the caller"]{
     .tst.logged:();
-    `.bjk.lg mock {.tst.logged,:enlist x};
+    `.log.warn mock {.tst.logged,:enlist x};
     `.bjk.isPit mock {0b};
     @[.bjk.pg;".tst.x:1";{x}] mustlike"Send a command*";
     first[.tst.logged] mustlike string[.z.u],"'s request failed: Send a command*";
@@ -556,7 +556,7 @@
 .tst.desc[".bjk.ps"]{
   should["logs a failed request and messages the player instead of throwing"]{
     .tst.logged:.tst.sent:();
-    `.bjk.lg mock {.tst.logged,:enlist x};
+    `.log.warn mock {.tst.logged,:enlist x};
     `.bjk.sendMsg mock {[x;y].tst.sent,:enlist x};
     `.bjk.isPit mock {0b};
     .bjk.ps".tst.x:1";

@@ -1,3 +1,6 @@
+if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
+.utl.require"common";
+
 .plr.pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;
 
@@ -16,19 +19,15 @@ insure:{.plr.dispatch[`insure;x]};
 hist:{.plr.dispatch[`hist;x]};
 
 .plr.init:{
-  system"c 100 200";
-  system"l vendor/qutil/bootstrap.q";
-  .utl.QPATH:enlist`:vendor;
-  .utl.require"qutil/opts.q";
   .utl.addOptDef["player";"S";`;`.plr.player];
   .utl.addOptDef["server";"S";`:localhost:5555;{`.plr.server set hsym x}];
   .utl.addOptDef["hands";"I";1000i;`.plr.toth];                                                    / auto mode only: strategy.q's .plr.stake counts hands
   .utl.parseArgs[];
   if[not null .plr.player;
-    if[not .plr.player in .plr.pt;-1"[ERROR] Unknown player, options - ",","sv string .plr.pt;exit 1];
+    if[not .plr.player in .plr.pt;.log.error"Unknown player, options - ",","sv string .plr.pt;exit 1];
     .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
-  .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];
+  .plr.h:@[hopen;.plr.server;{.log.error"Sorry, no tables currently available: ",x;exit 1}];
  };
 
 if[not[null .z.f]&"player.q"~last"/"vs string .z.f;.plr.init[]];
