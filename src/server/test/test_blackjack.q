@@ -1,26 +1,16 @@
 .utl.load`:src/server/bin/blackjack.q;
 .utl.load each .bjk.libs;
 
-.tst.desc["blackjack entry-script guard"]{
-  should["only fires for its own script, not when loaded as a dependency"]{
-    .tst.guard:{[zf] (not null zf) and "blackjack.q"~last "/" vs string zf};
-    (.tst.guard[`]) musteq 0b;
-    (.tst.guard[`$"src/server/bin/blackjack.q"]) musteq 1b;
-    (.tst.guard[`$"test/run.q"]) musteq 0b;
-    (.tst.guard[`$"/abs/path/src/server/bin/blackjack.q"]) musteq 1b;
-    };
- };
-
 .tst.desc[".bjk.shuffle pitboss-notify guard"]{
   should["behaves as intended AND semantics"]{
-    .tst.guard:{[shufflecnt;pit] (shufflecnt>1)&not null pit};
+    .tst.guard:{[shufflecnt;pit](shufflecnt>1)&not null pit};
     threw:@[{.tst.guard[1;0Ni];0b};();{1b}];
     threw musteq 0b;
     (.tst.guard[1;0Ni]) musteq 0b;
     (.tst.guard[1;5i]) musteq 0b;
     (.tst.guard[2;5i]) musteq 1b;
     (.tst.guard[2;0Ni]) musteq 0b;
-    };
+  };
  };
 
 .tst.desc[".bjk.start player-table upsert"]{

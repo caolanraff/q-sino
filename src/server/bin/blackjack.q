@@ -130,4 +130,4 @@ hist:{.bjk.hist,.bjk.res};
   .bjk.shuffle[];
  };
 
-if[not[null .z.f]&"blackjack.q"~last"/"vs string .z.f;.bjk.init[]];
+if[.cmn.isMain`blackjack.q;.bjk.init[]];

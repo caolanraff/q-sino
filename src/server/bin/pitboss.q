@@ -75,5 +75,5 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   .pit.startCards:.pit.shoeSize .pit.h;
  };
 
-if[not[null .z.f]&"pitboss.q"~last"/"vs string .z.f;.pit.init[]];
+if[.cmn.isMain`pitboss.q;.pit.init[]];
 
