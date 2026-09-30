@@ -1,21 +1,21 @@
 .utl.load`:src/server/lib/messaging.q;
 
 .tst.desc[".bjk.sendMsg"]{
-  should["dispatches a string message to .log.info, not show, on a local handle"]{
+  should["dispatches a string message to .log.plain, not show, on a local handle"]{
     .tst.lgCalls:();
-    `.log.info mock {[x].tst.lgCalls,:enlist x};
+    `.log.plain mock {[x].tst.lgCalls,:enlist x};
     .bjk.sendMsg["hello";0i];
     .tst.lgCalls mustmatch enlist"hello";
   };
-  should["does not dispatch a non-string message to .log.info (goes to show instead)"]{
+  should["does not dispatch a non-string message to .log.plain (goes to show instead)"]{
     .tst.lgCalls:();
-    `.log.info mock {[x].tst.lgCalls,:enlist x};
+    `.log.plain mock {[x].tst.lgCalls,:enlist x};
     .bjk.sendMsg[42;0i];
     .tst.lgCalls mustmatch();
   };
   should["targets only the first handle when given a list of handles"]{
     .tst.lgCalls:();
-    `.log.info mock {[x].tst.lgCalls,:enlist x};
+    `.log.plain mock {[x].tst.lgCalls,:enlist x};
     .bjk.sendMsg["hi";0 1i];
     .tst.lgCalls mustmatch enlist"hi";
   };

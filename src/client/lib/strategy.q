@@ -98,7 +98,7 @@
 .plr.stake:{[s]
   .stg.recv s;
   if[.plr.toth<.stg.handsPlayed+:1;
-    .log.info"Played ",string[.plr.toth]," hand",$[.plr.toth=1;"";"s"],", disconnecting";
+    -1"Played ",string[.plr.toth]," hand",$[.plr.toth=1;"";"s"],", disconnecting";
     hclose .plr.h;
     exit 0;
   ];
