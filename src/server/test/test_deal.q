@@ -900,3 +900,14 @@
     (exec profit from .bjk.res) musteq 5 10 10f;
   };
  };
+
+.tst.desc[".bjk.dealer turn clock"]{
+  should["stops the turn clock, since the players' turns are over"]{
+    `.bjk.resolveHands mock {};
+    `.bjk.recordRound mock {};
+    `.bjk.endHand mock {};
+    .bjk.turnDeadline:.z.p+0D00:00:10;
+    .bjk.dealer[];
+    .bjk.turnDeadline musteq 0Np;
+  };
+ };

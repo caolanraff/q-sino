@@ -15,6 +15,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.betDeadline:0Np;
 .bjk.insuring:0b;
 .bjk.insureDeadline:0Np;
+.bjk.turnTimeout:0D00:00:15;
+.bjk.turnDeadline:0Np;
 
 .bjk.cp:()!();
 .bjk.joined:(`int$())!`long$();                                                                     / kdb reuses handle numbers
@@ -111,7 +113,7 @@ hist:{.bjk.hist,.bjk.res};
   .bjk.leave x;
  };
 
-.z.ts:{.bjk.betTimer[];.bjk.insureTimer[]};
+.z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[]};
 
 .bjk.libs:`:src/server/lib/messaging.q`:src/server/lib/deck.q`:src/server/lib/deal.q`:src/server/lib/actions.q;
 .bjk.loadLibs:{.utl.require each .bjk.libs};

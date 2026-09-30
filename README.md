@@ -76,6 +76,7 @@ Standard Las Vegas Strip rules:
 - Insurance (even money on a blackjack) is offered whenever the dealer shows an ace.
 - No surrender.
 - Betting closes 15 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
+- You have 15 seconds per move on your turn; a hand that isn't played in time stands.
 
 ## Strategies
 Pass one of these to `--player`:

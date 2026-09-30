@@ -367,3 +367,80 @@
     count[.bjk.tab] musteq 2;
   };
  };
+
+.tst.desc[".bjk.promptPlay"]{
+  should["starts the turn clock and prompts the given handle to play"]{
+    .tst.sent:();
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
+    .bjk.turnTimeout:0D00:00:15;
+    .bjk.turnDeadline:0Np;
+    .bjk.promptPlay 7i;
+    (.bjk.turnDeadline within .z.p+0D00:00:14 0D00:00:15) musteq 1b;
+    .tst.sent mustmatch enlist(`.plr.play;7i);
+  };
+ };
+
+.tst.desc[".bjk.giveTurn"]{
+  should["tells the player how long they have per move, then prompts them"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    .tst.prompted:();
+    `.bjk.promptPlay mock {.tst.prompted,:x};
+    .bjk.turnTimeout:0D00:00:15;
+    .bjk.giveTurn 7i;
+    .tst.msgs mustmatch enlist("You have 15 seconds per move";7i);
+    .tst.prompted mustmatch enlist 7i;
+  };
+ };
+
+.tst.desc[".bjk.turnTimer"]{
+  should["does nothing while no turn clock is running"]{
+    .tst.stands:0;
+    `.bjk.stand mock {.tst.stands+:1};
+    .bjk.turnDeadline:0Np;
+    .bjk.turnTimer[];
+    .tst.stands musteq 0;
+  };
+  should["does nothing before the deadline"]{
+    .tst.stands:0;
+    `.bjk.stand mock {.tst.stands+:1};
+    .bjk.turnDeadline:.z.p+0D00:00:10;
+    .bjk.turnTimer[];
+    .tst.stands musteq 0;
+  };
+  should["stands the hand whose turn it is once the deadline passes, and says so"]{
+    .tst.msgs:();
+    `.bjk.pubMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bjk.nextTurn mock {};
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
+    .bjk.cp:0 1i!`p1`p2;
+    .bjk.turnDeadline:.z.p-0D00:00:01;
+    .bjk.turnTimer[];
+    (exec wait from .bjk.tab) musteq 01b;
+    (exec turn from .bjk.tab) musteq 00b;
+    .tst.msgs mustmatch enlist"p2 took too long - standing";
+    .bjk.turnDeadline musteq 0Np;
+  };
+  should["just clears the clock when no hand has the turn"]{
+    .tst.stands:0;
+    `.bjk.stand mock {.tst.stands+:1};
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:update out:00b,wait:00b,turn:00b from .bjk.tab;
+    .bjk.turnDeadline:.z.p-0D00:00:01;
+    .bjk.turnTimer[];
+    .tst.stands musteq 0;
+    .bjk.turnDeadline musteq 0Np;
+  };
+  should["restarts after each move, since a hit that doesn't end the hand prompts again"]{
+    `.bjk.sendMsg mock {[x;y]};
+    `.bjk.excFunc mock {[x;y;z]};
+    .bjk.double:0b;
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 15i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
+    .bjk.turnTimeout:0D00:00:15;
+    .bjk.turnDeadline:.z.p-0D00:00:01;
+    .bjk.hit1[];
+    (.bjk.turnDeadline>.z.p) musteq 1b;
+  };
+ };

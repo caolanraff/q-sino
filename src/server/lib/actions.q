@@ -10,6 +10,16 @@
   :1b;
  };
 
+.bjk.promptPlay:{[h]
+  .bjk.turnDeadline:.z.p+.bjk.turnTimeout;
+  .bjk.trigger[`.plr.play;h];
+ };
+
+.bjk.giveTurn:{[h]
+  .bjk.sendMsg["You have ",string["j"$.bjk.turnTimeout%0D00:00:01]," seconds per move";h];
+  .bjk.promptPlay h;
+ };
+
 .bjk.nextTurn:{
   update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out,not wait);
   .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
@@ -20,14 +30,26 @@
   h:first exec handle from .bjk.tab where turn;
   .bjk.pubMsg["It's ",string[first exec name from .bjk.tab where handle=h],"'s turn";h];
   .bjk.sendMsg[.bjk.turn]each key .bjk.cp;
-  .bjk.trigger[`.plr.play;h];
+  .bjk.giveTurn h;
+ };
+
+.bjk.stand:{
+  update wait:1b,turn:0b from`.bjk.tab where turn;
+  .bjk.nextTurn[];
  };
 
 stick:{
   if[not .bjk.checks[];:()];
   .bjk.pubMsg[string[.z.u]," has decided to stick";key .bjk.cp];
-  update wait:1b,turn:0b from`.bjk.tab where turn;
-  .bjk.nextTurn[];
+  .bjk.stand[];
+ };
+
+.bjk.turnTimer:{
+  if[null[.bjk.turnDeadline]|.z.p<.bjk.turnDeadline;:()];
+  .bjk.turnDeadline:0Np;
+  if[not any exec turn from .bjk.tab;:()];
+  .bjk.pubMsg[string[first exec name from .bjk.tab where turn]," took too long - standing";key .bjk.cp];
+  .bjk.stand[];
  };
 
 .bjk.dealTo:{[p]
@@ -51,7 +73,7 @@ stick:{
   ];
   if[.bjk.double;:stick[]];
   .bjk.sendMsg["Hit or Stick?";d`handle];
-  .bjk.trigger[`.plr.play;d`handle];
+  .bjk.promptPlay d`handle;
  };
 
 hit:{

@@ -134,7 +134,7 @@ stake:{[bet]
   .log.info .bjk.tab;
   .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
   .bjk.sendMsg[.bjk.turn]each key .bjk.cp;
-  .bjk.trigger[`.plr.play;first exec handle from .bjk.tab where turn];
+  .bjk.giveTurn first exec handle from .bjk.tab where turn;
  };
 
 .bjk.dealerDraws:{[c]
@@ -216,6 +216,7 @@ stake:{[bet]
  };
 
 .bjk.dealer:{
+  .bjk.turnDeadline:0Np;
   .bjk.resolveHands[];
   .bjk.recordRound[];
   .bjk.endHand[];

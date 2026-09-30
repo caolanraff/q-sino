@@ -480,6 +480,17 @@
     };
  };
 
+.tst.desc[".z.ts turn clock"]{
+  should["drives the turn clock"]{
+    .tst.turnCalls:0;
+    `.bjk.betTimer mock {};
+    `.bjk.insureTimer mock {};
+    `.bjk.turnTimer mock {.tst.turnCalls+:1};
+    .z.ts[.z.p];
+    .tst.turnCalls musteq 1;
+  };
+ };
+
 .tst.desc[".bjk.start mid-hand"]{
   should["tells the connection that just arrived to wait for the hand to finish"]{
     .tst.sent:();
