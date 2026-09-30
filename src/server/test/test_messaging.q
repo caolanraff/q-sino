@@ -26,7 +26,7 @@
   };
   should["logs instead of throwing when the handle can't be written to"]{
     .tst.lgCalls:();
-    `.log.warn mock {[x].tst.lgCalls,:enlist x};
+    `.log.warn mock {.tst.lgCalls,:enlist x};
     .bjk.sendMsg["hi";999i];
     count[.tst.lgCalls] musteq 1;
     first[.tst.lgCalls] mustlike "Couldn't send a message: *";
@@ -36,9 +36,9 @@
 .tst.desc[".bjk.pubMsg"]{
   should["logs once locally and calls sendMsg once per handle in the target list"]{
     .tst.lgCalls:0;
-    `.log.info mock {[x].tst.lgCalls+:1};
+    `.log.info mock {.tst.lgCalls+:1};
     .tst.sendCalls:();
-    `.bjk.sendMsg mock {[x;y].tst.sendCalls,:y};
+    `.bjk.sendMsg mock {.tst.sendCalls,:y};
     .bjk.pubMsg["hi";0 1 2i];
     .tst.lgCalls musteq 1;
     .tst.sendCalls musteq 0 1 2i;
@@ -48,13 +48,13 @@
 .tst.desc[".bjk.excFunc"]{
   should["evaluates the named function with its argument on the target handle"]{
     .tst.lgCalls:();
-    `.log.info mock {[x].tst.lgCalls,:enlist x};
+    `.log.info mock {.tst.lgCalls,:enlist x};
     .bjk.excFunc[`.log.info;"probed";0i];
     .tst.lgCalls mustmatch enlist"probed";
   };
   should["logs instead of throwing when the handle can't be written to"]{
     .tst.lgCalls:();
-    `.log.warn mock {[x].tst.lgCalls,:enlist x};
+    `.log.warn mock {.tst.lgCalls,:enlist x};
     .bjk.excFunc[`.plr.play;`;999i];
     first[.tst.lgCalls] mustlike "Couldn't send a trigger: *";
   };
@@ -75,7 +75,7 @@
 .tst.desc[".bjk.trigger"]{
   should["sends the client its table, the shoe's results and its own handle with the trigger"]{
     .tst.sent:();
-    `.bjk.excFunc mock {[x;y;z].tst.sent,:enlist(x;y;z)};
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.tab:([]round:enlist 3;player:enlist 1f;handle:enlist 7i;cards:enlist`K`5);
     .bjk.res:([]round:1 2;handle:7 7i;profit:10 -10f);
     .bjk.rules:`maxSplitHands`deckCnt!4 6;

@@ -69,7 +69,7 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.cp:0 1i!`p1`p2;
@@ -306,7 +306,7 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .tst.cardseq:`K`7;
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);

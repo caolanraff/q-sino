@@ -128,7 +128,7 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     excFuncCalls::();
-    `.bjk.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {excFuncCalls,:enlist(x;z)};
     .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:0b;
@@ -216,7 +216,7 @@
   should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
     `.bjk.sendMsg mock {[x;y]};
     excFuncCalls::();
-    `.bjk.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -229,7 +229,7 @@
   should["prompts every player when nobody has bet yet"]{
     `.bjk.sendMsg mock {[x;y]};
     excFuncCalls::();
-    `.bjk.excFunc mock {[x;y;z] excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:();handle:()]bet:());
@@ -271,7 +271,7 @@
   should["reports net winnings across every shoe this session, ignoring other players"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x]msgs,:enlist raze x};
+    `.log.info mock {msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
@@ -285,7 +285,7 @@
   should["shows a net loss with a leading minus sign"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x]msgs,:enlist raze x};
+    `.log.info mock {msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -299,7 +299,7 @@
   should["ignores results from an earlier connection that had the same handle"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x]msgs,:enlist raze x};
+    `.log.info mock {msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -313,7 +313,7 @@
   should["reports zero for a player who never finished a hand"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x]msgs,:enlist raze x};
+    `.log.info mock {msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -406,7 +406,7 @@
   should["counts the forfeited hand in the leaver's session winnings"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x]msgs,:enlist raze x};
+    `.log.info mock {msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
     .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
@@ -436,7 +436,7 @@
   should["pushes each unbet player their own state with .plr.stake"]{
     `.bjk.sendMsg mock {[x;y]};
     sent::();
-    `.bjk.excFunc mock {[x;y;z] sent,:enlist(x;y;z)};
+    `.bjk.excFunc mock {sent,:enlist(x;y;z)};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:();handle:()]bet:());
@@ -491,7 +491,7 @@
 .tst.desc[".bjk.start mid-hand"]{
   should["tells the connection that just arrived to wait for the hand to finish"]{
     sent::();
-    `.bjk.sendMsg mock {[x;y] sent,:enlist(x;y)};
+    `.bjk.sendMsg mock {sent,:enlist(x;y)};
     .bjk.hd:0b;
     .bjk.start[];
     sent mustmatch enlist("Please wait until the hand is over";.z.w);
