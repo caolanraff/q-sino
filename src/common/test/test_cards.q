@@ -1,6 +1,5 @@
 .utl.load`:src/common/lib/cards.q;
 
-/ .tst.round[1;`K`5;`2`3`4;`10`8]
 .tst.round:{[r;c1;c2;d]([]round:r,r;name:`a_5`b_6;cards:(c1;c2);dealer:(d;d))};
 
 .tst.desc[".crd.cardsSeen"]{
