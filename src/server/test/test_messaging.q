@@ -1,21 +1,26 @@
 .utl.load`:src/server/lib/messaging.q;
 
+.tst.desc[".bjk.display"]{
+  should["prints a string message as-is, with no timestamp or level"]{
+    .bjk.display["hello"] mustmatch(-1;"hello");
+  };
+  should["shows anything else, such as a table"]{
+    .bjk.display[42] mustmatch(show;42);
+  };
+ };
+
 .tst.desc[".bjk.sendMsg"]{
-  should["dispatches a string message to .log.plain, not show, on a local handle"]{
+  should["sends the message to the handle to be displayed there"]{
     .tst.lgCalls:();
-    `.log.plain mock {[x].tst.lgCalls,:enlist x};
+    .tst.rec:{.tst.lgCalls,:enlist x};
+    `.bjk.display mock {[msg](`.tst.rec;msg)};
     .bjk.sendMsg["hello";0i];
     .tst.lgCalls mustmatch enlist"hello";
   };
-  should["does not dispatch a non-string message to .log.plain (goes to show instead)"]{
-    .tst.lgCalls:();
-    `.log.plain mock {[x].tst.lgCalls,:enlist x};
-    .bjk.sendMsg[42;0i];
-    .tst.lgCalls mustmatch();
-  };
   should["targets only the first handle when given a list of handles"]{
     .tst.lgCalls:();
-    `.log.plain mock {[x].tst.lgCalls,:enlist x};
+    .tst.rec:{.tst.lgCalls,:enlist x};
+    `.bjk.display mock {[msg](`.tst.rec;msg)};
     .bjk.sendMsg["hi";0 1i];
     .tst.lgCalls mustmatch enlist"hi";
   };

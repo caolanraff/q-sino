@@ -853,7 +853,7 @@
 
 .tst.desc[".bjk.closeInsurance"]{
   should["treats anyone who didn't answer as declining, then checks for blackjack and starts turns"]{
-    `.log.info mock {[x]};
+    `.log.info mock {};
     .tst.settleCalls:0;
     .tst.startCalls:0;
     `.bjk.settleDeal mock {.tst.settleCalls+:1};

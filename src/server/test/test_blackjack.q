@@ -271,7 +271,7 @@
   should["reports net winnings across every shoe this session, ignoring other players"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x]msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
@@ -285,7 +285,7 @@
   should["shows a net loss with a leading minus sign"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x]msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -299,7 +299,7 @@
   should["ignores results from an earlier connection that had the same handle"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x]msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -313,7 +313,7 @@
   should["reports zero for a player who never finished a hand"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x]msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
@@ -406,7 +406,7 @@
   should["counts the forfeited hand in the leaver's session winnings"]{
     msgs::();
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {[x] msgs,:enlist raze x};
+    `.log.info mock {[x]msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
     .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
