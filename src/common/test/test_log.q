@@ -16,6 +16,18 @@
   };
  };
 
+.tst.desc[".log.str"]{
+  should["passes a string through"]{
+    .log.str["Shuffling the deck"] mustmatch"Shuffling the deck";
+  };
+  should["joins a list of strings"]{
+    .log.str[("New users";" have joined")] mustmatch"New users have joined";
+  };
+  should["formats anything else, such as a table, with .Q.s"]{
+    .log.str[([]hand:1 2;bet:10 20)] mustmatch .Q.s([]hand:1 2;bet:10 20);
+  };
+ };
+
 .tst.desc[".log.msg"]{
   should["stamps the line with the time and level"]{
     .tst.line:"";

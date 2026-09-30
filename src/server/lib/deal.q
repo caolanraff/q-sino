@@ -131,7 +131,7 @@ stake:{[bet]
 .bjk.startTurns:{
   if[.bjk.hd;:()];
   update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out);
-  .log.info .Q.s .bjk.tab;
+  .log.info .bjk.tab;
   .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
   .bjk.sendMsg[.bjk.turn]each key .bjk.cp;
   .bjk.trigger[`.plr.play;first exec handle from .bjk.tab where turn];
