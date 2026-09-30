@@ -27,7 +27,7 @@ hist:{.plr.dispatch[`hist;x]};
     if[not .plr.player in .plr.pt;.log.error"Unknown player, options - ",","sv string .plr.pt;exit 1];
     .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
-  .plr.h:@[hopen;.plr.server;{.log.error"Sorry, no tables currently available: ",x;exit 1}];
+  .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];
  };
 
 .util.run[`player.q;`.plr.init];
