@@ -130,4 +130,4 @@ hist:{.bjk.hist,.bjk.res};
   .bjk.shuffle[];
  };
 
-if[.cmn.isMain`blackjack.q;.bjk.init[]];
+.cmn.run[`blackjack.q;`.bjk.init];

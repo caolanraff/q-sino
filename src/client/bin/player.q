@@ -30,5 +30,5 @@ hist:{.plr.dispatch[`hist;x]};
   .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];
  };
 
-if[.cmn.isMain`player.q;.plr.init[]];
+.cmn.run[`player.q;`.plr.init];
 
