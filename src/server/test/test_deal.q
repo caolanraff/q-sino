@@ -72,7 +72,7 @@
   should["starts the clock on the round's first bet and tells the players still to bet"]{
     `.bjk.user mock {`p1};
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist(x;y)};
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     `.bjk.deal mock {};
     .bjk.hd:1b;
     .bjk.bd:0b;
@@ -137,7 +137,7 @@
   };
   should["sits out the players who didn't bet in time and deals the rest"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist(x;y)};
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     .tst.deal0Calls:0;
     `.bjk.deal0 mock {.tst.deal0Calls+:1;.bjk.hd:1b};
     .bjk.hd:1b;
@@ -357,7 +357,7 @@
   };
   should["sets the first player's turn, rebuilds .bjk.turn and prompts them, when the hand isn't already decided"]{
     .tst.excFuncCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.deal0 mock {.bjk.hd:0b};
     .bjk.hd:1b;
@@ -374,7 +374,7 @@
   };
   should["leaves the turn untouched when .bjk.deal0 already decided the hand"]{
     .tst.excFuncCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     `.bjk.deal0 mock {.bjk.hd:1b};
     .bjk.hd:1b;
     .bjk.bd:1b;
@@ -627,7 +627,7 @@
     .bjk.dc:`K`5;
     `.bjk.start mock {};
     .tst.excFuncCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excFuncCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
@@ -644,7 +644,7 @@
     .bjk.rnd:4;
     `.bjk.start mock {};
     .tst.sent:();
-    `.bjk.excFunc mock {[x;y;z].tst.sent,:enlist(x;y;z)};
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
     .bjk.tab:([]round:enlist 4;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
@@ -719,7 +719,7 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.sent:();
-    `.bjk.excFunc mock {[x;y;z].tst.sent,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
     .tst.peekCalls:0;
     .tst.deal1Calls:0;
     `.bjk.dealerPeek mock {.tst.peekCalls+:1};
@@ -745,7 +745,7 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.sent:();
-    `.bjk.excFunc mock {[x;y;z].tst.sent,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
     `.bjk.deal1 mock {[h]};
     .bjk.deck:200#`2;
     .tst.cardseq:`9`K`7`6;
@@ -853,7 +853,7 @@
 
 .tst.desc[".bjk.closeInsurance"]{
   should["treats anyone who didn't answer as declining, then checks for blackjack and starts turns"]{
-    `.bjk.lg mock {[x]};
+    `.log.info mock {};
     .tst.settleCalls:0;
     .tst.startCalls:0;
     `.bjk.settleDeal mock {.tst.settleCalls+:1};

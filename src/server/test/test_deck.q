@@ -42,7 +42,7 @@
   };
   should["unconditionally notifies every connected client's .plr.shuffle"]{
     .tst.excCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excCalls,:enlist(x;z)};
     .bjk.hd:1b;
     .bjk.deck:20?`A`K;
     .bjk.hist:0#([]round:enlist 1);
@@ -55,7 +55,7 @@
   };
   should["does not notify the detection algo on the very first shuffle, even when it's connected"]{
     .tst.excCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excCalls,:enlist(x;z)};
     .bjk.hd:1b;
     .bjk.deck:20?`A`K;
     .bjk.hist:0#([]round:enlist 1);
@@ -68,7 +68,7 @@
   };
   should["notifies the detection algo on subsequent shuffles when it's connected"]{
     .tst.excCalls:();
-    `.bjk.excFunc mock {[x;y;z].tst.excCalls,:enlist(x;z)};
+    `.bjk.excFunc mock {.tst.excCalls,:enlist(x;z)};
     .bjk.hd:1b;
     .bjk.deck:20?`A`K;
     .bjk.hist:0#([]round:enlist 1);

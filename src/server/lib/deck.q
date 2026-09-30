@@ -4,8 +4,8 @@
  };
 
 .bjk.shuffle:{
-  if[not .bjk.hd;.bjk.lg"Please wait until the hand is over before requesting a reshuffle";:()];
-  .bjk.lg"Shuffling the deck";
+  if[not .bjk.hd;.log.info"Please wait until the hand is over before requesting a reshuffle";:()];
+  .log.info"Shuffling the deck";
   .bjk.deck:neg[count .bjk.deck]?.bjk.deck;
   .bjk.hist,:.bjk.res;
   .bjk.res:0#.bjk.res;
@@ -28,10 +28,10 @@
  };
 
 .bjk.handCount:{[c]
-  v:sum"I"$string .bjk.cardDict c;
+  v:sum"I"$string .crd.cardDict c;
   :"i"$v-10*sum[c=`A]&0|ceiling(v-21)%10;
  };
 
-.bjk.isSoft:{[c].bjk.handCount[c]>sum["I"$string .bjk.cardDict c]-10*sum c=`A};
+.bjk.isSoft:{[c].bjk.handCount[c]>sum["I"$string .crd.cardDict c]-10*sum c=`A};
 .bjk.isBJ:{[c](2=count c)&21=.bjk.handCount c};                                                      / split hands' two-card 21 isn't a natural - callers exclude them
 

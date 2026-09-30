@@ -1,11 +1,13 @@
+if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
+.utl.require"common";
+
 .bjk.hd:1b;
 .bjk.bd:.bjk.double:0b;
 .bjk.rnd:0;
 .bjk.pit:0Ni;
 .bjk.public:`stake`hit`stick`double`split`insure`hist;
 
-.bjk.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
-.bjk.deckTemplate:raze 4#enlist key .bjk.cardDict;
+.bjk.deckTemplate:raze 4#enlist key .crd.cardDict;
 .bjk.shuffleCnt:0;
 .bjk.hitSoft17:1b;
 .bjk.rules:`maxSplitHands`deckCnt!4 6;
@@ -35,8 +37,8 @@ hist:{.bjk.hist,.bjk.res};
 
 .bjk.start:{
   if[not .bjk.hd;:.bjk.sendMsg["Please wait until the hand is over";.z.w]];
-  if[0=count .bjk.cp;:.bjk.lg"No users are connected"];
-  .bjk.lg $[.bjk.seated[]~.bjk.cp;"No new users have joined the table";"New users have joined the table"];
+  if[0=count .bjk.cp;:.log.info"No users are connected"];
+  .log.info $[.bjk.seated[]~.bjk.cp;"No new users have joined the table";"New users have joined the table"];
   .bjk.seat[];
   unbet:exec handle from .bjk.tab where null bet;
   .bjk.sendMsg["Please place your bets via the stake[] function"]each unbet;
@@ -60,7 +62,7 @@ hist:{.bjk.hist,.bjk.res};
 
 .bjk.logLeaver:{[h]
   won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;
-  .bjk.lg string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won];
+  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won];
  };
 
 .bjk.unseat:{[h]
@@ -98,7 +100,7 @@ hist:{.bjk.hist,.bjk.res};
  };
 
 .bjk.run:{value$[.bjk.isPit[];x;.bjk.command x]};
-.bjk.logFailure:{[e].bjk.lg string[.z.u],"'s request failed: ",e};
+.bjk.logFailure:{[e].log.warn string[.z.u],"'s request failed: ",e};
 
 .bjk.pg:{@[.bjk.run;x;{.bjk.logFailure x;'x}]};
 .bjk.ps:{@[.bjk.run;x;{.bjk.logFailure x;.bjk.sendMsg["That didn't work: ",x;.z.w]}]};
@@ -115,10 +117,6 @@ hist:{.bjk.hist,.bjk.res};
 .bjk.loadLibs:{.utl.require each .bjk.libs};
 
 .bjk.init:{
-  system"c 100 200";
-  system"l vendor/qutil/bootstrap.q";
-  .utl.QPATH:enlist`:vendor;
-  .utl.require"qutil/opts.q";
   .utl.addOptDef["seed";"I";"i"$.z.i+.z.t;`.bjk.seed];
   .utl.parseArgs[];
   system"S ",string .bjk.seed;
@@ -127,9 +125,9 @@ hist:{.bjk.hist,.bjk.res};
   .bjk.loadLibs[];
   .z.pg:.bjk.pg;
   .z.ps:.bjk.ps;
-  .bjk.lg"Welcome to Qsino Blackjack!";
+  .log.info"Welcome to Qsino Blackjack!";
   .bjk.buildDeck[];
   .bjk.shuffle[];
  };
 
-if[not[null .z.f]&"blackjack.q"~last"/"vs string .z.f;.bjk.init[]];
+.util.run[`blackjack.q;`.bjk.init];

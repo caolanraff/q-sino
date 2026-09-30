@@ -9,6 +9,7 @@ an optional pitboss process watches the table for card counters.
 - `src/client/bin/player.q` - the player client, for both manual and automated play.
 - `src/client/lib/strategy.q` - shared basic-strategy charts, card counting and the auto-play logic used by every strategy.
 - `src/client/lib/*.q` (the rest) - one file per strategy (see [Strategies](#strategies)).
+- `src/common/` - code every process shares, loaded with `.utl.require"common"`: logging (`.log.info`/`.log.warn`/`.log.error`), card values and the card-counting systems, and console settings.
 - `src/*/test/` - qspec specs; `test/run.q` runs them.
 
 ## Running
@@ -111,7 +112,7 @@ h".pit.betTrend"
 
 ## Tests
 ```bash
-q test/run.q src/server/test src/client/test -q
+q test/run.q src/common/test src/server/test src/client/test -q
 ```
 
 No test starts a real server or client: each entry script only opens ports

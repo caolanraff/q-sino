@@ -1,8 +1,9 @@
+.utl.require"common";
+
 .stg.trueCount:0f;
 .stg.insureAt:0w;
 .stg.handsPlayed:0;
 
-.stg.cardDict:`A`K`Q`J`10`9`8`7`6`5`4`3`2!`11`10`10`10`10`9`8`7`6`5`4`3`2;
 .stg.dealerDict:`2`3`4`5`6`7`8`9`10`J`Q`K`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
 
 .stg.hard:([hTotal:3+til 19]                                                                       / 6-deck H17 DAS basic strategy; DS = double if allowed, else stand
@@ -41,16 +42,11 @@
   TEN:`H`H`H`H`H`H`SP`S`S`SP;
   ACE:`H`H`H`H`H`H`SP`S`S`SP);
 
-.stg.countDict:`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 1 1 1 0 0 0 -1 -1 -1 -1 -1;
-
-.stg.cardsSeen:{[t]
-  c:raze[t`cards],raze value exec{x first idesc count each x}dealer by round from t;               / dealer's hand once per round; a forfeit row has only the up-card
-  :c where not null c;
- };
+.stg.countDict:.crd.hiLo;
 
 .stg.count:{
-  seen:.stg.cardsSeen[.stg.res],.stg.cardsSeen .stg.tab;
-  .stg.trueCount:sum[.stg.countDict seen]%((52*.stg.rules`deckCnt)-count seen)%52;
+  seen:.crd.cardsSeen[.stg.res],.crd.cardsSeen .stg.tab;
+  .stg.trueCount:.crd.trueCount[.stg.countDict;seen;52*.stg.rules`deckCnt];
  };
 
 .stg.recv:{[s]
@@ -61,7 +57,7 @@
  };
 
 .stg.values:{[cards]
-  v:"I"$string .stg.cardDict cards;
+  v:"I"$string .crd.cardDict cards;
   v[(0|sum[v=11]&ceiling(sum[v]-21)%10)#where v=11]:1;
   :v;
  };
@@ -75,9 +71,9 @@
  };
 
 .stg.help:{[cards]
-  if[all 11=distinct"I"$string .stg.cardDict[-1_cards];:`SP];
+  if[all 11=distinct"I"$string .crd.cardDict[-1_cards];:`SP];
   v:.stg.values[-1_cards];
-  r:.stg.chartPlay[v;.stg.cardDict[-1#cards]];
+  r:.stg.chartPlay[v;.crd.cardDict[-1#cards]];
   if[(r=`D)&2<count v;:`H];
   if[r=`DS;:$[2<count v;`S;`D]];
   if[(r=`SP)&2<count v;:`S];
@@ -90,7 +86,7 @@
 .stg.decide:{[cards;hands]
   r:.stg.help cards;
   if[(r=`SP)&hands>=.stg.rules`maxSplitHands;
-    r:.stg.lookup[.stg.hard;sum"I"$string .stg.cardDict[-1_cards];.stg.cardDict last cards];
+    r:.stg.lookup[.stg.hard;sum"I"$string .crd.cardDict[-1_cards];.crd.cardDict last cards];
   ];
   :r;
  };

@@ -2,7 +2,7 @@ stake:{[bet]
   if[not type[bet]in -5 -6 -7h;.bjk.sendMsg["Bets are whole dollars";.z.w];:()];
   if[1>bet;.bjk.sendMsg["Put some money down on the table or move on";.z.w];:()];
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];
-  .bjk.lg string[.z.u]," bets $",string bet;
+  .log.info string[.z.u]," bets $",string bet;
   upsert[`.bjk.stake;(.bjk.user[];.z.w;"j"$bet)];
   .bjk.bd:1b;
   .bjk.tab:.bjk.tab lj .bjk.stake;
@@ -18,14 +18,14 @@ stake:{[bet]
 .bjk.betTimer:{
   if[null[.bjk.betDeadline]|.z.p<.bjk.betDeadline;:()];
   if[0=count select from .bjk.tab where not null bet;.bjk.betDeadline:0Np;:()];                      / every bettor has left: dealing now would unseat everyone
-  .bjk.lg"Betting closed";
+  .log.info"Betting closed";
   .bjk.deal[];
  };
 
 .bjk.dealIfReady:{
   if[0=count .bjk.tab;:()];
   if[count select from .bjk.tab where null bet;:()];
-  .bjk.lg"All players have placed their bet - time to deal";
+  .log.info"All players have placed their bet - time to deal";
   .bjk.deal[];
  };
 
@@ -38,7 +38,7 @@ stake:{[bet]
 .bjk.dealUpCard:{
   c:.bjk.getCard[];
   .bjk.pubMsg["Dealers first card is ",string c;key .bjk.cp];
-  update dealer:c,dealerCnt:"I"$string .bjk.cardDict c from`.bjk.tab;
+  update dealer:c,dealerCnt:"I"$string .crd.cardDict c from`.bjk.tab;
   .bjk.dc:enlist c;
  };
 
@@ -48,8 +48,8 @@ stake:{[bet]
  };
 
 .bjk.deal0:{
-  if[0=count .bjk.tab;:.bjk.lg"No players at the table"];
-  if[78>count .bjk.deck;.bjk.lg"Deck needs reshuffled";.bjk.buildDeck[];.bjk.shuffle[]];
+  if[0=count .bjk.tab;:.log.info"No players at the table"];
+  if[78>count .bjk.deck;.log.info"Deck needs reshuffled";.bjk.buildDeck[];.bjk.shuffle[]];
   .bjk.newRound[];
   .bjk.dealCard each select from .bjk.tab where 0=count each cards;
   .bjk.dealUpCard[];
@@ -86,7 +86,7 @@ stake:{[bet]
   .bjk.insuring:0b;
   .bjk.insureDeadline:0Np;
   update insurance:0f from`.bjk.tab where null insurance;
-  .bjk.lg"Insurance closed";
+  .log.info"Insurance closed";
   .bjk.settleDeal[];
   .bjk.startTurns[];
  };
@@ -110,7 +110,7 @@ stake:{[bet]
   hand:first exec cards from .bjk.tab where handle=h;
   .bjk.sendMsg["Your hand is ",","sv string hand;h];
   if[21=first exec cnt from .bjk.tab where handle=h;:.bjk.payNatural h];                             / the dealer has already peeked, so a natural can't be beaten
-  if[(~/).bjk.cardDict hand;:.bjk.sendMsg["Hit, stick or split?";h]];
+  if[(~/).crd.cardDict hand;:.bjk.sendMsg["Hit, stick or split?";h]];
   .bjk.sendMsg["Hit or stick?";h];
  };
 
@@ -120,8 +120,8 @@ stake:{[bet]
  };
 
 .bjk.deal:{
-  if[not .bjk.hd;:.bjk.lg"Please finish the previous hand before dealing again"];
-  if[not .bjk.bd;:.bjk.lg"Please place your bets!"];
+  if[not .bjk.hd;:.log.info"Please finish the previous hand before dealing again"];
+  if[not .bjk.bd;:.log.info"Please place your bets!"];
   .bjk.betDeadline:0Np;
   .bjk.sitOutUnbet[];
   .bjk.deal0[];
@@ -131,7 +131,7 @@ stake:{[bet]
 .bjk.startTurns:{
   if[.bjk.hd;:()];
   update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out);
-  .bjk.lg .Q.s .bjk.tab;
+  .log.info .bjk.tab;
   .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;
   .bjk.sendMsg[.bjk.turn]each key .bjk.cp;
   .bjk.trigger[`.plr.play;first exec handle from .bjk.tab where turn];
@@ -199,7 +199,7 @@ stake:{[bet]
  };
 
 .bjk.recordRound:{
-  .bjk.lg"Hand stats;\n",.Q.s .bjk.tab;
+  .log.info"Hand stats;\n",.Q.s .bjk.tab;
   if[.bjk.wwch;update dealer:enlist each dealer from`.bjk.tab];
   upsert[`.bjk.res;update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from delete out,wait,turn from .bjk.tab];
   .bjk.sendMsg["Results table for the round;\n",.Q.s select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab]each key .bjk.cp;

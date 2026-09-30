@@ -3,26 +3,11 @@
 / .tst.pitRound[1;`K`5;`2`3`4;`10`8]
 .tst.pitRound:{[r;c1;c2;d]([]round:r,r;player:1 2;name:`a_5`b_6;handle:5 6i;cards:(c1;c2);cnt:0 0i;dealer:(d;d);dealerCnt:0 0i;bet:10 20;return:0 0f;profit:0 0f;split:00b;double:00b)};
 
-.tst.desc[".pit.cardsSeen"]{
-  should["counts the dealer's cards once per round, however many player rows repeat them"]{
-    t:.tst.pitRound[1;`K`5;`2`3`4;`10`8],.tst.pitRound[2;`A`9;`6`6;`7`K];
-    asc[.pit.cardsSeen t] mustmatch asc `K`5`2`3`4`10`8`A`9`6`6`7`K;
-  };
-  should["takes the longest dealer hand in a round, since a forfeit row only holds the up-card"]{
-    t:([]round:3 3;cards:(`K`6;`9`10);dealer:(enlist`9;`9`8));
-    asc[.pit.cardsSeen t] mustmatch asc `K`6`9`10`9`8;
-  };
-  should["ignores seats with no cards dealt yet"]{
-    t:([]round:0N 0N;cards:(();());dealer:``);
-    count[.pit.cardsSeen t] musteq 0;
-  };
- };
-
 .tst.desc[".pit.count"]{
   should["gives the true count with each card seen counted once"]{
     .pit.startCards:312;
     t:.tst.pitRound[1;`K`5;`2`3`4;`10`8];                                                           / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
-    .pit.count[.pit.basic;t] musteq 2%(312-7)%52;
+    .pit.count[.crd.hiLo;t] musteq 2%(312-7)%52;
   };
  };
 

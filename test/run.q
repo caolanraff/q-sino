@@ -54,7 +54,7 @@ resultFile:getenv `QSINO_TEST_RESULT;
 if[count resultFile;.z.x,:enlist "--noquit"];
 
 vendor:hsym `$root,"/vendor";
-.utl.QPATH:enlist vendor;
+.utl.QPATH:(vendor;hsym`$root,"/src");
 system "l ",(1_string vendor),"/qutil/bootstrap.q";
 system "l ",(1_string vendor),"/app/spec.q";
 
