@@ -685,7 +685,7 @@
  };
 
 .tst.desc[".bjk.betPrompt"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100};
   should["asks for a bet and shows the player's chips"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -730,7 +730,7 @@
 
 .tst.desc[".bjk.outOfChips"]{
   should["is only true for a player with chips, but fewer than the minimum bet"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.chips:(5 6i)!8 50f;
     (.bjk.outOfChips each 5 6 7i) mustmatch 100b;
   };
@@ -740,9 +740,9 @@
   should["tells a player without chips how to get them"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.chips:(`int$())!`float$();
     .bjk.betPrompt 7i;
-    .tst.msgs mustmatch enlist"Please place your bets via the stake[] function, $10 to $500; buyin[amount] first, or your first bet buys you $1000 in chips";
+    .tst.msgs mustmatch enlist"Please place your bets via the stake[] function, $10 to $500; buy some chips first: buyin[amount]";
   };
  };

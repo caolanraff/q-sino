@@ -2,7 +2,7 @@
 .utl.load each .bjk.libs;
 
 .tst.desc["stake[]"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;.bjk.chips:enlist[0i]!enlist 1000f};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.chips:enlist[0i]!enlist 1000f};
   should["refuses a bet outside the table limits, and says what they are"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -85,7 +85,7 @@
  };
 
 .tst.desc["stake[] betting clock"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;.bjk.chips:enlist[0i]!enlist 1000f};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.chips:enlist[0i]!enlist 1000f};
   should["starts the clock on the round's first bet and tells the players still to bet"]{
     `.bjk.user mock {`p1};
     .tst.msgs:();
@@ -931,7 +931,7 @@
  };
 
 .tst.desc["stake[] chips"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;.bjk.hd:1b;.bjk.stake:([name:();handle:()]bet:`long$())};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.stake:([name:();handle:()]bet:`long$())};
   should["refuses a bet bigger than the player's chips"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -963,7 +963,7 @@
  };
 
 .tst.desc["buyin[]"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;.bjk.hd:1b;.bjk.chips:(`int$())!`float$()};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.chips:(`int$())!`float$()};
   should["sets a player's chips with their first buy-in, and adds to them with later ones"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -994,19 +994,17 @@
   };
  };
 
-.tst.desc["stake[] default buy-in"]{
-  should["buys a player the default chips with their first bet if they haven't bought in"]{
-    `.bjk.user mock {`p1};
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.dealIfReady mock {};
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;
+.tst.desc["stake[] before buying in"]{
+  should["refuses a bet from a player who hasn't bought any chips, and tells them how"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.hd:1b;
-    .bjk.betDeadline:.z.p;
     .bjk.chips:(`int$())!`float$();
-    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.stake:([name:();handle:()]bet:`long$());
     stake[50];
-    .bjk.chips[0i] musteq 1000f;
-    (exec bet from .bjk.stake) mustmatch enlist 50;
+    count[.bjk.stake] musteq 0;
+    (0i in key .bjk.chips) musteq 0b;
+    .tst.msgs mustmatch enlist"Please buy some chips first: buyin[amount]";
   };
  };

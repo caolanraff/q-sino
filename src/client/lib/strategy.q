@@ -54,7 +54,7 @@
   .stg.res:s`res;                                                                                  / this shoe's results
   .stg.mh:s`me;                                                                                    / my handle
   .stg.rules:s`rules;                                                                              / table rules
-  .stg.chips:$[null s`chips;"f"$.stg.rules`defaultBuyIn;s`chips];                                  / my chips; the default buy-in until I've bought in
+  .stg.chips:$[null s`chips;"f"$.plr.buyin;s`chips];                                               / my chips; my buy-in until the server has it
  };
 
 .stg.values:{[cards]                                                                               / [cards] card values, with aces as 1 where needed

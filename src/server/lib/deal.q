@@ -15,9 +15,9 @@ buyin:{[amt]                                                                    
 
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand
   if[not type[bet]in -5 -6 -7h;.bjk.sendMsg["Bets are whole dollars";.z.w];:()];                   / whole dollars only
+  if[null .bjk.chips .z.w;.bjk.sendMsg["Please buy some chips first: buyin[amount]";.z.w];:()];    / no chips yet
   if[.bjk.outOfChips .z.w;.bjk.sendMsg["You're out of chips: buyin[amount] for more";.z.w];:()];   / not enough chips for the minimum
   if[not bet within .bjk.rules`minBet`maxBet;.bjk.sendMsg["Bets are ",.bjk.limits[];.z.w];:()];    / within the table limits
-  if[null .bjk.chips .z.w;.bjk.buyIn[.z.w;.bjk.rules`defaultBuyIn]];                               / first bet without a buy-in: buy the default
   if[bet>.bjk.chips .z.w;.bjk.sendMsg["You can't afford that: you have $",.Q.f[2;.bjk.chips .z.w]," in chips";.z.w];:()]; / no more than their chips
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / not mid-hand
   .log.info string[.z.u]," bets $",string bet;

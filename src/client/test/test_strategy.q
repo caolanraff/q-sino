@@ -197,11 +197,12 @@
  };
 
 .tst.desc[".stg.recv chips"]{
-  should["assumes the default buy-in until the server has chips for me"]{
+  should["assumes its own buy-in until the server has chips for it"]{
     .utl.load`:src/client/lib/strategy.q;
-    .stg.recv`tab`res`me`rules`chips!(();();7i;`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;0n);
+    .plr.buyin:1000;
+    .stg.recv`tab`res`me`rules`chips!(();();7i;`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;0n);
     .stg.chips musteq 1000f;
-    .stg.recv`tab`res`me`rules`chips!(();();7i;`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;420f);
+    .stg.recv`tab`res`me`rules`chips!(();();7i;`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;420f);
     .stg.chips musteq 420f;
   };
  };

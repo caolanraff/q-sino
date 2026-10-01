@@ -449,7 +449,7 @@
  };
 
 .tst.desc["double[], split[] and insure[] chips"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100};
   should["refuses to double a bet the player can't cover"]{
     `.bjk.checks mock {1b};
     .tst.msgs:();

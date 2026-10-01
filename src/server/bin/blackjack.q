@@ -11,7 +11,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;                                                 / one 52-card deck
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
-.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;         / table rules, pushed to clients
+.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
 .bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
 .bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
@@ -46,7 +46,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their chips
   if[.bjk.outOfChips h;:.bjk.sendMsg["You're out of chips: buyin[amount] for more";h]];            / they need more chips to bet
-  m:$[null .bjk.chips h;"buyin[amount] first, or your first bet buys you $",string[.bjk.rules`defaultBuyIn]," in chips";"your chips: $",.Q.f[2;.bjk.chips h]]; / their chips, or how they get some
+  m:$[null .bjk.chips h;"buy some chips first: buyin[amount]";"your chips: $",.Q.f[2;.bjk.chips h]]; / their chips, or that they need some
   .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],"; ",m;h];        / ask them to bet
  };
 
