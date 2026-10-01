@@ -11,10 +11,11 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.shuffleCnt:0;
 .bjk.hitSoft17:1b;
 .bjk.rules:`maxSplitHands`deckCnt!4 6;
-.bjk.betTimeout:0D00:00:15;
+.bjk.timeout:0D00:00:15;
 .bjk.betDeadline:0Np;
 .bjk.insuring:0b;
 .bjk.insureDeadline:0Np;
+.bjk.turnDeadline:0Np;
 
 .bjk.cp:()!();
 .bjk.joined:(`int$())!`long$();                                                                     / kdb reuses handle numbers
@@ -111,7 +112,7 @@ hist:{.bjk.hist,.bjk.res};
   .bjk.leave x;
  };
 
-.z.ts:{.bjk.betTimer[];.bjk.insureTimer[]};
+.z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[]};
 
 .bjk.libs:`:src/server/lib/messaging.q`:src/server/lib/deck.q`:src/server/lib/deal.q`:src/server/lib/actions.q;
 .bjk.loadLibs:{.utl.require each .bjk.libs};

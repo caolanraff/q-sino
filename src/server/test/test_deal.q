@@ -77,12 +77,12 @@
     .bjk.hd:1b;
     .bjk.bd:0b;
     .bjk.betDeadline:0Np;
-    .bjk.betTimeout:0D00:00:15;
+    .bjk.timeout:0D00:00:15;
     .bjk.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:3#0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:0f);
     .bjk.stake:([name:();handle:()]bet:());
     t0:.z.p;
     stake[10];
-    (.bjk.betDeadline within t0+.bjk.betTimeout+0D00:00:00 0D00:00:01) musteq 1b;
+    (.bjk.betDeadline within t0+.bjk.timeout+0D00:00:00 0D00:00:01) musteq 1b;
     .tst.msgs mustmatch (("Betting closes in 15 seconds";1i);("Betting closes in 15 seconds";2i));
   };
   should["doesn't restart the clock on later bets"]{
@@ -429,7 +429,7 @@
  };
 
 .tst.desc[".bjk.dealerDraws"]{
-  should["draws below 17 and stands on hard 17 under either rule"]{
+  should["draws below 17 and sticks on hard 17 under either rule"]{
     .bjk.hitSoft17:0b;
     .bjk.dealerDraws[`K`6] musteq 1b;
     .bjk.dealerDraws[`K`7] musteq 0b;
@@ -437,11 +437,11 @@
     .bjk.dealerDraws[`K`6] musteq 1b;
     .bjk.dealerDraws[`K`7] musteq 0b;
   };
-  should["stands on soft 17 when the table stands on all 17s"]{
+  should["sticks on soft 17 when the table sticks on all 17s"]{
     .bjk.hitSoft17:0b;
     .bjk.dealerDraws[`A`6] musteq 0b;
   };
-  should["draws on soft 17 when the table hits soft 17, but stands on soft 18"]{
+  should["draws on soft 17 when the table hits soft 17, but sticks on soft 18"]{
     .bjk.hitSoft17:1b;
     .bjk.dealerDraws[`A`6] musteq 1b;
     .bjk.dealerDraws[`A`A`5] musteq 1b;
@@ -450,7 +450,7 @@
  };
 
 .tst.desc[".bjk.dealer0 soft 17"]{
-  should["stands on A,6 when the table stands on all 17s"]{
+  should["sticks on A,6 when the table sticks on all 17s"]{
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hitSoft17:0b;
     .bjk.dc:`A`6;
@@ -530,7 +530,7 @@
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 0f;
   };
-  should["pays 1.5x plus the bet for a blackjack when the dealer stands on two cards"]{
+  should["pays 1.5x plus the bet for a blackjack when the dealer sticks on two cards"]{
     `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:17;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`K;cnt:enlist 21i;dealer:enlist`K`7;dealerCnt:enlist 17i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
@@ -898,5 +898,16 @@
     .bjk.cp:(0 1 2i)!`p1`p2`p3;
     .bjk.dealer[];
     (exec profit from .bjk.res) musteq 5 10 10f;
+  };
+ };
+
+.tst.desc[".bjk.dealer turn clock"]{
+  should["stops the turn clock, since the players' turns are over"]{
+    `.bjk.resolveHands mock {};
+    `.bjk.recordRound mock {};
+    `.bjk.endHand mock {};
+    .bjk.turnDeadline:.z.p+0D00:00:10;
+    .bjk.dealer[];
+    .bjk.turnDeadline musteq 0Np;
   };
  };

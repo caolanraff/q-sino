@@ -52,7 +52,7 @@ in its console:
 |---|---|
 | `stake[bet]` | Bet on the next hand, in whole dollars. |
 | `hit[]` | Take another card. |
-| `stick[]` | Stand on your hand. |
+| `stick[]` | Stick with your hand. |
 | `double[]` | Double your bet and take exactly one more card (first two cards only). |
 | `split[]` | Split a pair into two hands. |
 | `insure[amount]` | When the dealer shows an ace: insure for up to half your bet, or `insure[0]` to decline. |
@@ -76,6 +76,7 @@ Standard Las Vegas Strip rules:
 - Insurance (even money on a blackjack) is offered whenever the dealer shows an ace.
 - No surrender.
 - Betting closes 15 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
+- You have 15 seconds per move on your turn; a hand that isn't played in time sticks.
 
 ## Strategies
 Pass one of these to `--player`:
@@ -99,9 +100,9 @@ The pitboss records every hand and looks for two signs of counting:
   covariance of their bets against the Hi-Lo, Omega II and perfect counts,
   in `.pit.betTrend`.
 - **Plays basic strategy wouldn't make** - doubling 18-20, splitting tens,
-  standing on 15/16 against a strong dealer card, and taking insurance, each
+  sticking on 15/16 against a strong dealer card, and taking insurance, each
   with the count it was made at, in `.pit.double`, `.pit.split`,
-  `.pit.stand` and `.pit.insure`.
+  `.pit.stick` and `.pit.insure`.
 
 Query them on its port from another `q` session:
 

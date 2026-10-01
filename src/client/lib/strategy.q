@@ -6,7 +6,7 @@
 
 .stg.dealerDict:`2`3`4`5`6`7`8`9`10`J`Q`K`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE;
 
-.stg.hard:([hTotal:3+til 19]                                                                       / 6-deck H17 DAS basic strategy; DS = double if allowed, else stand
+.stg.hard:([hTotal:3+til 19]                                                                       / 6-deck H17 DAS basic strategy; DS = double if allowed, else stick
   TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;
   THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
   FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
