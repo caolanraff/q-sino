@@ -88,6 +88,7 @@
     .tst.startCalls:0;
     `.bjk.regConn mock {.tst.regConnCalls+:1};
     `.bjk.isPit mock {0b};
+    `.bjk.isBanned mock {0b};
     `.bjk.start mock {.tst.startCalls+:1};
     .z.po[];
     .tst.regConnCalls musteq 1;
@@ -97,6 +98,7 @@
     .tst.startCalls:0;
     `.bjk.regConn mock {};
     `.bjk.isPit mock {1b};
+    `.bjk.isBanned mock {0b};
     `.bjk.start mock {.tst.startCalls+:1};
     .z.po[];
     .tst.startCalls musteq 0;
@@ -577,8 +579,11 @@
     `.bjk.disconnect mock {};
     .bjk.ejectCounters:0b;
     .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.users:enlist[5i]!enlist`alice;
+    .bjk.banned:`symbol$();
     .bjk.eject 5i;
     count[.tst.left] musteq 0;
+    .bjk.banned mustmatch`symbol$();
     first[.tst.logged] mustlike"The pitboss suspects a_5 of counting cards*";
   };
   should["tells the player, takes them off the table and closes their connection when ejection is on"]{
@@ -591,7 +596,10 @@
     `.bjk.disconnect mock {.tst.closed,:x};
     .bjk.ejectCounters:1b;
     .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.users:enlist[5i]!enlist`alice;
+    .bjk.banned:`symbol$();
     .bjk.eject 5i;
+    .bjk.banned mustmatch enlist`alice;
     .tst.msgs mustmatch enlist("The pitboss has asked you to leave the table";5i);
     .tst.left mustmatch enlist 5i;
     .tst.closed mustmatch enlist 5i;
@@ -604,5 +612,53 @@
     .bjk.cp:enlist[5i]!enlist`a_5;
     .bjk.eject 9i;
     count[.tst.left] musteq 0;
+  };
+ };
+
+.tst.desc[".bjk.isBanned"]{
+  should["is true for a username on the ban list, and false otherwise"]{
+    .bjk.banned:enlist .z.u;
+    .bjk.isBanned[] musteq 1b;
+    .bjk.banned:enlist`someoneElse;
+    .bjk.isBanned[] musteq 0b;
+  };
+ };
+
+.tst.desc[".z.po ban list"]{
+  should["turns a banned user away before they're registered or seated"]{
+    `.bjk.isBanned mock {1b};
+    .tst.turnedAway:();
+    `.bjk.turnAway mock {.tst.turnedAway,:x};
+    .tst.regConnCalls:0;
+    `.bjk.regConn mock {.tst.regConnCalls+:1};
+    `.bjk.start mock {};
+    .z.po[];
+    .tst.turnedAway mustmatch enlist .z.w;
+    .tst.regConnCalls musteq 0;
+  };
+ };
+
+.tst.desc[".bjk.turnAway"]{
+  should["tells the user they've been asked to leave, then closes the connection"]{
+    `.log.info mock {[x]};
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    .tst.closed:();
+    `.bjk.disconnect mock {.tst.closed,:x};
+    .bjk.turnAway 7i;
+    .tst.msgs mustmatch enlist("You've been asked to leave this table";7i);
+    .tst.closed mustmatch enlist 7i;
+  };
+ };
+
+.tst.desc[".bjk.users"]{
+  should["records each player's username when they connect, and forgets it when they leave"]{
+    `.bjk.isPit mock {0b};
+    .bjk.cp:()!();
+    .bjk.users:(`int$())!`symbol$();
+    .bjk.regConn[42i];
+    .bjk.users[42i] musteq .z.u;
+    .bjk.unseat 42i;
+    (42i in key .bjk.users) musteq 0b;
   };
  };

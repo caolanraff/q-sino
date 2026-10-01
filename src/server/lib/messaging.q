@@ -10,5 +10,6 @@
 .bjk.regConn:{[h]
   if[.bjk.isPit[];:.bjk.pit:h];
   .bjk.cp[h]:.bjk.user[];
+  .bjk.users[h]:.z.u;
   .bjk.joined[h]:.bjk.rnd;
  };
