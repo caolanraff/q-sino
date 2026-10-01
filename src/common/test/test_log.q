@@ -9,10 +9,15 @@
   };
  };
 
-.tst.desc[".log.warn and .log.error"]{
+.tst.desc[".log.warn"]{
   should["write to stderr"]{
     .log.warn["careful"] musteq -2i;
-    .log.error["broken"] musteq -2i;
+  };
+ };
+
+.tst.desc[".log.error"]{
+  should["write to stdout and stderr"]{
+    .log.error["broken"] mustmatch -1 -2;
   };
  };
 
