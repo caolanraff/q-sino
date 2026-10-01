@@ -5,6 +5,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.bd:.bjk.double:0b;
 .bjk.rnd:0;
 .bjk.pit:0Ni;
+.bjk.ejectCounters:0b;
 .bjk.public:`stake`hit`stick`double`split`insure`hist;
 
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;
@@ -106,6 +107,18 @@ hist:{.bjk.hist,.bjk.res};
 .bjk.pg:{@[.bjk.run;x;{.bjk.logFailure x;'x}]};
 .bjk.ps:{@[.bjk.run;x;{.bjk.logFailure x;.bjk.sendMsg["That didn't work: ",x;.z.w]}]};
 
+.bjk.disconnect:{[h]@[neg h;::;{}];hclose h};
+
+.bjk.eject:{[h]
+  if[not h in key .bjk.cp;:()];
+  n:string .bjk.cp h;
+  if[not .bjk.ejectCounters;:.log.info"The pitboss suspects ",n," of counting cards (run with --pitboss 1 to eject)"];
+  .log.warn"The pitboss has ejected ",n," for suspected card counting";
+  .bjk.sendMsg["The pitboss has asked you to leave the table";h];
+  .bjk.leave h;
+  .bjk.disconnect h;
+ };
+
 .z.pc:{
   if[x=.bjk.pit;:.bjk.pit:0Ni];
   if[not x in key .bjk.cp;:()];                                                                    / e.g. handle 0, when the console's stdin closes
@@ -119,6 +132,7 @@ hist:{.bjk.hist,.bjk.res};
 
 .bjk.init:{
   .utl.addOptDef["seed";"I";"i"$.z.i+.z.t;`.bjk.seed];
+  .utl.addOptDef["pitboss";"B";0b;`.bjk.ejectCounters];
   .utl.parseArgs[];
   system"S ",string .bjk.seed;
   if[not system"p";system"p 5555"];

@@ -186,3 +186,78 @@
     (exec round from .pit.insure) musteq 1 2;
   };
  };
+
+.tst.desc[".pit.recordBets"]{
+  should["adds the round's scored bets to each player's history"]{
+    .pit.bets:0#.pit.bets;
+    .pit.window:100;
+    .pit.rnd:2;
+    .pit.res:([]round:1 2 2;name:`a_5`a_5`b_6;handle:5 5 6i;bet:10 20 30;basic_cnt:0 1 1f;omega_cnt:0 2 2f;perfect_cnt:0 3 3f);
+    .pit.recordBets[];
+    .pit.bets mustmatch([]name:`a_5`b_6;handle:5 6i;bet:20 30;basic:1 1f;omega:2 2f;perfect:3 3f);
+  };
+  should["keeps only each player's latest window of hands"]{
+    .pit.bets:0#.pit.bets;
+    .pit.window:3;
+    .pit.res:([]round:1 2 3 4;name:4#`a_5;handle:4#5i;bet:10 20 30 40;basic_cnt:4#0f;omega_cnt:4#0f;perfect_cnt:4#0f);
+    {.pit.rnd:x;.pit.recordBets[]}each 1 2 3 4;
+    (exec bet from .pit.bets) mustmatch 20 30 40;
+  };
+ };
+
+.tst.desc[".pit.correlations"]{
+  should["scores each player by whichever count their bets follow most closely"]{
+    .pit.bets:([]name:6#`a_5;handle:6#5i;bet:10 10 20 20 40 40;basic:6#0f;omega:0 1 0 1 0 1f;perfect:1 2 3 4 5 6f);
+    s:.pit.correlations[];
+    (exec hands from s) musteq enlist 6;
+    (exec score from s) musteq enlist 10 10 20 20 40 40f cor 1 2 3 4 5 6f;
+  };
+  should["scores a flat bettor 0, not null"]{
+    .pit.bets:([]name:3#`a_5;handle:3#5i;bet:3#20;basic:1 2 3f;omega:1 2 3f;perfect:1 2 3f);
+    (exec score from .pit.correlations[]) musteq enlist 0f;
+  };
+ };
+
+.tst.desc[".pit.suspects"]{
+  should["flags a player once they've enough hands and their bets follow the count closely enough"]{
+    .pit.minHands:20;
+    .pit.suspectCor:0.5;
+    `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25 25 10;score:0.6 0.3 0.9)};
+    (exec name from .pit.suspects[]) mustmatch enlist`a_5;
+  };
+ };
+
+.tst.desc[".pit.report"]{
+  should["asks the server to eject the player, and starts their history afresh"]{
+    .tst.ejected:();
+    `.bjk.eject mock {.tst.ejected,:x};
+    `.log.warn mock {[x]};
+    .pit.h:0i;
+    .pit.bets:([]name:`a_5`b_6;handle:5 6i;bet:10 20;basic:0 0f;omega:0 0f;perfect:0 0f);
+    .pit.report`name`handle`hands`score!(`a_5;5i;25;0.6);
+    .tst.ejected mustmatch enlist 5i;
+    (exec name from .pit.bets) mustmatch enlist`b_6;
+  };
+  should["logs the suspicion with the evidence"]{
+    .tst.logged:();
+    `.log.warn mock {.tst.logged,:enlist x};
+    `.bjk.eject mock {};
+    .pit.h:0i;
+    .pit.bets:0#.pit.bets;
+    .pit.report`name`handle`hands`score!(`a_5;5i;25;0.6);
+    .tst.logged mustlike"Suspected card counter: a_5 (bets follow the count, correlation 0.60 over 25 hands)";
+  };
+ };
+
+.tst.desc[".pit.getDetect suspects"]{
+  should["reports each suspect after scoring the round"]{
+    `.pit.getBetTrend mock {};
+    `.pit.getPlayTrend mock {};
+    .tst.reported:();
+    `.pit.report mock {.tst.reported,:enlist x`name};
+    `.pit.suspects mock {([]name:`a_5`c_7;handle:5 7i;hands:25 30;score:0.6 0.7)};
+    .pit.res:([]round:enlist 1);
+    .pit.getDetect enlist 1;
+    .tst.reported mustmatch`a_5`c_7;
+  };
+ };
