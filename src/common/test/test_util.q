@@ -27,3 +27,10 @@
     .tst.runs musteq 0;
   };
  };
+
+.tst.desc[".util.clist"]{
+  should["joins symbols into a comma-separated string"]{
+    .util.clist[`stake`hit`stick] musteq "stake, hit, stick";
+    .util.clist[enlist`hit] musteq "hit";
+  };
+ };
