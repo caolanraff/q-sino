@@ -2,11 +2,11 @@
 .utl.load each .bjk.libs;
 
 .tst.desc["stake[]"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
   should["refuses a bet outside the table limits, and says what they are"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.hd:1b;
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     .bjk.stake:([name:();handle:()]bet:`long$());
     stake each 0 9 501;
     count[.bjk.stake] musteq 0;
@@ -18,7 +18,6 @@
     `.bjk.dealIfReady mock {};
     .bjk.hd:1b;
     .bjk.betDeadline:.z.p;
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.stake:([name:();handle:()]bet:`long$());
     stake[10];
@@ -27,7 +26,6 @@
     (exec bet from .bjk.stake) mustmatch enlist 500;
   };
   should["refuses when the hand isn't done"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     `.bjk.sendMsg mock {[x;y]};
     .bjk.hd:0b;
     .bjk.stake:([name:();handle:()]bet:());
@@ -35,7 +33,6 @@
     count[.bjk.stake] musteq 0;
   };
   should["accepts a valid bet and joins it into .bjk.tab, but doesn't deal while another player is unbet"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     `.bjk.user mock {`p1};
     `.bjk.sendMsg mock {[x;y]};
     .tst.dealCalls:0;
@@ -51,7 +48,6 @@
     .tst.dealCalls musteq 0;
   };
   should["deals once the last unbet player places their bet"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     `.bjk.user mock {`p1};
     `.bjk.sendMsg mock {[x;y]};
     .tst.dealCalls:0;
@@ -65,7 +61,6 @@
     .tst.dealCalls musteq 1;
   };
   should["refuses a fractional bet, which would stop the round from being recorded"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     .tst.sent:();
     `.bjk.sendMsg mock {[x;y].tst.sent,:enlist x};
     .bjk.hd:1b;
@@ -75,7 +70,6 @@
     .tst.sent mustmatch enlist"Bets are whole dollars";
   };
   should["stores an int or short bet as a long, so it fits the bet column"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     `.bjk.user mock {`p1};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.dealIfReady mock {};
@@ -91,8 +85,8 @@
  };
 
 .tst.desc["stake[] betting clock"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
   should["starts the clock on the round's first bet and tells the players still to bet"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     `.bjk.user mock {`p1};
     .tst.msgs:();
     `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
@@ -109,7 +103,6 @@
     .tst.msgs mustmatch (("Betting closes in 15 seconds";1i);("Betting closes in 15 seconds";2i));
   };
   should["doesn't restart the clock on later bets"]{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
     `.bjk.user mock {`p2};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.deal mock {};
