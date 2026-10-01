@@ -15,14 +15,14 @@
 
 .tst.desc[".bjk.start player-table upsert"]{
   should["succeeds for exactly one connected player"]{
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!();
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.cp:enlist[5i]!enlist`alice;
     threw:@[{`.bjk.tab upsert ([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);0b};();{1b}];
     threw musteq 0b;
     (count .bjk.tab) musteq 1;
     };
   should["succeeds for two connected players"]{
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!();
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.cp:(5i;6i)!`alice`bob;
     threw:@[{`.bjk.tab upsert ([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);0b};();{1b}];
     threw musteq 0b;
@@ -33,8 +33,8 @@
 
 .tst.desc[".bjk.tab keeps a typed bet column"]{
   should["select ... where null bet doesn't throw before anyone has staked this round"]{
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
-    `.bjk.tab upsert ([]player:1 2f;name:`alice`bob;handle:10 11i);
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    `.bjk.tab upsert ([]player:1 2i;name:`alice`bob;handle:10 11i);
     threw:@[{select from .bjk.tab where null bet;0b};();{1b}];
     threw musteq 0b;
     (count select from .bjk.tab where null bet) musteq 2;
@@ -108,8 +108,8 @@
 .tst.desc["leave removes the disconnecting handle from cp"]{
   should["drops only the disconnecting handle's key, leaving other connected players untouched"]{
     .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!();
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.hd:1b;
     .bjk.leave[5i];
     .bjk.cp musteq enlist[6i]!enlist`bob;
@@ -122,7 +122,7 @@
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:0b;
     .bjk.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -135,7 +135,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.dealerCalls:0;
     `.bjk.dealer mock {.tst.dealerCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:0b;
     .bjk.tab:update out:00b,wait:10b,turn:01b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -146,7 +146,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.nextTurnCalls:0;
     `.bjk.nextTurn mock {.tst.nextTurnCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:0b;
     .bjk.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -157,7 +157,7 @@
   should["removes every split hand belonging to the leaver"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:0b;
     .bjk.tab:([]round:1 1 1;player:1 2.01 2.02;name:`alice`bob`bob;handle:5 6 6i;cards:(`8`8;`9`3;`9`4);cnt:16 12 13i;dealer:3#`5;dealerCnt:5 5 5i;bet:10 10 10;return:3#0n;profit:3#0n;split:011b;double:000b;insurance:0f);
@@ -172,7 +172,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.dealCalls:0;
     `.bjk.deal mock {.tst.dealCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:1b;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -184,7 +184,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.dealCalls:0;
     `.bjk.deal mock {.tst.dealCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
     .bjk.hd:1b;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -195,7 +195,7 @@
   should["drops the leaver's pending bet"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.deal mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(); .bjk.hist:.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.hd:1b;
     .bjk.stake:([name:`alice`bob;handle:5 6i]bet:10 20);
@@ -213,7 +213,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     (exec bet from .bjk.tab where handle=5i) musteq enlist 10;
     (exec handle from .bjk.tab where null bet) musteq 6 7i;
@@ -226,7 +226,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     .tst.excFuncCalls mustmatch ((`.plr.stake;5i);(`.plr.stake;6i));
     };
@@ -359,7 +359,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -375,7 +375,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`A`K;`9`7);cnt:21 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(25f;());profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -387,7 +387,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3 3;player:1.01 1.02 2;name:`alice`alice`bob;handle:5 5 6i;cards:(`8`3`K;`8`K`5;`9`7);cnt:21 23 16i;dealer:`9`9`9;dealerCnt:9 9 9i;bet:20 10 10;return:(();0f;());profit:3#0n;split:110b;double:100b;insurance:0f);
@@ -402,7 +402,7 @@
     `.log.info mock {.tst.msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.res:([]round:enlist 1;player:enlist 1;name:enlist`alice;handle:enlist 5i;cards:enlist`K`9;cnt:enlist 19i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 25f;profit:enlist 15f;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
@@ -415,7 +415,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.deal mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -433,7 +433,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
+    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     (.tst.sent[;0]) mustmatch `.plr.stake`.plr.stake;
     ({x[1]`me} each .tst.sent) musteq 5 6i;
@@ -447,7 +447,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.closeCalls:0;
     `.bjk.closeInsurance mock {.tst.closeCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b; .bjk.insuring:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`9`7;`10`8);cnt:16 18i;dealer:2#`A;dealerCnt:11 11i;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:5 0n);
@@ -460,7 +460,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.closeInsurance mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b; .bjk.insuring:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`9`7;`10`8);cnt:16 18i;dealer:2#`A;dealerCnt:11 11i;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:5 0n);
