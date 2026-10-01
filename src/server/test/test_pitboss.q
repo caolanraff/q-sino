@@ -225,11 +225,37 @@
   };
  };
 
-.tst.desc[".pit.suspects"]{
+.tst.desc[".pit.flagged"]{
   should["flags a player once they've enough hands and their bets follow the count closely enough"]{
     .pit.minHands:20;
     .pit.suspectCor:0.5;
     `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25 25 10;score:0.6 0.3 0.9)};
+    (exec name from .pit.flagged[]) mustmatch enlist`a_5;
+  };
+ };
+
+.tst.desc[".pit.updateStreaks"]{
+  should["counts the rounds in a row each player has been flagged, resetting anyone who isn't"]{
+    `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25 25 25;score:0.6 0.3 0.9)};
+    `.pit.flagged mock {([name:`a_5`c_7;handle:5 7i]hands:25 25;score:0.6 0.9)};
+    .pit.streak:`a_5`b_6!2 4;
+    .pit.updateStreaks[];
+    .pit.streak mustmatch`a_5`b_6`c_7!3 0 1;
+  };
+  should["forgets a player who has no scores any more"]{
+    `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.6)};
+    `.pit.flagged mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.6)};
+    .pit.streak:`a_5`gone_9!1 7;
+    .pit.updateStreaks[];
+    .pit.streak mustmatch enlist[`a_5]!enlist 2;
+  };
+ };
+
+.tst.desc[".pit.suspects"]{
+  should["only suspects a player who has stayed flagged for .pit.persist rounds in a row"]{
+    .pit.persist:5;
+    `.pit.flagged mock {([name:`a_5`c_7;handle:5 7i]hands:25 25;score:0.6 0.9)};
+    .pit.streak:`a_5`c_7!5 4;
     (exec name from .pit.suspects[]) mustmatch enlist`a_5;
   };
  };
@@ -241,8 +267,10 @@
     `.log.warn mock {[x]};
     .pit.h:0i;
     .pit.bets:([]name:`a_5`b_6;handle:5 6i;bet:10 20;basic:0 0f;omega:0 0f;perfect:0 0f);
+    .pit.streak:`a_5`b_6!5 3;
     .pit.report`name`handle`hands`score!(`a_5;5i;25;0.6);
     .tst.ejected mustmatch enlist 5i;
+    .pit.streak mustmatch enlist[`b_6]!enlist 3;
     (exec name from .pit.bets) mustmatch enlist`b_6;
   };
   should["logs the suspicion with the evidence"]{
@@ -261,6 +289,7 @@
     `.pit.getBetTrend mock {};
     `.pit.recordScores mock {};
     `.pit.getPlayTrend mock {};
+    `.pit.updateStreaks mock {};
     .tst.reported:();
     `.pit.report mock {.tst.reported,:enlist x`name};
     `.pit.suspects mock {([]name:`a_5`c_7;handle:5 7i;hands:25 30;score:0.6 0.7)};

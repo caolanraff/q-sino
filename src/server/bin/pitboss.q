@@ -8,6 +8,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.window:100;
 .pit.minHands:20;
 .pit.suspectCor:0.5;
+.pit.persist:5;
+.pit.streak:(`symbol$())!`long$();
 .pit.scores:([]time:`timestamp$();round:`long$();name:`symbol$();handle:`int$();hands:`long$();basic:`float$();omega:`float$();perfect:`float$();score:`float$());
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
@@ -32,11 +34,19 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 
 .pit.correlations:{update score:basic|omega|perfect from select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect by name,handle from .pit.bets};
 .pit.recordScores:{.pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[]};
-.pit.suspects:{0!select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor};
+.pit.flagged:{select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor};
+
+.pit.updateStreaks:{
+  n:exec name from .pit.correlations[];
+  .pit.streak:n!(1+0^.pit.streak n)*n in exec name from .pit.flagged[];
+ };
+
+.pit.suspects:{0!select from .pit.flagged[]where .pit.persist<=.pit.streak name};                  / one round over the line can be chance
 
 .pit.report:{[s]
   .log.warn"Suspected card counter: ",string[s`name]," (bets follow the count, correlation ",.Q.f[2;s`score]," over ",string[s`hands]," hands)";
   delete from`.pit.bets where name=s`name;
+  .pit.streak _:s`name;
   neg[.pit.h](`.bjk.eject;s`handle);
  };
 
@@ -79,6 +89,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   .pit.getBetTrend[];
   .pit.recordScores[];
   .pit.getPlayTrend select from .pit.res where round in rs;                                        / a finished round's tells never change
+  .pit.updateStreaks[];
   .pit.report each .pit.suspects[];
  };
 
