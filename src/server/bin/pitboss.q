@@ -8,6 +8,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.window:100;
 .pit.minHands:20;
 .pit.suspectCor:0.5;
+.pit.scores:([]Time:`timestamp$();Round:`long$();name:`symbol$();handle:`int$();hands:`long$();basic:`float$();omega:`float$();perfect:`float$();score:`float$());
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
 
@@ -29,7 +30,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   delete from`.pit.bets where .pit.window<=({reverse til count x};i)fby name;                      / a shoe can be too short to judge at a full table
  };
 
-.pit.correlations:{select hands:count i,score:max(0f^bet cor basic;0f^bet cor omega;0f^bet cor perfect)by name,handle from .pit.bets};
+.pit.correlations:{update score:basic|omega|perfect from select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect by name,handle from .pit.bets};
+.pit.recordScores:{.pit.scores,:`Time`Round xcols update Time:.z.p,Round:.pit.rnd from 0!.pit.correlations[]};
 .pit.suspects:{0!select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor};
 
 .pit.report:{[s]
@@ -60,21 +62,22 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   .pit.insure,:select round,name,handle,cards,cnt,dealer,theCount,insurance from t where insureTell;
  };
 
-.pit.gcol:{`Round,`$string[x except`Round],\:"_",string y};
+.pit.gcol:{`Time,`$string[x],\:"_",string y};
 
 .pit.chart:{
-  if[not count .pit.betTrend;:()];
-  u:exec distinct Player from .pit.betTrend;
-  b:.pit.gcol[u;`basic]xcol exec u#Player!basic_cov by Round:.z.d+Round from .pit.betTrend;
-  o:.pit.gcol[u;`omega]xcol exec u#Player!omega_cov by Round:.z.d+Round from .pit.betTrend;
-  p:.pit.gcol[u;`perfect]xcol exec u#Player!perfect_cov by Round:.z.d+Round from .pit.betTrend;
-  :update alert1:10,alert2:-10 from 0!(lj/)(b;o;p);
+  if[not count .pit.scores;:()];
+  u:exec distinct name from .pit.scores;
+  b:.pit.gcol[u;`basic]xcol exec u#name!basic by Time:Time from .pit.scores;
+  o:.pit.gcol[u;`omega]xcol exec u#name!omega by Time:Time from .pit.scores;
+  p:.pit.gcol[u;`perfect]xcol exec u#name!perfect by Time:Time from .pit.scores;
+  :update alert:.pit.suspectCor from 0!(lj/)(b;o;p);
  };
 
 .pit.shuffle:{.pit.res:0#.pit.res};
 
 .pit.getDetect:{[rs]
   .pit.getBetTrend[];
+  .pit.recordScores[];
   .pit.getPlayTrend select from .pit.res where round in rs;                                        / a finished round's tells never change
   .pit.report each .pit.suspects[];
  };
