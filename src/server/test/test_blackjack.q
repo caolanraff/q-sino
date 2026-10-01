@@ -33,7 +33,7 @@
 
 .tst.desc[".bjk.tab keeps a typed bet column"]{
   should["select ... where null bet doesn't throw before anyone has staked this round"]{
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     `.bjk.tab upsert ([]player:1 2f;name:`alice`bob;handle:10 11i);
     threw:@[{select from .bjk.tab where null bet;0b};();{1b}];
     threw musteq 0b;
@@ -213,7 +213,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.start[];
     (exec bet from .bjk.tab where handle=5i) musteq enlist 10;
     (exec handle from .bjk.tab where null bet) musteq 6 7i;
@@ -226,7 +226,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:();handle:()]bet:());
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.start[];
     .tst.excFuncCalls mustmatch ((`.plr.stake;5i);(`.plr.stake;6i));
     };
@@ -331,14 +331,14 @@
 
 .tst.desc["regConn join round"]{
   should["records the current round against a plain connection's handle"]{
-    .bjk.cp:()!(); .bjk.pit:0Ni; .bjk.joined:(`int$())!`long$();
+    .bjk.cp:()!(); .bjk.pit:0Ni; .bjk.joined:("i"$())!"j"$();
     `.bjk.isPit mock {0b};
     .bjk.rnd:7;
     .bjk.regConn[42i];
     .bjk.joined[42i] musteq 7;
     };
   should["doesn't record a pitboss connection"]{
-    .bjk.cp:()!(); .bjk.pit:0Ni; .bjk.joined:(`int$())!`long$();
+    .bjk.cp:()!(); .bjk.pit:0Ni; .bjk.joined:("i"$())!"j"$();
     `.bjk.isPit mock {1b};
     .bjk.regConn[42i];
     (count .bjk.joined) musteq 0;
@@ -359,7 +359,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -375,7 +375,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`A`K;`9`7);cnt:21 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(25f;());profit:0n 0n;split:00b;double:00b;insurance:0f);
@@ -387,7 +387,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3 3;player:1.01 1.02 2;name:`alice`alice`bob;handle:5 5 6i;cards:(`8`3`K;`8`K`5;`9`7);cnt:21 23 16i;dealer:`9`9`9;dealerCnt:9 9 9i;bet:20 10 10;return:(();0f;());profit:3#0n;split:110b;double:100b;insurance:0f);
@@ -402,7 +402,7 @@
     `.log.info mock {.tst.msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.res:([]round:enlist 1;player:enlist 1;name:enlist`alice;handle:enlist 5i;cards:enlist`K`9;cnt:enlist 19i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 25f;profit:enlist 15f;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.hd:0b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
@@ -415,7 +415,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.deal mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
@@ -433,7 +433,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:();handle:()]bet:());
-    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.start[];
     (.tst.sent[;0]) mustmatch `.plr.stake`.plr.stake;
     ({x[1]`me} each .tst.sent) musteq 5 6i;
@@ -447,7 +447,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.closeCalls:0;
     `.bjk.closeInsurance mock {.tst.closeCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b; .bjk.insuring:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`9`7;`10`8);cnt:16 18i;dealer:2#`A;dealerCnt:11 11i;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:5 0n);
@@ -460,7 +460,7 @@
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.closeInsurance mock {};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); .bjk.hist:0#.bjk.res;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();()); .bjk.hist:0#.bjk.res;
     .bjk.hd:0b; .bjk.insuring:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`9`7;`10`8);cnt:16 18i;dealer:2#`A;dealerCnt:11 11i;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:5 0n);
@@ -580,10 +580,10 @@
     .bjk.ejectCounters:0b;
     .bjk.cp:enlist[5i]!enlist`a_5;
     .bjk.users:enlist[5i]!enlist`alice;
-    .bjk.banned:`symbol$();
+    .bjk.banned:`$();
     .bjk.eject 5i;
     count[.tst.left] musteq 0;
-    .bjk.banned mustmatch`symbol$();
+    .bjk.banned mustmatch`$();
     first[.tst.logged] mustlike"The pitboss suspects a_5 of counting cards*";
   };
   should["tells the player, takes them off the table and closes their connection when ejection is on"]{
@@ -597,7 +597,7 @@
     .bjk.ejectCounters:1b;
     .bjk.cp:enlist[5i]!enlist`a_5;
     .bjk.users:enlist[5i]!enlist`alice;
-    .bjk.banned:`symbol$();
+    .bjk.banned:`$();
     .bjk.eject 5i;
     .bjk.banned mustmatch enlist`alice;
     .tst.msgs mustmatch enlist("The pitboss has asked you to leave the table";5i);
@@ -655,7 +655,7 @@
   should["records each player's username when they connect, and forgets it when they leave"]{
     `.bjk.isPit mock {0b};
     .bjk.cp:()!();
-    .bjk.users:(`int$())!`symbol$();
+    .bjk.users:("i"$())!`$();
     .bjk.regConn[42i];
     .bjk.users[42i] musteq .z.u;
     .bjk.unseat 42i;

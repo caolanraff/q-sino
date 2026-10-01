@@ -15,7 +15,7 @@
   should["holds each round once, though the server re-sends the whole shoe every round"]{
     `.pit.getPlayTrend mock {};
     .pit.startCards:312;
-    .pit.res:([]round:`long$());
+    .pit.res:([]round:"j"$());
     .pit.betTrend:0#.pit.betTrend;
     r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
     r2:r1,.tst.pitRound[2;`A`9;`6`6;`7`K];
@@ -26,7 +26,7 @@
   should["scores each round's bets against the count from earlier rounds only"]{
     `.pit.getPlayTrend mock {};
     .pit.startCards:312;
-    .pit.res:([]round:`long$());
+    .pit.res:([]round:"j"$());
     .pit.betTrend:0#.pit.betTrend;
     r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
     r2:r1,.tst.pitRound[2;`A`9;`6`6;`7`K];
@@ -39,7 +39,7 @@
     `.pit.getBetTrend mock {};
     .tst.examined:();
     `.pit.getPlayTrend mock {.tst.examined,:enlist exec distinct round from x};
-    .pit.res:([]round:`long$());
+    .pit.res:([]round:"j"$());
     r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
     .pit.gameover[`res`rnd!(r1;1)];
     .pit.gameover[`res`rnd!(r1,.tst.pitRound[2;`A`9;`6`6;`7`K];2)];
@@ -47,7 +47,7 @@
   };
   should["reports each tell once, and keeps an earlier shoe's tells after a shuffle"]{
     .pit.startCards:312;
-    .pit.res:([]round:`long$());
+    .pit.res:([]round:"j"$());
     .pit.betTrend:0#.pit.betTrend;
     .pit.double:.pit.split:.pit.stick:.pit.insure:();
     r1:update cnt:15 9i,insurance:0f from .tst.pitRound[1;`K`5;`2`3`4;`10`8];
@@ -63,7 +63,7 @@
   should["scores a flat bettor's correlation as 0 on every count, not just basic"]{
     `.pit.getPlayTrend mock {};
     .pit.startCards:312;
-    .pit.res:([]round:`long$());
+    .pit.res:([]round:"j"$());
     .pit.betTrend:0#.pit.betTrend;
     r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
     .pit.gameover[`res`rnd!(r1;1)];
@@ -75,7 +75,7 @@
   should["keeps a real correlation"]{
     `.pit.getPlayTrend mock {};
     .pit.startCards:312;
-    .pit.res:([]round:`long$());
+    .pit.res:([]round:"j"$());
     .pit.betTrend:0#.pit.betTrend;
     r1:.tst.pitRound[1;`K`5;`2`3`4;`10`8];
     .pit.gameover[`res`rnd!(r1;1)];
@@ -229,8 +229,8 @@
   should["flags a player once they've enough hands and their bets follow the count closely enough"]{
     .pit.minHands:20;
     .pit.suspectCor:0.5;
-    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
-    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
+    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$())};
+    `.pit.ramps mock {([name:`$();handle:"i"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
     `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25 25 10;score:0.6 0.3 0.9)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
@@ -367,20 +367,20 @@
   before{.pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2;.pit.minRampHands:5;.pit.minRamp:1.5};
   should["flags a player who only insures at a high count, even if their bets don't follow the count"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.1)};
-    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
+    `.pit.ramps mock {([name:`$();handle:"i"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
     `.pit.insurers mock {([name:enlist`a_5;handle:enlist 5i]insures:enlist 2;highOnly:enlist 1b)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
   should["doesn't flag a player with too few high-count insurances"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.1)};
-    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
+    `.pit.ramps mock {([name:`$();handle:"i"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
     `.pit.insurers mock {([name:enlist`a_5;handle:enlist 5i]insures:enlist 1;highOnly:enlist 1b)};
     count[.pit.flagged[]] musteq 0;
   };
   should["still flags on the bet/count correlation alone"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.6)};
-    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
-    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$();highOnly:`boolean$())};
+    `.pit.ramps mock {([name:`$();handle:"i"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
+    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$();highOnly:"b"$())};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
  };
@@ -401,19 +401,19 @@
   before{.pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2;.pit.minRampHands:5;.pit.minRamp:1.5};
   should["flags a player who bets clearly more at a good count, even if they've never insured"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.2)};
-    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$())};
     `.pit.ramps mock {([name:enlist`a_5;handle:enlist 5i]good:enlist 6;bad:enlist 9;ramp:enlist 3f)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
   should["doesn't flag on too few bets at a good or a bad count"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.2)};
-    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$())};
     `.pit.ramps mock {([name:enlist`a_5;handle:enlist 5i]good:enlist 4;bad:enlist 9;ramp:enlist 3f)};
     count[.pit.flagged[]] musteq 0;
   };
   should["doesn't flag a player whose bets barely change with the count"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.2)};
-    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$())};
     `.pit.ramps mock {([name:enlist`a_5;handle:enlist 5i]good:enlist 6;bad:enlist 9;ramp:enlist 1.2)};
     count[.pit.flagged[]] musteq 0;
   };

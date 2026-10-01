@@ -1,26 +1,25 @@
 if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .utl.require"common";
 
-.pit.res:([]round:`long$());                                                                       / hands seen this shoe
+.pit.res:([]round:"j"$());                                                                         / hands seen this shoe
 .pit.double:.pit.split:.pit.stick:.pit.insure:();                                                  / tell plays caught, by kind
 .pit.betTrend:([]round:();name:();handle:();                                                       / each round's bet/count correlation and covariance by player
   basic_cor:();basic_cov:();omega_cor:();omega_cov:();perfect_cor:();perfect_cov:());
-.pit.bets:([]name:`symbol$();handle:`int$();bet:`long$();                                          / each player's recent bets, with the counts when they bet
-  basic:`float$();omega:`float$();perfect:`float$());
+.pit.bets:([]name:`$();handle:"i"$();bet:"j"$();basic:"f"$();omega:"f"$();perfect:"f"$());         / each player's recent bets, with the counts when they bet
 .pit.window:100;                                                                                   / bets kept per player
 .pit.minHands:20;                                                                                  / bets needed before judging a player
 .pit.suspectCor:0.5;                                                                               / correlation that marks a counter
 .pit.persist:5;                                                                                    / rounds in a row a player must stay flagged
-.pit.streak:(`symbol$())!`long$();                                                                 / player to rounds flagged in a row
-.pit.insured:([]name:`symbol$();handle:`int$();basic:`float$());                                   / each player's insured hands, with the Hi-Lo count when they bet
+.pit.streak:(`$())!"j"$();                                                                         / player to rounds flagged in a row
+.pit.insured:([]name:`$();handle:"i"$();basic:"f"$());                                             / each player's insured hands, with the Hi-Lo count when they bet
 .pit.insureCount:3;                                                                                / Hi-Lo true count where a counter starts insuring
 .pit.minInsures:2;                                                                                 / insured hands, all at a high count, that mark a counter
 .pit.goodCount:2;                                                                                  / Hi-Lo true count from which the deck favours the player
 .pit.badCount:0;                                                                                   / Hi-Lo true count at or below which it doesn't
 .pit.minRampHands:5;                                                                               / bets needed at each before comparing them
 .pit.minRamp:1.5;                                                                                  / how many times bigger a counter bets when the count is good
-.pit.scores:([]time:`timestamp$();round:`long$();name:`symbol$();handle:`int$();hands:`long$();    / each round's correlation scores, for charting
-  basic:`float$();omega:`float$();perfect:`float$();score:`float$());
+.pit.scores:([]time:"p"$();round:"j"$();name:`$();handle:"i"$();hands:"j"$();                      / each round's correlation scores, for charting
+  basic:"f"$();omega:"f"$();perfect:"f"$();score:"f"$());
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                       / [handle] cards in a full shoe, from the server's rules
 

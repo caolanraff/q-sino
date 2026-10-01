@@ -7,7 +7,7 @@
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.hd:1b;
-    .bjk.stake:([name:();handle:()]bet:`long$());
+    .bjk.stake:([name:();handle:()]bet:"j"$());
     stake each 0 9 501;
     count[.bjk.stake] musteq 0;
     .tst.msgs mustmatch 3#enlist"Bets are $10 to $500";
@@ -19,7 +19,7 @@
     .bjk.hd:1b;
     .bjk.betDeadline:.z.p;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:`long$());
+    .bjk.stake:([name:();handle:()]bet:"j"$());
     stake[10];
     (exec bet from .bjk.stake) mustmatch enlist 10;
     stake[500];
@@ -64,7 +64,7 @@
     .tst.sent:();
     `.bjk.sendMsg mock {[x;y].tst.sent,:enlist x};
     .bjk.hd:1b;
-    .bjk.stake:([name:();handle:()]bet:`long$());
+    .bjk.stake:([name:();handle:()]bet:"j"$());
     stake[10.5];
     count[.bjk.stake] musteq 0;
     .tst.sent mustmatch enlist"Bets are whole dollars";
@@ -76,7 +76,7 @@
     .bjk.hd:1b;
     .bjk.betDeadline:.z.p;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:`long$());
+    .bjk.stake:([name:();handle:()]bet:"j"$());
     stake[10i];
     (exec bet from .bjk.stake) mustmatch enlist 10;
     stake[20h];
@@ -604,7 +604,7 @@
     `.bjk.dealer1 mock {[p].tst.dealer1Calls+:1};
     .tst.startCalls:0;
     `.bjk.start mock {.tst.startCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
@@ -626,7 +626,7 @@
     `.bjk.dealer1 mock {[p].tst.dealer1Args,:p};
     .tst.startCalls:0;
     `.bjk.start mock {.tst.startCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`9`8;`K`7);cnt:17 17i;dealer:(`K`Q`5;`K`Q`5);dealerCnt:25 25i;bet:10 10;return:0 0f;profit:2#0n;split:00b;double:00b;insurance:0f);
     .bjk.tab:update out:00b,wait:11b,turn:00b from .bjk.tab;
     .bjk.cp:0 1i!`p1`p2;
@@ -645,7 +645,7 @@
     `.bjk.start mock {};
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
@@ -662,7 +662,7 @@
     `.bjk.start mock {};
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:enlist 4;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
@@ -677,7 +677,7 @@
     .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`K`5;
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:5#1;player:1 2 3 4 5f;name:`p1`p2`p3`p4`p5;handle:0 1 2 3 4i;cards:(`K`9;`K`6;`K`8;`A`K;`5`6`K);cnt:19 16 18 21 21i;dealer:5#`K;dealerCnt:5#18i;bet:10 10 10 10 20;return:20 0 10 25 40f;profit:5#0n;split:00000b;double:00001b;insurance:0f);
     .bjk.tab:update out:11111b,wait:00000b,turn:00000b from .bjk.tab;
     .bjk.cp:(0 1 2 3 4i)!`p1`p2`p3`p4`p5;
@@ -707,7 +707,7 @@
     .tst.stakeAtStart:-1;
     `.bjk.start mock {.tst.stakeAtStart:count .bjk.stake};
     .bjk.stake:([name:enlist`p1;handle:enlist 0i]bet:enlist 10);
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
@@ -722,7 +722,7 @@
     .bjk.dc:`K`5;
     .tst.startCalls:0;
     `.bjk.start mock {.tst.startCalls+:1};
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`5;dealerCnt:enlist 25i;bet:enlist 10;return:enlist 0f;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.tab:update out:enlist 1b,wait:enlist 0b,turn:enlist 0b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
@@ -895,7 +895,7 @@
     .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`A`K;
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:3#1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:(`9`7;`10`8;`A`Q);cnt:16 18 21i;dealer:3#enlist`A`K;dealerCnt:3#21i;bet:3#10;return:0 0 10f;profit:3#0n;split:000b;double:000b;insurance:5 0 5f);
     .bjk.tab:update out:111b,wait:000b,turn:000b from .bjk.tab;
     .bjk.cp:(0 1 2i)!`p1`p2`p3;
@@ -909,7 +909,7 @@
     .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`A`6;
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.tab:([]round:3#1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:(`10`9;`10`8;`A`Q);cnt:19 18 21i;dealer:3#enlist`A`6;dealerCnt:3#17i;bet:3#10;return:20 20 25f;profit:3#0n;split:000b;double:000b;insurance:5 0 5f);
     .bjk.tab:update out:111b,wait:000b,turn:000b from .bjk.tab;
     .bjk.cp:(0 1 2i)!`p1`p2`p3;

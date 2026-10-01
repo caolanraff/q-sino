@@ -19,12 +19,12 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.turnDeadline:0Np;                                                                             / turn clock, null when not running
 
 .bjk.cp:()!();                                                                                     / handle to player name
-.bjk.users:(`int$())!`symbol$();                                                                   / handle to connecting username
-.bjk.banned:`symbol$();                                                                            / usernames banned this session
-.bjk.joined:(`int$())!`long$();                                                                    / round each handle joined; kdb reuses handle numbers
+.bjk.users:("i"$())!`$();                                                                          / handle to connecting username
+.bjk.banned:`$();                                                                                  / usernames banned this session
+.bjk.joined:("i"$())!"j"$();                                                                       / round each handle joined; kdb reuses handle numbers
 .bjk.res:.bjk.tab:.bjk.hist:([]round:();player:();name:();handle:();cards:();cnt:();dealer:();     / hands in play, this shoe's results, earlier shoes' results
-  dealerCnt:();bet:`long$();return:();profit:();split:();double:();insurance:());
-.bjk.stake:([name:();handle:()]bet:`long$());                                                      / each player's bet for the next hand
+  dealerCnt:();bet:"j"$();return:();profit:();split:();double:();insurance:());
+.bjk.stake:([name:();handle:()]bet:"j"$());                                                        / each player's bet for the next hand
 
 .bjk.intro:{                                                                                       / help text sent to each new player
   show"Welcome to Qsino Blackjack!";
