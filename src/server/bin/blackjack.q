@@ -11,7 +11,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.shuffleCnt:0;
 .bjk.hitSoft17:1b;
 .bjk.rules:`maxSplitHands`deckCnt!4 6;
-.bjk.betTimeout:.bjk.turnTimeout:0D00:00:15;
+.bjk.timeout:0D00:00:15;
 .bjk.betDeadline:0Np;
 .bjk.insuring:0b;
 .bjk.insureDeadline:0Np;

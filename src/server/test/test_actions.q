@@ -372,7 +372,7 @@
   should["starts the turn clock and prompts the given handle to play"]{
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
-    .bjk.turnTimeout:0D00:00:15;
+    .bjk.timeout:0D00:00:15;
     .bjk.turnDeadline:0Np;
     .bjk.promptPlay 7i;
     (.bjk.turnDeadline within .z.p+0D00:00:14 0D00:00:15) musteq 1b;
@@ -386,7 +386,7 @@
     `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     .tst.prompted:();
     `.bjk.promptPlay mock {.tst.prompted,:x};
-    .bjk.turnTimeout:0D00:00:15;
+    .bjk.timeout:0D00:00:15;
     .bjk.giveTurn 7i;
     .tst.msgs mustmatch enlist("You have 15 seconds per move";7i);
     .tst.prompted mustmatch enlist 7i;
@@ -438,7 +438,7 @@
     .bjk.double:0b;
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 15i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
-    .bjk.turnTimeout:0D00:00:15;
+    .bjk.timeout:0D00:00:15;
     .bjk.turnDeadline:.z.p-0D00:00:01;
     .bjk.hit1[];
     (.bjk.turnDeadline>.z.p) musteq 1b;

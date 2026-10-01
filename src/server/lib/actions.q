@@ -11,12 +11,12 @@
  };
 
 .bjk.promptPlay:{[h]
-  .bjk.turnDeadline:.z.p+.bjk.turnTimeout;
+  .bjk.turnDeadline:.z.p+.bjk.timeout;
   .bjk.trigger[`.plr.play;h];
  };
 
 .bjk.giveTurn:{[h]
-  .bjk.sendMsg["You have ",string["j"$.bjk.turnTimeout%0D00:00:01]," seconds per move";h];
+  .bjk.sendMsg["You have ",string["j"$.bjk.timeout%0D00:00:01]," seconds per move";h];
   .bjk.promptPlay h;
  };
 

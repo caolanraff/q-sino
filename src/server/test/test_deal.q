@@ -77,12 +77,12 @@
     .bjk.hd:1b;
     .bjk.bd:0b;
     .bjk.betDeadline:0Np;
-    .bjk.betTimeout:0D00:00:15;
+    .bjk.timeout:0D00:00:15;
     .bjk.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:3#0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:0f);
     .bjk.stake:([name:();handle:()]bet:());
     t0:.z.p;
     stake[10];
-    (.bjk.betDeadline within t0+.bjk.betTimeout+0D00:00:00 0D00:00:01) musteq 1b;
+    (.bjk.betDeadline within t0+.bjk.timeout+0D00:00:00 0D00:00:01) musteq 1b;
     .tst.msgs mustmatch (("Betting closes in 15 seconds";1i);("Betting closes in 15 seconds";2i));
   };
   should["doesn't restart the clock on later bets"]{

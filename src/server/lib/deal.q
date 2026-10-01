@@ -11,8 +11,8 @@ stake:{[bet]
  };
 
 .bjk.armBetTimer:{
-  .bjk.betDeadline:.z.p+.bjk.betTimeout;
-  .bjk.sendMsg["Betting closes in ",string["j"$.bjk.betTimeout%0D00:00:01]," seconds"]each exec handle from .bjk.tab where null bet;
+  .bjk.betDeadline:.z.p+.bjk.timeout;
+  .bjk.sendMsg["Betting closes in ",string["j"$.bjk.timeout%0D00:00:01]," seconds"]each exec handle from .bjk.tab where null bet;
  };
 
 .bjk.betTimer:{
@@ -67,7 +67,7 @@ stake:{[bet]
 
 .bjk.offerInsurance:{
   .bjk.insuring:1b;
-  .bjk.insureDeadline:.z.p+.bjk.betTimeout;
+  .bjk.insureDeadline:.z.p+.bjk.timeout;
   update insurance:0n from`.bjk.tab;
   .bjk.pubMsg["Dealer shows an ace - insurance? insure[amount] up to half your bet, or insure[0] to decline";key .bjk.cp];
   .bjk.trigger[`.plr.insure]each exec handle from .bjk.tab;
