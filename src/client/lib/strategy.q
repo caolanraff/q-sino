@@ -7,40 +7,40 @@
 .stg.dealerDict:`2`3`4`5`6`7`8`9`10`J`Q`K`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE; / dealer card to chart column
 
 .stg.hard:([hTotal:3+til 19]                                                                       / hard totals: 6-deck H17 DAS basic strategy
-  TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;                                                      / dealer 2
-  THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;                                                    / dealer 3
-  FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;                                                     / dealer 4
-  FIVE:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;                                                     / dealer 5
-  SIX:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;                                                      / dealer 6
-  SEVEN:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;                                                    / dealer 7
-  EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;                                                    / dealer 8
-  NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;                                                     / dealer 9
-  TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;                                                      / dealer 10
-  ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S);                                                     / dealer ace
+  TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;
+  THREE:`H`H`H`H`H`H`D`D`D`H`S`S`S`S`S`S`S`S`S;
+  FOUR:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
+  FIVE:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
+  SIX:`H`H`H`H`H`H`D`D`D`S`S`S`S`S`S`S`S`S`S;
+  SEVEN:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+  EIGHT:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+  NINE:`H`H`H`H`H`H`H`D`D`H`H`H`H`H`S`S`S`S`S;
+  TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
+  ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S);
 
 .stg.soft:([hTotal:13+til 9]                                                                       / soft totals, A2 (13) to A10 (21); DS = double if allowed, else stick
-  TWO:`H`H`H`H`H`DS`S`S`S;                                                                         / dealer 2
-  THREE:`H`H`H`H`D`DS`S`S`S;                                                                       / dealer 3
-  FOUR:`H`H`D`D`D`DS`S`S`S;                                                                        / dealer 4
-  FIVE:`D`D`D`D`D`DS`S`S`S;                                                                        / dealer 5
-  SIX:`D`D`D`D`D`DS`DS`S`S;                                                                        / dealer 6
-  SEVEN:`H`H`H`H`H`S`S`S`S;                                                                        / dealer 7
-  EIGHT:`H`H`H`H`H`S`S`S`S;                                                                        / dealer 8
-  NINE:`H`H`H`H`H`H`S`S`S;                                                                         / dealer 9
-  TEN:`H`H`H`H`H`H`S`S`S;                                                                          / dealer 10
-  ACE:`H`H`H`H`H`H`S`S`S);                                                                         / dealer ace
+  TWO:`H`H`H`H`H`DS`S`S`S;
+  THREE:`H`H`H`H`D`DS`S`S`S;
+  FOUR:`H`H`D`D`D`DS`S`S`S;
+  FIVE:`D`D`D`D`D`DS`S`S`S;
+  SIX:`D`D`D`D`D`DS`DS`S`S;
+  SEVEN:`H`H`H`H`H`S`S`S`S;
+  EIGHT:`H`H`H`H`H`S`S`S`S;
+  NINE:`H`H`H`H`H`H`S`S`S;
+  TEN:`H`H`H`H`H`H`S`S`S;
+  ACE:`H`H`H`H`H`H`S`S`S);
 
 .stg.pair:([hTotal:2+til 10]                                                                       / pairs, by card value; 11 is aces
-  TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;                                                                 / dealer 2
-  THREE:`SP`SP`H`D`SP`SP`SP`SP`S`SP;                                                               / dealer 3
-  FOUR:`SP`SP`H`D`SP`SP`SP`SP`S`SP;                                                                / dealer 4
-  FIVE:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;                                                               / dealer 5
-  SIX:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;                                                                / dealer 6
-  SEVEN:`SP`SP`H`D`H`SP`SP`S`S`SP;                                                                 / dealer 7
-  EIGHT:`H`H`H`D`H`H`SP`SP`S`SP;                                                                   / dealer 8
-  NINE:`H`H`H`D`H`H`SP`SP`S`SP;                                                                    / dealer 9
-  TEN:`H`H`H`H`H`H`SP`S`S`SP;                                                                      / dealer 10
-  ACE:`H`H`H`H`H`H`SP`S`S`SP);                                                                     / dealer ace
+  TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
+  THREE:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
+  FOUR:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
+  FIVE:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
+  SIX:`SP`SP`SP`D`SP`SP`SP`SP`S`SP;
+  SEVEN:`SP`SP`H`D`H`SP`SP`S`S`SP;
+  EIGHT:`H`H`H`D`H`H`SP`SP`S`SP;
+  NINE:`H`H`H`D`H`H`SP`SP`S`SP;
+  TEN:`H`H`H`H`H`H`SP`S`S`SP;
+  ACE:`H`H`H`H`H`H`SP`S`S`SP);
 
 .stg.countDict:.crd.hiLo;                                                                          / count system; a strategy may replace it
 
