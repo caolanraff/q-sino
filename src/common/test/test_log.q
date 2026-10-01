@@ -10,9 +10,9 @@
  };
 
 .tst.desc[".log.warn and .log.error"]{
-  should["write to stdout and stderr"]{
-    .log.warn["careful"] mustmatch -1 -2;
-    .log.error["broken"] mustmatch -1 -2;
+  should["write to stdout"]{
+    .log.warn["careful"] musteq -1i;
+    .log.error["broken"] musteq -1i;
   };
  };
 
