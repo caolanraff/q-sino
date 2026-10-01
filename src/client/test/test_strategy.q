@@ -87,16 +87,17 @@
  };
 
 .tst.desc[".stg.insureAmount"]{
-  before{.utl.load`:src/client/lib/strategy.q};
+  before{
+    .utl.load`:src/client/lib/strategy.q;
+    .stg.mh:7i;
+  };
   should["never insures by default"]{
     .stg.tab:([]handle:enlist 7i;bet:enlist 20);
-    .stg.mh:7i;
     .stg.trueCount:10f;
     .stg.insureAmount[] musteq 0f;
   };
   should["insures half the bet once the true count reaches .stg.insureAt"]{
     .stg.tab:([]handle:6 7i;bet:40 20);
-    .stg.mh:7i;
     .stg.insureAt:3;
     .stg.trueCount:3f;
     .stg.insureAmount[] musteq 10f;

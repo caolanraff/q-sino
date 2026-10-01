@@ -81,13 +81,15 @@
  };
 
 .tst.desc["stake[] betting clock"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  before{
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
+    `.bjk.deal mock {};
+    .bjk.hd:1b;
+  };
   should["starts the clock on the round's first bet and tells the players still to bet"]{
     `.bjk.user mock {`p1};
     .tst.msgs:();
     `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
-    `.bjk.deal mock {};
-    .bjk.hd:1b;
     .bjk.bd:0b;
     .bjk.betDeadline:0Np;
     .bjk.timeout:0D00:00:15;
@@ -101,8 +103,6 @@
   should["doesn't restart the clock on later bets"]{
     `.bjk.user mock {`p2};
     `.bjk.sendMsg mock {[x;y]};
-    `.bjk.deal mock {};
-    .bjk.hd:1b;
     .bjk.bd:1b;
     deadline:.z.p+0D00:00:05;
     .bjk.betDeadline:deadline;
@@ -166,8 +166,10 @@
  };
 
 .tst.desc[".bjk.deal0"]{
-  should["does nothing when no players are seated"]{
+  before{
     `.bjk.pubMsg mock {[x;y]};
+  };
+  should["does nothing when no players are seated"]{
     .tst.getCardCalls:0;
     `.bjk.getCard mock {.tst.getCardCalls+:1;`5};
     .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
@@ -175,7 +177,6 @@
     .tst.getCardCalls musteq 0;
   };
   should["rebuilds the deck when fewer than 78 cards remain"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.buildCalls:0;
     .tst.shuffleCalls:0;
@@ -190,7 +191,6 @@
     .tst.shuffleCalls musteq 1;
   };
   should["deals two cards to every player and two to the dealer, computing counts"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`7`8`5`3;                                                                         / p1's 1st, dealer's 1st (up-card), p1's 2nd, dealer's 2nd (hole card)
@@ -205,7 +205,6 @@
     .bjk.hd musteq 0b;
   };
   should["deals each player's first card in seating order before either gets a second, with multiple players"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`2`9`5`3`8`6;                                                                     / p1's 1st, p2's 1st, dealer's up-card, p1's 2nd, p2's 2nd, dealer's hole card
@@ -222,7 +221,6 @@
     .bjk.hd musteq 0b;
   };
   should["an immediate player blackjack against a dealer up-card under 10 pays out and calls .bjk.dealer[] when no one else is left to act"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`A`5`K`3;                                                                         / p1: A,K = 21; dealer up-card 5 (<10)
@@ -242,7 +240,6 @@
     .bjk.hd musteq 1b;
   };
   should["pays a player blackjack immediately against a dealer 10 up-card once the dealer has peeked and has no blackjack"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`A`K`K`3;                                                                         / p1: A,K = 21; dealer K up, 3 in the hole (no dealer blackjack)
@@ -261,7 +258,6 @@
     .tst.dealerCalls musteq 1;
   };
   should["ends the hand via .bjk.dealerPeek before anyone acts when the dealer has blackjack"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`6`K`5`A;                                                                         / p1: 6,5 = 11; dealer K up, A in the hole (blackjack)
@@ -279,7 +275,6 @@
     (exec first cnt from .bjk.tab) musteq 11i;
   };
   should["pays out one player's immediate blackjack but doesn't call .bjk.dealer[] while another player still needs to act"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`A`9`5`K`8`3;                                                                     / p1: A,K = 21 (blackjack); p2: 9,8 = 17 (no blackjack); dealer up-card 5 (<10)
@@ -298,7 +293,6 @@
     .bjk.hd musteq 0b;
   };
   should["calls .bjk.dealer[] exactly once, after the last player's immediate blackjack leaves nobody still in"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.deck:200#`2;
     .tst.cardseq:`A`A`5`K`Q`3;                                                                     / p1: A,K = 21 (blackjack); p2: A,Q = 21 (blackjack); dealer up-card 5 (<10)
@@ -400,8 +394,10 @@
  };
 
 .tst.desc[".bjk.dealer0"]{
-  should["doesn't draw when the dealer already has 17 or more"]{
+  before{
     `.bjk.pubMsg mock {[x;y]};
+  };
+  should["doesn't draw when the dealer already has 17 or more"]{
     .bjk.dc:`K`8;
     .tst.getCardCalls:0;
     `.bjk.getCard mock {.tst.getCardCalls+:1;`5};
@@ -411,7 +407,6 @@
     (exec first dealerCnt from .bjk.tab) musteq 18i;
   };
   should["hits until the dealer reaches 17 or more"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dc:`6`5;
     .tst.cardseq:`4`2`2`2`2;
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
@@ -421,7 +416,6 @@
     (exec first dealerCnt from .bjk.tab) musteq 17i;
   };
   should["reduces a newly-drawn ace by 10 to avoid busting"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dc:`6`9;
     .tst.cardseq:`A`3`2`2`2;
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
@@ -430,7 +424,6 @@
     (exec first dealerCnt from .bjk.tab) musteq 19i;
   };
   should["drops an ace drawn earlier to 1 when a later card would otherwise bust the dealer"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dc:`3`2;
     .tst.cardseq:`A`10`2;                                                                          / 3,2,A = soft 16; +10 = hard 16 (not 26); +2 = 18
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
@@ -463,23 +456,22 @@
  };
 
 .tst.desc[".bjk.dealer0 soft 17"]{
-  should["sticks on A,6 when the table sticks on all 17s"]{
+  before{
     `.bjk.pubMsg mock {[x;y]};
-    .bjk.hitSoft17:0b;
     .bjk.dc:`A`6;
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`A;dealerCnt:enlist 11i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+  };
+  should["sticks on A,6 when the table sticks on all 17s"]{
+    .bjk.hitSoft17:0b;
     .tst.getCardCalls:0;
     `.bjk.getCard mock {.tst.getCardCalls+:1;`2};
-    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`A;dealerCnt:enlist 11i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer0[];
     .tst.getCardCalls musteq 0;
     .bjk.dealerCount musteq 17i;
   };
   should["draws on A,6 when the table hits soft 17"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.hitSoft17:1b;
-    .bjk.dc:`A`6;
     `.bjk.getCard mock {`2};
-    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`A;dealerCnt:enlist 11i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer0[];
     (exec first dealer from .bjk.tab) mustmatch`A`6`2;
     .bjk.dealerCount musteq 19i;
@@ -487,99 +479,88 @@
  };
 
 .tst.desc[".bjk.dealer1"]{
-  should["pays double the bet when the dealer busts and the player is 21 or under"]{
+  before{
     `.bjk.pubMsg mock {[x;y]};
+  };
+  should["pays double the bet when the dealer busts and the player is 21 or under"]{
     .bjk.dealerCount:24;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K;dealerCnt:enlist 24i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 20f;
   };
   should["pays nothing when both the dealer and the player bust"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:24;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`K`Q`5;cnt:enlist 25i;dealer:enlist`K;dealerCnt:enlist 24i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 0f;
   };
   should["pushes (returns the bet) when the counts are equal and both are 21 or under"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:18;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`9;cnt:enlist 18i;dealer:enlist`K;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 10f;
   };
   should["pays nothing when the dealer is under 21 and beats the player"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:19;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K;dealerCnt:enlist 19i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 0f;
   };
   should["pays nothing when the dealer is under 21 but the player busted"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:18;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`K`Q`5;cnt:enlist 25i;dealer:enlist`K;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 0f;
   };
   should["pays double the bet for a plain win when the player beats an under-21 dealer without blackjack"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:18;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`9`1;cnt:enlist 19i;dealer:enlist`K`3`4;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 20f;
   };
   should["pays 1.5x plus the bet for a two-card 21 (blackjack) against an under-21 dealer"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:19;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`K;cnt:enlist 21i;dealer:enlist`K`3`6;dealerCnt:enlist 19i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 25f;
   };
   should["pays nothing when the dealer has exactly 21 and the player doesn't"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:21;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`9`8;cnt:enlist 17i;dealer:enlist`K`Q`A;dealerCnt:enlist 21i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 0f;
   };
   should["pays 1.5x plus the bet for a blackjack when the dealer sticks on two cards"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:17;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`K;cnt:enlist 21i;dealer:enlist`K`7;dealerCnt:enlist 17i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 25f;
   };
   should["pays 1.5x plus the bet for a blackjack when the dealer busts"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:24;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`K;cnt:enlist 21i;dealer:enlist`K`4`K;dealerCnt:enlist 24i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 25f;
   };
   should["pays 1.5x plus the bet for a blackjack against a dealer's three-card 21"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:21;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`K;cnt:enlist 21i;dealer:enlist`K`4`7;dealerCnt:enlist 21i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 25f;
   };
   should["pays nothing when the dealer has blackjack and the player has a three-card 21"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:21;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`5`6`10;cnt:enlist 21i;dealer:enlist`A`K;dealerCnt:enlist 21i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 0f;
   };
   should["pushes when both the dealer and the player have blackjack"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:21;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`Q;cnt:enlist 21i;dealer:enlist`A`K;dealerCnt:enlist 21i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1f];
     (exec first return from .bjk.tab) musteq 10f;
   };
   should["pays a two-card 21 on a split hand as a plain win, not a blackjack"]{
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.dealerCount:18;
     .bjk.tab:([]round:enlist 1;player:enlist 1.01;name:enlist`p1;handle:enlist 0i;cards:enlist`A`K;cnt:enlist 21i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 1b;double:enlist 0b;insurance:0f);
     .bjk.dealer1[1.01];
@@ -590,11 +571,11 @@
 .tst.desc[".bjk.dealer"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
-  };
-  should["skips .bjk.dealer0/.bjk.dealer1 when every player is already out, but still records the result"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.wwch:0b;
+  };
+  should["skips .bjk.dealer0/.bjk.dealer1 when every player is already out, but still records the result"]{
     .bjk.pit:0Ni;
     .bjk.dc:`K`5;
     .tst.dealer0Calls:0;
@@ -614,9 +595,6 @@
     .bjk.hd musteq 1b;
   };
   should["resolves every waiting player through .bjk.dealer0/.bjk.dealer1 and marks them out"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .tst.dealer0Calls:0;
     .tst.dealer1Args:();
@@ -634,9 +612,6 @@
     (exec wait from .bjk.tab) musteq 00b;
   };
   should["notifies pitboss with the round's results when it's connected"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    .bjk.wwch:0b;
     .bjk.pit:99i;
     .bjk.dc:`K`5;
     `.bjk.start mock {};
@@ -649,9 +624,6 @@
     .tst.excFuncCalls mustmatch enlist(`.pit.gameover;99i);
   };
   should["sends the detection algo the shoe's results and the round just played"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    .bjk.wwch:0b;
     .bjk.pit:99i;
     .bjk.dc:`K`5;
     .bjk.rnd:4;
@@ -666,10 +638,7 @@
     (.tst.sent[0;1]`res) mustmatch .bjk.res;
   };
   should["records each hand's net profit - return minus bet - in .bjk.res"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
     `.bjk.start mock {};
-    .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`K`5;
     .bjk.tab:([]round:5#1;player:1 2 3 4 5f;name:`p1`p2`p3`p4`p5;handle:0 1 2 3 4i;cards:(`K`9;`K`6;`K`8;`A`K;`5`6`K);cnt:19 16 18 21 21i;dealer:5#`K;dealerCnt:5#18i;bet:10 10 10 10 20;return:20 0 10 25 40f;profit:5#0n;split:00000b;double:00001b;insurance:0f);
@@ -679,10 +648,7 @@
     (exec profit from .bjk.res) musteq 10 -10 0 15 20f;
   };
   should["doesn't carry a running total into a player's later hands"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
     `.bjk.start mock {};
-    .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`K`5;
     .bjk.res:([]round:enlist 1;player:enlist 1;name:enlist`p1;handle:enlist 0i;cards:enlist`K`9;cnt:enlist 19i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 20f;profit:enlist 10f;split:enlist 0b;double:enlist 0b;insurance:0f);
@@ -693,9 +659,6 @@
     (exec profit from .bjk.res) musteq 10 -10f;
   };
   should["clears the round's bets before starting the next hand"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`K`5;
     .tst.stakeAtStart:-1;
@@ -708,9 +671,6 @@
     .tst.stakeAtStart musteq 0;
   };
   should["always starts the next hand - the server has no round-count cap of its own"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    .bjk.wwch:0b;
     .bjk.pit:0Ni;
     .bjk.dc:`K`5;
     .tst.startCalls:0;
@@ -724,24 +684,26 @@
  };
 
 .tst.desc[".bjk.deal0 insurance offer"]{
-  should["offers insurance before the dealer checks for blackjack when the up-card is an ace"]{
+  before{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
-    .tst.peekCalls:0;
-    .tst.deal1Calls:0;
-    `.bjk.dealerPeek mock {.tst.peekCalls+:1};
-    `.bjk.deal1 mock {[h].tst.deal1Calls+:1};
     .bjk.deck:200#`2;
-    .tst.cardseq:`9`A`7`K;
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
     .bjk.rnd:0;
     .bjk.hd:1b;
     .bjk.insuring:0b;
-    .bjk.insureDeadline:0Np;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.cp:enlist[0i]!enlist`p1;
+  };
+  should["offers insurance before the dealer checks for blackjack when the up-card is an ace"]{
+    .tst.peekCalls:0;
+    .tst.deal1Calls:0;
+    `.bjk.dealerPeek mock {.tst.peekCalls+:1};
+    `.bjk.deal1 mock {[h].tst.deal1Calls+:1};
+    .tst.cardseq:`9`A`7`K;
+    .bjk.insureDeadline:0Np;
     .bjk.deal0[];
     .bjk.insuring musteq 1b;
     null[.bjk.insureDeadline] musteq 0b;
@@ -751,19 +713,8 @@
     .tst.deal1Calls musteq 0;
   };
   should["doesn't offer insurance under any other up-card"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    .tst.sent:();
-    `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
     `.bjk.deal1 mock {[h]};
-    .bjk.deck:200#`2;
     .tst.cardseq:`9`K`7`6;
-    `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
-    .bjk.rnd:0;
-    .bjk.hd:1b;
-    .bjk.insuring:0b;
-    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
-    .bjk.cp:enlist[0i]!enlist`p1;
     .bjk.deal0[];
     .bjk.insuring musteq 0b;
     count[.tst.sent] musteq 0;
@@ -842,17 +793,17 @@
  };
 
 .tst.desc[".bjk.insureTimer"]{
-  should["does nothing before the window closes"]{
+  before{
     .tst.closeCalls:0;
     `.bjk.closeInsurance mock {.tst.closeCalls+:1};
+  };
+  should["does nothing before the window closes"]{
     .bjk.insureDeadline:.z.p+0D00:00:10;
     .bjk.insureTimer[];
     .tst.closeCalls musteq 0;
     .bjk.insureDeadline:0Np;
   };
   should["closes insurance once the window has passed"]{
-    .tst.closeCalls:0;
-    `.bjk.closeInsurance mock {.tst.closeCalls+:1};
     .bjk.insureDeadline:.z.p-0D00:00:01;
     .bjk.insureTimer[];
     .tst.closeCalls musteq 1;
@@ -882,30 +833,24 @@
 .tst.desc[".bjk.dealer insurance settlement"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
-  };
-  should["pays insurance 2:1 when the dealer has blackjack, including even money on a player blackjack"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.start mock {};
     .bjk.wwch:0b;
     .bjk.pit:0Ni;
+    .bjk.cp:(0 1 2i)!`p1`p2`p3;
+  };
+  should["pays insurance 2:1 when the dealer has blackjack, including even money on a player blackjack"]{
     .bjk.dc:`A`K;
     .bjk.tab:([]round:3#1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:(`9`7;`10`8;`A`Q);cnt:16 18 21i;dealer:3#enlist`A`K;dealerCnt:3#21i;bet:3#10;return:0 0 10f;profit:3#0n;split:000b;double:000b;insurance:5 0 5f);
     .bjk.tab:update out:111b,wait:000b,turn:000b from .bjk.tab;
-    .bjk.cp:(0 1 2i)!`p1`p2`p3;
     .bjk.dealer[];
     (exec profit from .bjk.res) musteq 0 -10 10f;
   };
   should["loses the insurance when the dealer doesn't have blackjack, and even money still nets the bet"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.start mock {};
-    .bjk.wwch:0b;
-    .bjk.pit:0Ni;
     .bjk.dc:`A`6;
     .bjk.tab:([]round:3#1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:(`10`9;`10`8;`A`Q);cnt:19 18 21i;dealer:3#enlist`A`6;dealerCnt:3#17i;bet:3#10;return:20 20 25f;profit:3#0n;split:000b;double:000b;insurance:5 0 5f);
     .bjk.tab:update out:111b,wait:000b,turn:000b from .bjk.tab;
-    .bjk.cp:(0 1 2i)!`p1`p2`p3;
     .bjk.dealer[];
     (exec profit from .bjk.res) musteq 5 10 10f;
   };

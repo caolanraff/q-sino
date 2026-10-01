@@ -66,15 +66,16 @@
  };
 
 .tst.desc["regConn"]{
-  should["adds a plain connection to cp when isDA is false"]{
+  before{
     .bjk.cp:()!(); .bjk.pit:0Ni;
+  };
+  should["adds a plain connection to cp when isDA is false"]{
     `.bjk.isPit mock {0b};
     .bjk.regConn[42i];
     (count .bjk.cp) musteq 1;
     .bjk.pit musteq 0Ni;
     };
   should["routes a pitboss connection to .bjk.pit instead of cp"]{
-    .bjk.cp:()!(); .bjk.pit:0Ni;
     `.bjk.isPit mock {1b};
     .bjk.regConn[42i];
     .bjk.pit musteq 42i;
@@ -83,24 +84,23 @@
  };
 
 .tst.desc[".z.po"]{
+  before{
+    .tst.startCalls:0;
+    `.bjk.isBanned mock {0b};
+    `.bjk.start mock {.tst.startCalls+:1};
+  };
   should["registers the connection and starts the table for a plain client"]{
     .bjk.cp:()!(); .bjk.pit:0Ni;
     .tst.regConnCalls:0;
-    .tst.startCalls:0;
     `.bjk.regConn mock {.tst.regConnCalls+:1};
     `.bjk.isPit mock {0b};
-    `.bjk.isBanned mock {0b};
-    `.bjk.start mock {.tst.startCalls+:1};
     .z.po[];
     .tst.regConnCalls musteq 1;
     .tst.startCalls musteq 1;
     };
   should["skips .bjk.start for a pitboss connection"]{
-    .tst.startCalls:0;
     `.bjk.regConn mock {};
     `.bjk.isPit mock {1b};
-    `.bjk.isBanned mock {0b};
-    `.bjk.start mock {.tst.startCalls+:1};
     .z.po[];
     .tst.startCalls musteq 0;
     };
@@ -120,14 +120,14 @@
 .tst.desc[".bjk.leave mid-hand"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
+    `.bjk.pubMsg mock {[x;y]};
+    .bjk.cp:(5i;6i)!`alice`bob;
+    .bjk.hd:0b;
   };
   should["passes the turn to the next player's hand when the leaver held it"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
-    .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.hd:0b;
     .bjk.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.leave[5i];
     (exec handle from .bjk.tab) musteq enlist 6i;
@@ -135,31 +135,22 @@
     .tst.excFuncCalls mustmatch enlist(`.plr.play;6i);
     };
   should["runs the dealer when the leaver was the last player still to act"]{
-    `.bjk.pubMsg mock {[x;y]};
     .tst.dealerCalls:0;
     `.bjk.dealer mock {.tst.dealerCalls+:1};
-    .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.hd:0b;
     .bjk.tab:update out:00b,wait:10b,turn:01b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.leave[6i];
     .tst.dealerCalls musteq 1;
     };
   should["leaves the turn with its holder when someone else leaves"]{
-    `.bjk.pubMsg mock {[x;y]};
     .tst.nextTurnCalls:0;
     `.bjk.nextTurn mock {.tst.nextTurnCalls+:1};
-    .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.hd:0b;
     .bjk.tab:update out:00b,wait:00b,turn:10b from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.leave[6i];
     (exec handle from .bjk.tab where turn) musteq enlist 5i;
     .tst.nextTurnCalls musteq 0;
     };
   should["removes every split hand belonging to the leaver"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
-    .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.hd:0b;
     .bjk.tab:([]round:1 1 1;player:1 2.01 2.02;name:`alice`bob`bob;handle:5 6 6i;cards:(`8`8;`9`3;`9`4);cnt:16 12 13i;dealer:3#`5;dealerCnt:5 5 5i;bet:10 10 10;return:3#0n;profit:3#0n;split:011b;double:000b;insurance:0f);
     .bjk.tab:update out:000b,wait:000b,turn:100b from .bjk.tab;
     .bjk.leave[6i];
@@ -170,34 +161,30 @@
 .tst.desc[".bjk.leave between hands"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
+    `.bjk.pubMsg mock {[x;y]};
+    .bjk.hd:1b;
   };
   should["deals when the leaver was the only seated player yet to bet"]{
-    `.bjk.pubMsg mock {[x;y]};
     .tst.dealCalls:0;
     `.bjk.deal mock {.tst.dealCalls+:1};
     .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.hd:1b;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
     .bjk.tab:update bet:10 0N from ([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.leave[6i];
     .tst.dealCalls musteq 1;
     };
   should["doesn't deal while another remaining player still hasn't bet"]{
-    `.bjk.pubMsg mock {[x;y]};
     .tst.dealCalls:0;
     `.bjk.deal mock {.tst.dealCalls+:1};
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
-    .bjk.hd:1b;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
     .bjk.tab:([]round:1 1 1;player:1 2 3f;name:`alice`bob`carol;handle:5 6 7i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:0f);
     .bjk.leave[6i];
     .tst.dealCalls musteq 0;
     };
   should["drops the leaver's pending bet"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.deal mock {};
     .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.hd:1b;
     .bjk.stake:([name:`alice`bob;handle:5 6i]bet:10 20);
     .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.leave[6i];
@@ -208,12 +195,12 @@
 .tst.desc[".bjk.start"]{
   before{
     .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
-  };
-  should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
+  };
+  should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
     .bjk.start[];
@@ -222,10 +209,6 @@
     .tst.excFuncCalls mustmatch ((`.plr.stake;6i);(`.plr.stake;7i));
     };
   should["prompts every player when nobody has bet yet"]{
-    `.bjk.sendMsg mock {[x;y]};
-    .tst.excFuncCalls:();
-    `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
-    .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.start[];
@@ -234,8 +217,10 @@
  };
 
 .tst.desc[".z.pc"]{
-  should["resets .bjk.pit to null for the pitboss handle, without calling leave"]{
+  before{
     .bjk.pit:7i;
+  };
+  should["resets .bjk.pit to null for the pitboss handle, without calling leave"]{
     .tst.leaveCalls:0;
     `.bjk.leave mock {.tst.leaveCalls+:1};
     .z.pc[7i];
@@ -243,7 +228,6 @@
     .tst.leaveCalls musteq 0;
   };
   should["calls leave for a seated player's disconnect, leaving .bjk.pit untouched"]{
-    .bjk.pit:7i;
     .bjk.cp:enlist[3i]!enlist`bob_3;
     .tst.leaveArg:0Ni;
     `.bjk.leave mock {.tst.leaveArg:x};
@@ -252,7 +236,6 @@
     .tst.leaveArg musteq 3i;
   };
   should["ignores a handle that never joined, such as the console closing"]{
-    .bjk.pit:7i;
     .bjk.cp:enlist[3i]!enlist`bob_3;
     .tst.leaveCalls:0;
     `.bjk.leave mock {.tst.leaveCalls+:1};
@@ -262,84 +245,71 @@
  };
 
 .tst.desc[".bjk.leave winnings message"]{
-  should["reports net winnings across every shoe this session, ignoring other players"]{
-    .tst.msgs:();
+  before{
     `.bjk.sendMsg mock {[x;y]};
-    `.log.info mock {.tst.msgs,:enlist raze x};
     `.bjk.pubMsg mock {[x;y]};
     .bjk.hd:1b;
+    .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
+  };
+  should["reports net winnings across every shoe this session, ignoring other players"]{
+    .tst.msgs:();
+    `.log.info mock {.tst.msgs,:enlist raze x};
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.joined:(5 6i)!0 0;
     .bjk.hist:([]round:1 1;handle:5 6i;profit:10 50f);
     .bjk.res:([]round:2 3 3;handle:5 5 6i;profit:-5 15 -50f);
-    .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
     (any .tst.msgs like "*net winnings this session $20.00") musteq 1b;
     };
   should["shows a net loss with a leading minus sign"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {.tst.msgs,:enlist raze x};
-    `.bjk.pubMsg mock {[x;y]};
-    .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
     .bjk.joined:enlist[5i]!enlist 0;
     .bjk.hist:([]round:0#0;handle:0#0i;profit:0#0f);
     .bjk.res:([]round:1 2;handle:5 5i;profit:-10 -2.5);
-    .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
     (any .tst.msgs like "*net winnings this session -$12.50") musteq 1b;
     };
   should["ignores results from an earlier connection that had the same handle"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {.tst.msgs,:enlist raze x};
-    `.bjk.pubMsg mock {[x;y]};
-    .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
     .bjk.joined:enlist[5i]!enlist 2;  / this session joined after round 2
     .bjk.hist:([]round:1 2;handle:5 5i;profit:100 100f);
     .bjk.res:([]round:enlist 3;handle:enlist 5i;profit:enlist 10f);
-    .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
     (any .tst.msgs like "*net winnings this session $10.00") musteq 1b;
     };
   should["reports zero for a player who never finished a hand"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {.tst.msgs,:enlist raze x};
-    `.bjk.pubMsg mock {[x;y]};
-    .bjk.hd:1b;
     .bjk.cp:enlist[5i]!enlist`alice;
     .bjk.joined:enlist[5i]!enlist 0;
     .bjk.hist:.bjk.res:([]round:0#0;handle:0#0i;profit:0#0f);
-    .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
     (any .tst.msgs like "*net winnings this session $0.00") musteq 1b;
     };
   should["forgets the session's join round"]{
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.pubMsg mock {[x;y]};
-    .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.joined:(5 6i)!0 3;
     .bjk.hist:.bjk.res:([]round:0#0;handle:0#0i;profit:0#0f);
-    .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
     .bjk.joined musteq enlist[6i]!enlist 3;
     };
  };
 
 .tst.desc["regConn join round"]{
-  should["records the current round against a plain connection's handle"]{
+  before{
     .bjk.cp:()!(); .bjk.pit:0Ni; .bjk.joined:("i"$())!"j"$();
+  };
+  should["records the current round against a plain connection's handle"]{
     `.bjk.isPit mock {0b};
     .bjk.rnd:7;
     .bjk.regConn[42i];
     .bjk.joined[42i] musteq 7;
     };
   should["doesn't record a pitboss connection"]{
-    .bjk.cp:()!(); .bjk.pit:0Ni; .bjk.joined:("i"$())!"j"$();
     `.bjk.isPit mock {1b};
     .bjk.regConn[42i];
     (count .bjk.joined) musteq 0;
@@ -358,13 +328,13 @@
 .tst.desc[".bjk.leave records a mid-hand leaver's hands"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
-  };
-  should["records an unfinished hand as a loss of its bet"]{
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
+    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
+  };
+  should["records an unfinished hand as a loss of its bet"]{
     `.bjk.nextTurn mock {};
     .bjk.hd:0b;
-    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
     .bjk.leave[5i];
@@ -375,22 +345,16 @@
     (exec first dealer from .bjk.res) mustmatch enlist`9;
     };
   should["keeps the result of a hand that was already settled, like a paid blackjack"]{
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
     .bjk.hd:0b;
-    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`A`K;`9`7);cnt:21 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(25f;());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.tab:update out:10b,wait:00b,turn:01b from .bjk.tab;
     .bjk.leave[5i];
     (exec profit from .bjk.res) musteq enlist 15f;
     };
   should["records every split hand, forfeiting a doubled stake in full"]{
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
     .bjk.hd:0b;
-    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:3 3 3;player:1.01 1.02 2;name:`alice`alice`bob;handle:5 5 6i;cards:(`8`3`K;`8`K`5;`9`7);cnt:21 23 16i;dealer:`9`9`9;dealerCnt:9 9 9i;bet:20 10 10;return:(();0f;());profit:3#0n;split:110b;double:100b;insurance:0f);
     .bjk.tab:update out:010b,wait:100b,turn:001b from .bjk.tab;
     .bjk.leave[5i];
@@ -399,24 +363,18 @@
     };
   should["counts the forfeited hand in the leaver's session winnings"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {.tst.msgs,:enlist raze x};
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.nextTurn mock {};
     .bjk.res:([]round:enlist 1;player:enlist 1;name:enlist`alice;handle:enlist 5i;cards:enlist`K`9;cnt:enlist 19i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 25f;profit:enlist 15f;split:enlist 0b;double:enlist 0b;insurance:0f);
     .bjk.hd:0b;
-    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:2 2;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
     .bjk.leave[5i];
     (any .tst.msgs like "*net winnings this session $5.00") musteq 1b;
     };
   should["records nothing for a player who leaves between hands"]{
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.deal mock {};
     .bjk.hd:1b;
-    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
     .bjk.tab:([]round:0N 0N;player:1 2f;name:`alice`bob;handle:5 6i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 0N;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.leave[5i];
@@ -443,27 +401,22 @@
 .tst.desc[".bjk.leave during insurance"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:0#.bjk.res;
-  };
-  should["closes insurance when the last player yet to answer leaves"]{
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.pubMsg mock {[x;y]};
-    .tst.closeCalls:0;
-    `.bjk.closeInsurance mock {.tst.closeCalls+:1};
     .bjk.hd:0b; .bjk.insuring:1b;
     .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
     .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`9`7;`10`8);cnt:16 18i;dealer:2#`A;dealerCnt:11 11i;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:5 0n);
+  };
+  should["closes insurance when the last player yet to answer leaves"]{
+    .tst.closeCalls:0;
+    `.bjk.closeInsurance mock {.tst.closeCalls+:1};
     .bjk.tab:update out:00b,wait:00b,turn:00b from .bjk.tab;
     .bjk.leave[6i];
     .tst.closeCalls musteq 1;
     .bjk.insuring:0b;
     };
   should["records a leaver's insurance as lost along with their bet"]{
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.closeInsurance mock {};
-    .bjk.hd:0b; .bjk.insuring:1b;
-    .bjk.cp:(5i;6i)!`alice`bob; .bjk.joined:(5 6i)!0 0;
-    .bjk.tab:([]round:1 1;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`9`7;`10`8);cnt:16 18i;dealer:2#`A;dealerCnt:11 11i;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:5 0n);
     .bjk.tab:update out:00b,wait:00b,turn:00b from .bjk.tab;
     .bjk.leave[5i];
     (exec profit from .bjk.res) musteq enlist -15f;
@@ -571,14 +524,16 @@
  };
 
 .tst.desc[".bjk.eject"]{
+  before{
+    .tst.left:();
+    `.bjk.leave mock {.tst.left,:x};
+    .bjk.cp:enlist[5i]!enlist`a_5;
+  };
   should["only logs the suspicion when ejection is off"]{
     .tst.logged:();
     `.log.info mock {.tst.logged,:enlist x};
-    .tst.left:();
-    `.bjk.leave mock {.tst.left,:x};
     `.bjk.disconnect mock {};
     .bjk.ejectCounters:0b;
-    .bjk.cp:enlist[5i]!enlist`a_5;
     .bjk.users:enlist[5i]!enlist`alice;
     .bjk.banned:`$();
     .bjk.eject 5i;
@@ -590,12 +545,9 @@
     .tst.msgs:();
     `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     `.log.warn mock {[x]};
-    .tst.left:();
-    `.bjk.leave mock {.tst.left,:x};
     .tst.closed:();
     `.bjk.disconnect mock {.tst.closed,:x};
     .bjk.ejectCounters:1b;
-    .bjk.cp:enlist[5i]!enlist`a_5;
     .bjk.users:enlist[5i]!enlist`alice;
     .bjk.banned:`$();
     .bjk.eject 5i;
@@ -605,11 +557,8 @@
     .tst.closed mustmatch enlist 5i;
   };
   should["ignores a handle that isn't at the table, e.g. a player who has already left"]{
-    .tst.left:();
-    `.bjk.leave mock {.tst.left,:x};
     `.bjk.disconnect mock {};
     .bjk.ejectCounters:1b;
-    .bjk.cp:enlist[5i]!enlist`a_5;
     .bjk.eject 9i;
     count[.tst.left] musteq 0;
   };

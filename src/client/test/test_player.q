@@ -8,15 +8,15 @@
  };
 
 .tst.desc[".plr.dispatch"]{
-  should["forwards the given function name and argument to .plr.h as a single sync request"]{
+  before{
     .tst.req:();
     `.plr.h mock {[fx].tst.req:fx};
+  };
+  should["forwards the given function name and argument to .plr.h as a single sync request"]{
     .plr.dispatch[`stake;10];
     .tst.req mustmatch(`stake;10);
   };
   should["passes through whatever argument it's given, including no argument"]{
-    .tst.req:();
-    `.plr.h mock {[fx].tst.req:fx};
     .plr.dispatch[`hit;::];
     .tst.req mustmatch(`hit;::);
   };

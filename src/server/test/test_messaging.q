@@ -10,22 +10,22 @@
  };
 
 .tst.desc[".bjk.sendMsg"]{
-  should["sends the message to the handle to be displayed there"]{
+  before{
     .tst.lgCalls:();
+  };
+  should["sends the message to the handle to be displayed there"]{
     .tst.rec:{.tst.lgCalls,:enlist x};
     `.bjk.display mock {[msg](`.tst.rec;msg)};
     .bjk.sendMsg["hello";0i];
     .tst.lgCalls mustmatch enlist"hello";
   };
   should["targets only the first handle when given a list of handles"]{
-    .tst.lgCalls:();
     .tst.rec:{.tst.lgCalls,:enlist x};
     `.bjk.display mock {[msg](`.tst.rec;msg)};
     .bjk.sendMsg["hi";0 1i];
     .tst.lgCalls mustmatch enlist"hi";
   };
   should["logs instead of throwing when the handle can't be written to"]{
-    .tst.lgCalls:();
     `.log.warn mock {.tst.lgCalls,:enlist x};
     .bjk.sendMsg["hi";999i];
     count[.tst.lgCalls] musteq 1;
@@ -46,14 +46,15 @@
  };
 
 .tst.desc[".bjk.excFunc"]{
-  should["evaluates the named function with its argument on the target handle"]{
+  before{
     .tst.lgCalls:();
+  };
+  should["evaluates the named function with its argument on the target handle"]{
     `.log.info mock {.tst.lgCalls,:enlist x};
     .bjk.excFunc[`.log.info;"probed";0i];
     .tst.lgCalls mustmatch enlist"probed";
   };
   should["logs instead of throwing when the handle can't be written to"]{
-    .tst.lgCalls:();
     `.log.warn mock {.tst.lgCalls,:enlist x};
     .bjk.excFunc[`.plr.play;`;999i];
     first[.tst.lgCalls] mustlike "Couldn't send a trigger: *";
