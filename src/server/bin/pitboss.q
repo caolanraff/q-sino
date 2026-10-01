@@ -13,6 +13,10 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.insured:([]name:`symbol$();handle:`int$();basic:`float$());                                   / each player's insured hands, with the Hi-Lo count when they bet
 .pit.insureCount:3;                                                                                / Hi-Lo true count where a counter starts insuring
 .pit.minInsures:2;                                                                                 / insured hands, all at a high count, that mark a counter
+.pit.goodCount:2;                                                                                  / Hi-Lo true count from which the deck favours the player
+.pit.badCount:0;                                                                                   / Hi-Lo true count at or below which it doesn't
+.pit.minRampHands:5;                                                                               / bets needed at each before comparing them
+.pit.minRamp:1.5;                                                                                  / how many times bigger a counter bets when the count is good
 .pit.scores:([]time:`timestamp$();round:`long$();name:`symbol$();handle:`int$();hands:`long$();basic:`float$();omega:`float$();perfect:`float$();score:`float$()); / each round's correlation scores, for charting
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                       / [handle] cards in a full shoe, from the server's rules
@@ -39,9 +43,12 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.correlations:{update score:basic|omega|perfect from select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect by name,handle from .pit.bets}; / per player: hands, bet/count correlation per system, and the best
 .pit.recordScores:{.pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[]}; / keep this round's scores
 .pit.insurers:{select insures:count i by name,handle from .pit.insured where(all;basic>=.pit.insureCount)fby name}; / players who've only insured at a high count; basic strategy never insures
-.pit.flagged:{                                                                                     / players over the line this round, on either tell
-  s:.pit.correlations[]lj .pit.insurers[];                                                         / each player's scores and insurance record
-  :select from s where((hands>=.pit.minHands)&score>=.pit.suspectCor)|.pit.minInsures<=0^insures;  / bets follow the count, or insures only at a high count
+.pit.ramps:{select good:sum basic>=.pit.goodCount,bad:sum basic<=.pit.badCount,ramp:(avg bet where basic>=.pit.goodCount)%avg bet where basic<=.pit.badCount by name,handle from .pit.bets}; / per player: bets at a good and a bad count, and how much bigger the good-count ones are
+.pit.flagged:{                                                                                     / players over the line this round, on any tell
+  s:(.pit.correlations[]lj .pit.insurers[])lj .pit.ramps[];                                        / each player's scores, insurance record and bet ramp
+  s:update follows:(hands>=.pit.minHands)&score>=.pit.suspectCor,insuresHigh:.pit.minInsures<=0^insures from s; / bets follow the count; insures only at a high count
+  s:update ramps:(.pit.minRampHands<=good&bad)&ramp>=.pit.minRamp from s;                          / bets clearly more when the count is good
+  :select from s where follows|insuresHigh|ramps;                                                  / flagged on any of them
  };
 
 .pit.updateStreaks:{                                                                               / count the rounds each player has been flagged in a row
@@ -52,7 +59,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.suspects:{0!select from .pit.flagged[]where .pit.persist<=.pit.streak name};                  / players flagged .pit.persist rounds in a row; one round can be chance
 
 .pit.report:{[s]                                                                                   / [suspect] flag a suspected counter to the server
-  .log.warn"Suspected card counter: ",string[s`name]," (bet/count correlation ",.Q.f[2;s`score]," over ",string[s`hands]," hands; insured only at a high count ",string[0^s`insures]," times)";
+  .log.warn"Suspected card counter: ",string[s`name]," (bet/count correlation ",.Q.f[2;s`score]," over ",string[s`hands]," hands; bets ",.Q.f[1;0^s`ramp],"x as much at a good count; insured only at a high count ",string[0^s`insures]," times)";
   delete from`.pit.bets where name=s`name;                                                         / start their record afresh
   delete from`.pit.insured where name=s`name;                                                      / and their insurance record
   .pit.streak _:s`name;                                                                            / reset their streak

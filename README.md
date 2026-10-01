@@ -119,14 +119,20 @@ a column per player and count (e.g. `alice_8_perfect`) holding that player's
 score: how closely their last 100 bets followed that count, from -1 to 1. An
 `alert` column holds the suspicion threshold (0.5) to draw as a line.
 
-A player becomes a **suspected card counter** once they have at least 20
-hands in their last 100, and their bets have followed one of the three counts
-with a correlation of 0.5 or more for 5 rounds in a row (one round over the
-line can be chance). A player is also flagged if they've taken insurance at
-least twice, and only ever when the Hi-Lo true count was +3 or more:
-basic strategy never insures, but a counter does exactly that, so it catches
-a counter who flat-bets to hide the bet/count signal. The pitboss logs a
-warning and asks the server to eject them. The server only does so when it was started with `--pitboss 1`:
+A player becomes a **suspected card counter** once any of these signs has
+held for 5 rounds in a row (one round over the line can be chance):
+- **Bets follow the count** - over their last 100 hands (at least 20), their
+  bets correlate with one of the three counts at 0.5 or more.
+- **Bets jump when the count is good** - their average bet at a Hi-Lo true
+  count of +2 or more is at least 1.5 times their average at 0 or below, with
+  at least 5 hands at each. This still sees a counter who jumps their bet in
+  steps or adds random bets as cover, which weakens the correlation.
+- **Insurance only at a high count** - they've insured at least twice, only
+  ever at a Hi-Lo true count of +3 or more. Basic strategy never insures, so
+  this catches a counter who flat-bets.
+
+The pitboss then logs a warning and asks the server to eject them.
+The server only does so when it was started with `--pitboss 1`:
 the player is told "The pitboss has asked you to leave the table", their hand
 is forfeited if one is in play, and they're disconnected. Their username is
 then banned for the rest of the server's session: any later connection from
