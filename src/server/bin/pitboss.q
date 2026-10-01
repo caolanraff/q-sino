@@ -45,7 +45,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.insurers:{select insures:count i by name,handle from .pit.insured where(all;basic>=.pit.insureCount)fby name}; / players who've only insured at a high count; basic strategy never insures
 .pit.ramps:{select good:sum basic>=.pit.goodCount,bad:sum basic<=.pit.badCount,ramp:(avg bet where basic>=.pit.goodCount)%avg bet where basic<=.pit.badCount by name,handle from .pit.bets}; / per player: bets at a good and a bad count, and how much bigger the good-count ones are
 .pit.flagged:{                                                                                     / players over the line this round, on any tell
-  s:(.pit.correlations[]lj .pit.insurers[])lj .pit.ramps[];                                        / each player's scores, insurance record and bet ramp
+  s:(lj/)(.pit.correlations[];.pit.insurers[];.pit.ramps[]);                                       / each player's scores, insurance record and bet ramp
   s:update follows:(hands>=.pit.minHands)&score>=.pit.suspectCor,insuresHigh:.pit.minInsures<=0^insures from s; / bets follow the count; insures only at a high count
   s:update ramps:(.pit.minRampHands<=good&bad)&ramp>=.pit.minRamp from s;                          / bets clearly more when the count is good
   :select from s where follows|insuresHigh|ramps;                                                  / flagged on any of them
