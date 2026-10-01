@@ -122,8 +122,11 @@ score: how closely their last 100 bets followed that count, from -1 to 1. An
 A player becomes a **suspected card counter** once they have at least 20
 hands in their last 100, and their bets have followed one of the three counts
 with a correlation of 0.5 or more for 5 rounds in a row (one round over the
-line can be chance). The pitboss logs a warning and asks the server to
-eject them. The server only does so when it was started with `--pitboss 1`:
+line can be chance). A player is also flagged if they've taken insurance at
+least twice, and only ever when the Hi-Lo true count was +3 or more:
+basic strategy never insures, but a counter does exactly that, so it catches
+a counter who flat-bets to hide the bet/count signal. The pitboss logs a
+warning and asks the server to eject them. The server only does so when it was started with `--pitboss 1`:
 the player is told "The pitboss has asked you to leave the table", their hand
 is forfeited if one is in play, and they're disconnected. Their username is
 then banned for the rest of the server's session: any later connection from
