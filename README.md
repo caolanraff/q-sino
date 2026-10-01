@@ -70,6 +70,7 @@ code sent to it is refused and logged.
 ## Table rules
 Standard Las Vegas Strip rules:
 - Bets are $10 to $500, in whole dollars. Doubling and splitting can take a hand past $500.
+- Every player starts with $1,000. You can't bet, double, split or insure for more than you have left, and once you can't afford the $10 minimum you're out of money. Each bets prompt shows your balance.
 - 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
 - Blackjack pays 3:2; other wins pay 1:1.
 - The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.

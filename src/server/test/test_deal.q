@@ -2,7 +2,7 @@
 .utl.load each .bjk.libs;
 
 .tst.desc["stake[]"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000;.bjk.bank:enlist[0i]!enlist 1000f};
   should["refuses a bet outside the table limits, and says what they are"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -85,7 +85,7 @@
  };
 
 .tst.desc["stake[] betting clock"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000;.bjk.bank:enlist[0i]!enlist 1000f};
   should["starts the clock on the round's first bet and tells the players still to bet"]{
     `.bjk.user mock {`p1};
     .tst.msgs:();
@@ -795,6 +795,7 @@
  };
 
 .tst.desc["insure[]"]{
+  before{.bjk.bank:(0 1 2i)!3#1000f};
   should["records the side bet"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.closeInsurance mock {};
@@ -926,5 +927,37 @@
     .bjk.turnDeadline:.z.p+0D00:00:10;
     .bjk.dealer[];
     .bjk.turnDeadline musteq 0Np;
+  };
+ };
+
+.tst.desc["stake[] balance"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000;.bjk.hd:1b;.bjk.stake:([name:();handle:()]bet:`long$())};
+  should["refuses a bet bigger than the player's balance"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.bank:enlist[0i]!enlist 40f;
+    stake[50];
+    count[.bjk.stake] musteq 0;
+    .tst.msgs mustmatch enlist"You can't afford that: your balance is $40.00";
+  };
+  should["refuses any bet from a player who can't afford the minimum"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.bank:enlist[0i]!enlist 8f;
+    stake[10];
+    .tst.msgs mustmatch enlist"You're out of money";
+  };
+ };
+
+.tst.desc[".bjk.recordRound balance"]{
+  should["settles each player's balance with the round's profit, insurance included"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.wwch:0b;
+    .bjk.dc:`K`5;
+    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.tab:([]round:1 1 1;player:1 1.01 2;name:`p1`p1`p2;handle:0 0 1i;cards:(`8`3;`8`10;`9`7);cnt:11 18 16i;dealer:3#enlist`K`5`Q;dealerCnt:25 25 25i;bet:10 10 20;return:20 20 40f;profit:3#0n;split:110b;double:000b;insurance:5 0 0f;out:000b;wait:000b;turn:000b);
+    .bjk.bank:(0 1i)!100 100f;
+    .bjk.recordRound[];
+    .bjk.bank mustmatch(0 1i)!115 120f;
   };
  };

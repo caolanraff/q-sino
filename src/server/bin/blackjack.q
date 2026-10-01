@@ -11,7 +11,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;                                                 / one 52-card deck
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
-.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;                                        / table rules, pushed to clients
+.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000;                         / table rules, pushed to clients
+.bjk.bank:(`int$())!`float$();                                                                     / each player's balance
 .bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
@@ -39,13 +40,22 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 
 hist:{.bjk.hist,.bjk.res};                                                                         / every hand result so far
 
+.bjk.committed:{[h]exec sum(0^bet)+0^insurance from .bjk.tab where handle=h};                      / [handle] what a player has on the table this round
+.bjk.available:{[h](0^.bjk.bank h)-.bjk.committed h};                                              / [handle] what a player can still put on the table
+.bjk.broke:{[h].bjk.bank[h]<.bjk.rules`minBet};                                                    / [handle] can't afford the minimum bet
+
+.bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their balance
+  if[.bjk.broke h;:.bjk.sendMsg["You're out of money";h]];                                         / they can't bet any more
+  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],"; your balance is $",.Q.f[2;.bjk.bank h];h]; / ask them to bet
+ };
+
 .bjk.start:{                                                                                       / seat players and ask for bets
   if[not .bjk.hd;:.bjk.sendMsg["Please wait until the hand is over";.z.w]];                        / a hand is in progress
   if[0=count .bjk.cp;:.log.info"No users are connected"];                                          / nobody to deal to
   .log.info $[.bjk.seated[]~.bjk.cp;"No new users have joined the table";"New users have joined the table"];
   .bjk.seat[];                                                                                     / seat everyone connected
   unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
-  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[]]each unbet;       / ask them to bet
+  .bjk.betPrompt each unbet;                                                                       / ask them to bet
   .bjk.trigger[`.plr.stake]each unbet;                                                             / prompt their stake handler
  };
 
@@ -66,13 +76,14 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.logLeaver:{[h]                                                                                / [handle] log a leaver's net winnings
   won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;                           / net profit since they joined
-  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won];
+  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won],", leaving with $",.Q.f[2;$[.bjk.hd;.bjk.bank h;.bjk.available h]];
  };
 
 .bjk.unseat:{[h]                                                                                   / [handle] remove a player from the table
   .bjk.cp:.bjk.cp _ h;                                                                             / drop the connection
   .bjk.users:.bjk.users _ h;                                                                       / drop their username
   .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
+  .bjk.bank:.bjk.bank _ h;                                                                         / drop their balance
   delete from`.bjk.tab where handle=h;                                                             / drop their hands
   delete from`.bjk.stake where handle=h;                                                           / drop their bet
  };

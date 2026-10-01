@@ -2,7 +2,9 @@
 
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand
   if[not type[bet]in -5 -6 -7h;.bjk.sendMsg["Bets are whole dollars";.z.w];:()];                   / whole dollars only
+  if[.bjk.broke .z.w;.bjk.sendMsg["You're out of money";.z.w];:()];                                / can't afford the minimum
   if[not bet within .bjk.rules`minBet`maxBet;.bjk.sendMsg["Bets are ",.bjk.limits[];.z.w];:()];    / within the table limits
+  if[bet>.bjk.bank .z.w;.bjk.sendMsg["You can't afford that: your balance is $",.Q.f[2;.bjk.bank .z.w];.z.w];:()]; / no more than their balance
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / not mid-hand
   .log.info string[.z.u]," bets $",string bet;
   upsert[`.bjk.stake;(.bjk.user[];.z.w;"j"$bet)];                                                  / record the bet
@@ -203,7 +205,9 @@ stake:{[bet]                                                                    
 .bjk.recordRound:{                                                                                 / record the round's results
   .log.info"Hand stats;\n",.Q.s .bjk.tab;
   if[.bjk.wwch;update dealer:enlist each dealer from`.bjk.tab];                                    / dealer has only the up-card: make it a list
-  upsert[`.bjk.res;update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from delete out,wait,turn from .bjk.tab]; / add to results; insurance pays 2:1 on a dealer blackjack, else is lost
+  t:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from delete out,wait,turn from .bjk.tab; / each hand's result; insurance pays 2:1 on a dealer blackjack, else is lost
+  upsert[`.bjk.res;t];                                                                             / add to results
+  .bjk.bank+:exec sum profit by handle from t;                                                     / settle each player's balance
   .bjk.sendMsg["Results table for the round;\n",.Q.s select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab]each key .bjk.cp; / show everyone the results
  };
 

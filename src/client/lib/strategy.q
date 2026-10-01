@@ -54,6 +54,7 @@
   .stg.res:s`res;                                                                                  / this shoe's results
   .stg.mh:s`me;                                                                                    / my handle
   .stg.rules:s`rules;                                                                              / table rules
+  .stg.bank:s`bank;                                                                                / my balance
  };
 
 .stg.values:{[cards]                                                                               / [cards] card values, with aces as 1 where needed
@@ -83,26 +84,29 @@
 .stg.hitBelow17:{[cards]$[17>sum .stg.values[-1_cards];`H;`S]};                                    / [cards] hit under 17, else stick
 .stg.betSpread:{[bets]bets 0|4&-1+floor .stg.trueCount};                                           / [bets] pick a bet by true count
 
-.stg.decide:{[cards;hands]                                                                         / [cards;hands] the play, playing a pair as a hard total at the split cap
+.stg.decide:{[cards;hands;afford]                                                                  / [cards;hands;afford] the play, playing a pair as a hard total at the split cap or when I can't cover another bet
   r:.stg.help cards;                                                                               / chart play
-  if[(r=`SP)&hands>=.stg.rules`maxSplitHands;                                                      / split, but at the cap
+  if[(r=`SP)&(hands>=.stg.rules`maxSplitHands)|not afford;                                         / split, but at the cap or short of money
     r:.stg.lookup[.stg.hard;sum"I"$string .crd.cardDict[-1_cards];.crd.cardDict last cards];       / play the pair as a hard total
+  ];
+  if[(r=`D)&not afford;                                                                            / double, but short of money
+    r:$[`DS=.stg.chartPlay[.stg.values -1_cards;.crd.cardDict -1#cards];`S;`H];                    / stick where the chart says double-else-stick, else hit
   ];
   :r;                                                                                              / the play
  };
 
-.stg.tableBet:{.stg.rules[`minBet]|.stg.rules[`maxBet]&x};                                         / keep a bet within the table limits
+.stg.tableBet:{.stg.rules[`minBet]|.stg.rules[`maxBet]&("j"$floor .stg.bank)&x};                   / keep a bet within the table limits and my balance
+.stg.available:{.stg.bank-exec sum(0^bet)+0^insurance from .stg.tab where handle=.stg.mh};         / my balance less what I have on the table this round
 .stg.insureAmount:{$[.stg.trueCount>=.stg.insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f]}; / half the bet once the true count reaches .stg.insureAt, else 0
+
+.plr.leave:{[msg] -1 msg;hclose .plr.h;exit 0};                                                    / [message] say why, disconnect and exit
 
 .plr.stake:{[s]                                                                                    / [state] bet by the count; replaces player.q's prompt
   .stg.recv s;                                                                                     / take the pushed state
-  if[.plr.toth<.stg.handsPlayed+:1;                                                                / count this hand; past --hands, leave
-    -1"Played ",string[.plr.toth]," hand",$[.plr.toth=1;"";"s"],", disconnecting";
-    hclose .plr.h;                                                                                 / disconnect
-    exit 0;                                                                                        / exit
-  ];
+  if[.stg.bank<.stg.rules`minBet;:.plr.leave"Out of money, disconnecting"];                        / can't afford the minimum: leave
+  if[.plr.toth<.stg.handsPlayed+:1;:.plr.leave"Played ",string[.plr.toth]," hand",$[.plr.toth=1;"";"s"],", disconnecting"]; / count this hand; past --hands, leave
   .stg.count[];                                                                                    / update the true count
-  neg[.plr.h](`stake;.stg.tableBet .stg.getBet[]);                                                 / bet within the table limits
+  neg[.plr.h](`stake;.stg.tableBet .stg.getBet[]);                                                 / bet within the table limits and my balance
  };
 
 .plr.insure:{[s]                                                                                   / [state] insure by the count; replaces player.q's prompt
@@ -114,7 +118,8 @@
 .plr.play:{[s]                                                                                     / [state] play by the chart; replaces player.q's prompt
   .stg.recv s;                                                                                     / take the pushed state
   hand:raze[exec cards from .stg.tab where turn],raze exec dealer from .stg.tab where turn;        / player's cards, then the dealer's
-  neg[.plr.h](.plr.handDict .stg.decide[hand;count select from .stg.tab where handle=.stg.mh];`);  / send the play
+  afford:.stg.available[]>=first exec bet from .stg.tab where turn;                                / can I cover another bet the size of this hand's
+  neg[.plr.h](.plr.handDict .stg.decide[hand;count select from .stg.tab where handle=.stg.mh;afford];`); / send the play
  };
 
 .plr.shuffle:{.stg.trueCount:0f};                                                                  / new shoe: reset the count; replaces player.q's note

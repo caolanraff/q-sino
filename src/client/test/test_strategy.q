@@ -17,14 +17,14 @@
 .tst.desc[".stg.decide"]{
   before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt!4 6};
   should["passes .stg.help's split through while the player is under the hand cap"]{
-    .stg.decide[`8`8`10;3] musteq`SP;
+    .stg.decide[`8`8`10;3;1b] musteq`SP;
   };
   should["plays a pair as its hard total once the player is at the hand cap"]{
-    .stg.decide[`8`8`10;4] musteq`H;                                                               / hard 16 vs 10
-    .stg.decide[`10`10`6;4] musteq`S;                                                              / hard 20 vs 6
+    .stg.decide[`8`8`10;4;1b] musteq`H;                                                               / hard 16 vs 10
+    .stg.decide[`10`10`6;4;1b] musteq`S;                                                              / hard 20 vs 6
   };
   should["leaves non-split decisions alone at the hand cap"]{
-    .stg.decide[`5`6`6;4] musteq`D;
+    .stg.decide[`5`6`6;4;1b] musteq`D;
   };
  };
 
@@ -80,7 +80,7 @@
   };
   should["uses the pushed split cap and deck count, not fixed ones"]{
     .stg.recv[`tab`res`me`rules!(([]round:0#0;cards:();dealer:0#`);([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2)];
-    .stg.decide[`8`8`10;2] musteq`H;
+    .stg.decide[`8`8`10;2;1b] musteq`H;
     .stg.count[];
     .stg.trueCount musteq -1%(104-4)%52;
   };
@@ -121,7 +121,7 @@
  };
 
 .tst.desc[".stg.tableBet"]{
-  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;.stg.bank:1000f};
   should["keeps a bet inside the table limits"]{
     .stg.tableBet[25] musteq 25;
   };
@@ -143,7 +143,55 @@
     .plr.toth:1000;
     .stg.handsPlayed:0;
     t:([]round:0#0;cards:();dealer:0#`);
-    .plr.stake`tab`res`me`rules!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500);
+    .plr.stake`tab`res`me`rules`bank!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;1000f);
     .tst.staked mustmatch enlist 10;
+  };
+ };
+
+.tst.desc[".stg.decide short of money"]{
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt!4 6};
+  should["hits instead of doubling when it can't cover another bet"]{
+    .stg.decide[`5`6`6;1;0b] musteq`H;                                                             / hard 11 vs 6 doubles, else hit
+  };
+  should["sticks instead of doubling where the chart says double, else stick"]{
+    .stg.decide[`A`7`4;1;0b] musteq`S;                                                             / soft 18 vs 4: double, else stick
+  };
+  should["plays a pair as its hard total instead of splitting"]{
+    .stg.decide[`8`8`10;1;0b] musteq`H;                                                            / 8,8 vs 10 as hard 16: hit
+  };
+ };
+
+.tst.desc[".stg.tableBet balance"]{
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  should["never bets more than the balance, in whole dollars"]{
+    .stg.bank:35.5;
+    .stg.tableBet[80] mustmatch 35;
+  };
+ };
+
+.tst.desc[".stg.available"]{
+  should["is the balance less this round's bets and insurance"]{
+    .utl.load`:src/client/lib/strategy.q;
+    .stg.mh:5i;
+    .stg.bank:100f;
+    .stg.tab:([]handle:5 5 6i;bet:20 20 40;insurance:10 0 0f);
+    .stg.available[] musteq 50f;
+  };
+ };
+
+.tst.desc[".plr.stake out of money"]{
+  should["leaves instead of staking once it can't afford the minimum bet"]{
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer1.q;
+    .tst.left:();
+    `.plr.leave mock {.tst.left,:enlist x};
+    .tst.staked:();
+    `stake mock {.tst.staked,:x};
+    .plr.h:0i;
+    .plr.toth:1000;
+    .stg.handsPlayed:0;
+    t:([]round:0#0;cards:();dealer:0#`);
+    .plr.stake`tab`res`me`rules`bank!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;8f);
+    .tst.left mustmatch enlist"Out of money, disconnecting";
+    count[.tst.staked] musteq 0;
   };
  };

@@ -273,7 +273,7 @@
     .bjk.res:([]round:2 3 3;handle:5 5 6i;profit:-5 15 -50f);
     .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $20.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $20.00*") musteq 1b;
     };
   should["shows a net loss with a leading minus sign"]{
     .tst.msgs:();
@@ -287,7 +287,7 @@
     .bjk.res:([]round:1 2;handle:5 5i;profit:-10 -2.5);
     .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session -$12.50") musteq 1b;
+    (any .tst.msgs like "*net winnings this session -$12.50*") musteq 1b;
     };
   should["ignores results from an earlier connection that had the same handle"]{
     .tst.msgs:();
@@ -301,7 +301,7 @@
     .bjk.res:([]round:enlist 3;handle:enlist 5i;profit:enlist 10f);
     .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $10.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $10.00*") musteq 1b;
     };
   should["reports zero for a player who never finished a hand"]{
     .tst.msgs:();
@@ -314,7 +314,7 @@
     .bjk.hist:.bjk.res:([]round:0#0;handle:0#0i;profit:0#0f);
     .bjk.tab:([]round:0#0;player:0#0f;name:0#`;handle:0#0i;bet:0#0);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $0.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $0.00*") musteq 1b;
     };
   should["forgets the session's join round"]{
     `.bjk.sendMsg mock {[x;y]};
@@ -409,7 +409,7 @@
     .bjk.tab:([]round:2 2;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $5.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $5.00*") musteq 1b;
     };
   should["records nothing for a player who leaves between hands"]{
     `.bjk.sendMsg mock {[x;y]};
@@ -660,5 +660,68 @@
     .bjk.users[42i] musteq .z.u;
     .bjk.unseat 42i;
     (42i in key .bjk.users) musteq 0b;
+  };
+ };
+
+.tst.desc[".bjk.bank"]{
+  should["gives each player the starting balance when they connect, and forgets it when they leave"]{
+    `.bjk.isPit mock {0b};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000;
+    .bjk.cp:()!();
+    .bjk.bank:(`int$())!`float$();
+    .bjk.regConn[42i];
+    .bjk.bank[42i] musteq 1000f;
+    .bjk.unseat 42i;
+    (42i in key .bjk.bank) musteq 0b;
+  };
+  should["counts what a player has on the table, bets and insurance, against their balance"]{
+    .bjk.bank:(0 1i)!100 50f;
+    .bjk.tab:update insurance:5 0f from ([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    .bjk.committed[0i] musteq 15f;
+    .bjk.available[0i] musteq 85f;
+  };
+ };
+
+.tst.desc[".bjk.betPrompt"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000};
+  should["asks for a bet and shows the player's balance"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.bank:enlist[7i]!enlist 512.5;
+    .bjk.betPrompt 7i;
+    .tst.msgs mustmatch enlist"Please place your bets via the stake[] function, $10 to $500; your balance is $512.50";
+  };
+  should["tells a player who can't afford the minimum bet that they're out of money"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.bank:enlist[7i]!enlist 8f;
+    .bjk.betPrompt 7i;
+    .tst.msgs mustmatch enlist"You're out of money";
+  };
+ };
+
+.tst.desc[".bjk.clientState balance"]{
+  should["pushes the player their own balance"]{
+    .bjk.bank:(5 6i)!250 80f;
+    .bjk.clientState[6i][`bank] musteq 80f;
+  };
+ };
+
+.tst.desc[".bjk.logLeaver balance"]{
+  should["says what a player leaves with, less anything lost on a hand in play"]{
+    .tst.msgs:();
+    `.log.info mock {.tst.msgs,:enlist raze x};
+    .bjk.hist:.bjk.res:0#.bjk.res;
+    .bjk.joined:enlist[0i]!enlist 0;
+    .bjk.cp:enlist[0i]!enlist`p1;
+    .bjk.bank:enlist[0i]!enlist 300f;
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    .bjk.hd:1b;
+    .bjk.logLeaver 0i;
+    .bjk.hd:0b;
+    .bjk.logLeaver 0i;
+    .bjk.hd:1b;
+    .tst.msgs[0] mustlike"*leaving with $300.00";
+    .tst.msgs[1] mustlike"*leaving with $290.00";
   };
  };

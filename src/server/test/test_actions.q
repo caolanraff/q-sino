@@ -168,6 +168,7 @@
  };
 
 .tst.desc["hit[] on split hands"]{
+  before{`.bjk.available mock {1e9}};
   should["busting one split hand leaves the player's other split hand live and gives it the turn"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
@@ -206,6 +207,7 @@
  };
 
 .tst.desc["double[]"]{
+  before{`.bjk.available mock {1e9}};
   should["does nothing when checks[] fails"]{
     `.bjk.checks mock {0b};
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`7`8;cnt:enlist 15i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
@@ -242,6 +244,7 @@
  };
 
 .tst.desc["split[] / .bjk.split0 / .bjk.dealTo"]{
+  before{`.bjk.available mock {1e9}};
   should["does nothing when checks[] fails"]{
     `.bjk.checks mock {0b};
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`10`9;cnt:enlist 19i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
@@ -442,5 +445,36 @@
     .bjk.turnDeadline:.z.p-0D00:00:01;
     .bjk.hit1[];
     (.bjk.turnDeadline>.z.p) musteq 1b;
+  };
+ };
+
+.tst.desc["double[], split[] and insure[] balance"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000};
+  should["refuses to double a bet the player can't cover"]{
+    `.bjk.checks mock {1b};
+    .tst.msgs:();
+    `.bjk.pubMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bjk.available mock {5f};
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`5`6;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    double[];
+    (exec first bet from .bjk.tab where handle=0) musteq 10;
+    first[.tst.msgs] mustlike"You can't afford to double*";
+  };
+  should["refuses to split a hand the player can't cover"]{
+    `.bjk.sendMsg mock {[x;y]};
+    `.bjk.available mock {5f};
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    .bjk.canSplit[] musteq 0b;
+  };
+  should["refuses more insurance than the player has left"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bjk.available mock {3f};
+    .bjk.insuring:1b;
+    .bjk.tab:update insurance:0n from ([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    insure 5;
+    .bjk.insuring:0b;
+    (exec first insurance from .bjk.tab where handle=0) musteq 0n;
+    .tst.msgs mustmatch enlist"You can't afford that much insurance";
   };
  };
