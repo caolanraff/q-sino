@@ -212,6 +212,13 @@
     (exec hands from s) musteq enlist 6;
     (exec score from s) musteq enlist 10 10 20 20 40 40f cor 1 2 3 4 5 6f;
   };
+  should["keeps each count's correlation, so they can be charted"]{
+    .pit.bets:([]name:6#`a_5;handle:6#5i;bet:10 10 20 20 40 40;basic:6#0f;omega:0 1 0 1 0 1f;perfect:1 2 3 4 5 6f);
+    s:.pit.correlations[];
+    (exec basic from s) musteq enlist 0f;
+    (exec omega from s) musteq enlist 10 10 20 20 40 40f cor 0 1 0 1 0 1f;
+    (exec perfect from s) musteq enlist 10 10 20 20 40 40f cor 1 2 3 4 5 6f;
+  };
   should["scores a flat bettor 0, not null"]{
     .pit.bets:([]name:3#`a_5;handle:3#5i;bet:3#20;basic:1 2 3f;omega:1 2 3f;perfect:1 2 3f);
     (exec score from .pit.correlations[]) musteq enlist 0f;
@@ -252,6 +259,7 @@
 .tst.desc[".pit.getDetect suspects"]{
   should["reports each suspect after scoring the round"]{
     `.pit.getBetTrend mock {};
+    `.pit.recordScores mock {};
     `.pit.getPlayTrend mock {};
     .tst.reported:();
     `.pit.report mock {.tst.reported,:enlist x`name};
@@ -259,5 +267,37 @@
     .pit.res:([]round:enlist 1);
     .pit.getDetect enlist 1;
     .tst.reported mustmatch`a_5`c_7;
+  };
+ };
+
+.tst.desc[".pit.recordScores"]{
+  should["adds each player's scores for the round, stamped with the time it was played"]{
+    .pit.scores:0#.pit.scores;
+    .pit.rnd:7;
+    `.pit.correlations mock {([name:`a_5`b_6;handle:5 6i]hands:20 25;basic:.1 .2;omega:.3 .4;perfect:.5 .6;score:.5 .6)};
+    t0:.z.p;
+    .pit.recordScores[];
+    (exec name from .pit.scores) mustmatch`a_5`b_6;
+    (exec round from .pit.scores) mustmatch 7 7;
+    (exec perfect from .pit.scores) mustmatch .5 .6;
+    (all (exec time from .pit.scores) within t0,.z.p) musteq 1b;
+  };
+ };
+
+.tst.desc[".pit.chart"]{
+  should["gives nothing to chart before any round has been scored"]{
+    .pit.scores:0#.pit.scores;
+    .pit.chart[] mustmatch();
+  };
+  should["charts each player's score under each count against the time it was played, with the suspicion line"]{
+    .pit.suspectCor:0.5;
+    t0:2026.10.01D12:00:00;
+    .pit.scores:([]time:t0,t0,t0+0D00:00:01;round:1 1 2;name:`a_5`b_6`a_5;handle:5 6 5i;hands:20 20 21;basic:.1 .2 .3;omega:.4 .5 .6;perfect:.7 .8 .9;score:.7 .8 .9);
+    c:.pit.chart[];
+    cols[c] mustmatch`time`a_5_basic`b_6_basic`a_5_omega`b_6_omega`a_5_perfect`b_6_perfect`alert;
+    c[`time] mustmatch(t0;t0+0D00:00:01);
+    c[`a_5_perfect] mustmatch .7 .9;
+    c[`b_6_basic] mustmatch .2 0n;
+    c[`alert] mustmatch .5 .5;
   };
  };
