@@ -46,7 +46,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.report:{[s]
   .log.warn"Suspected card counter: ",string[s`name]," (bets follow the count, correlation ",.Q.f[2;s`score]," over ",string[s`hands]," hands)";
   delete from`.pit.bets where name=s`name;
-  .pit.streak:.pit.streak _ s`name;
+  .pit.streak _:s`name;
   neg[.pit.h](`.bjk.eject;s`handle);
  };
 
