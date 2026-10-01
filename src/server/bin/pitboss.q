@@ -4,6 +4,10 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.res:([]round:`long$());
 .pit.double:.pit.split:.pit.stick:.pit.insure:();
 .pit.betTrend:flip`Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
+.pit.bets:([]name:`symbol$();handle:`int$();bet:`long$();basic:`float$();omega:`float$();perfect:`float$());
+.pit.window:100;
+.pit.minHands:20;
+.pit.suspectCor:0.5;
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
 
@@ -17,6 +21,21 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
     perfect_cor:0f^bet cor perfect_cnt,perfect_cov:bet cov perfect_cnt
     by Player:name,Handle:handle from .pit.res;
   upsert[`.pit.betTrend;`Round xcols update Round:.pit.rnd from tab];
+  .pit.recordBets[];
+ };
+
+.pit.recordBets:{
+  .pit.bets,:select name,handle,"j"$bet,basic:basic_cnt,omega:omega_cnt,perfect:perfect_cnt from .pit.res where round=.pit.rnd;
+  delete from`.pit.bets where .pit.window<=({reverse til count x};i)fby name;                      / a shoe can be too short to judge at a full table
+ };
+
+.pit.correlations:{select hands:count i,score:max(0f^bet cor basic;0f^bet cor omega;0f^bet cor perfect)by name,handle from .pit.bets};
+.pit.suspects:{0!select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor};
+
+.pit.report:{[s]
+  .log.warn"Suspected card counter: ",string[s`name]," (bets follow the count, correlation ",.Q.f[2;s`score]," over ",string[s`hands]," hands)";
+  delete from`.pit.bets where name=s`name;
+  neg[.pit.h](`.bjk.eject;s`handle);
  };
 
 .pit.handFacts:{[t]                                                                                 / tells: plays 6-deck H17 basic strategy wouldn't make
@@ -57,6 +76,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.getDetect:{[rs]
   .pit.getBetTrend[];
   .pit.getPlayTrend select from .pit.res where round in rs;                                        / a finished round's tells never change
+  .pit.report each .pit.suspects[];
  };
 
 .pit.gameover:{[s]

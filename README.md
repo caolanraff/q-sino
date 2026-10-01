@@ -18,6 +18,7 @@ Run everything from the repo root. Start the server first:
 ```bash
 q src/server/bin/blackjack.q                     # port 5555, random shuffle
 q src/server/bin/blackjack.q -p 6000 --seed 42   # port 6000, repeatable shuffle
+q src/server/bin/blackjack.q --pitboss 1         # the pitboss may eject suspected card counters
 ```
 
 `-p` (q's own listening-port flag) defaults to `5555`.
@@ -111,6 +112,15 @@ Query them on its port from another `q` session:
 h:hopen 5556
 h".pit.betTrend"
 ```
+
+A player becomes a **suspected card counter** once they have at least 20
+hands in their last 100, and their bets follow one of the three counts with a
+correlation of 0.5 or more. The pitboss logs a warning and asks the server to
+eject them. The server only does so when it was started with `--pitboss 1`:
+the player is told "The pitboss has asked you to leave the table", their hand
+is forfeited if one is in play, and they're disconnected. Without the flag
+the server just logs the suspicion. In testing, the four counting strategies
+were all flagged within 50 rounds, and the other three never were.
 
 ## Tests
 ```bash

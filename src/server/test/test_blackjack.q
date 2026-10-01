@@ -567,3 +567,42 @@
     first[.tst.sent] mustlike"That didn't work: Send a command*";
   };
  };
+
+.tst.desc[".bjk.eject"]{
+  should["only logs the suspicion when ejection is off"]{
+    .tst.logged:();
+    `.log.info mock {.tst.logged,:enlist x};
+    .tst.left:();
+    `.bjk.leave mock {.tst.left,:x};
+    `.bjk.disconnect mock {};
+    .bjk.ejectCounters:0b;
+    .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.eject 5i;
+    count[.tst.left] musteq 0;
+    first[.tst.logged] mustlike"The pitboss suspects a_5 of counting cards*";
+  };
+  should["tells the player, takes them off the table and closes their connection when ejection is on"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    `.log.warn mock {[x]};
+    .tst.left:();
+    `.bjk.leave mock {.tst.left,:x};
+    .tst.closed:();
+    `.bjk.disconnect mock {.tst.closed,:x};
+    .bjk.ejectCounters:1b;
+    .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.eject 5i;
+    .tst.msgs mustmatch enlist("The pitboss has asked you to leave the table";5i);
+    .tst.left mustmatch enlist 5i;
+    .tst.closed mustmatch enlist 5i;
+  };
+  should["ignores a handle that isn't at the table, e.g. a player who has already left"]{
+    .tst.left:();
+    `.bjk.leave mock {.tst.left,:x};
+    `.bjk.disconnect mock {};
+    .bjk.ejectCounters:1b;
+    .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.eject 9i;
+    count[.tst.left] musteq 0;
+  };
+ };

@@ -28,6 +28,7 @@ hist:{.plr.dispatch[`hist;x]};
     .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
   .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];
+  .z.pc:{if[x=.plr.h;-1"Disconnected from the table";exit 0]};
  };
 
 .util.run[`player.q;`.plr.init];
