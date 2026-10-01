@@ -278,9 +278,9 @@
     t0:.z.p;
     .pit.recordScores[];
     (exec name from .pit.scores) mustmatch`a_5`b_6;
-    (exec Round from .pit.scores) mustmatch 7 7;
+    (exec round from .pit.scores) mustmatch 7 7;
     (exec perfect from .pit.scores) mustmatch .5 .6;
-    (all (exec Time from .pit.scores) within t0,.z.p) musteq 1b;
+    (all (exec time from .pit.scores) within t0,.z.p) musteq 1b;
   };
  };
 
@@ -292,10 +292,10 @@
   should["charts each player's score under each count against the time it was played, with the suspicion line"]{
     .pit.suspectCor:0.5;
     t0:2026.10.01D12:00:00;
-    .pit.scores:([]Time:t0,t0,t0+0D00:00:01;Round:1 1 2;name:`a_5`b_6`a_5;handle:5 6 5i;hands:20 20 21;basic:.1 .2 .3;omega:.4 .5 .6;perfect:.7 .8 .9;score:.7 .8 .9);
+    .pit.scores:([]time:t0,t0,t0+0D00:00:01;round:1 1 2;name:`a_5`b_6`a_5;handle:5 6 5i;hands:20 20 21;basic:.1 .2 .3;omega:.4 .5 .6;perfect:.7 .8 .9;score:.7 .8 .9);
     c:.pit.chart[];
-    cols[c] mustmatch`Time`a_5_basic`b_6_basic`a_5_omega`b_6_omega`a_5_perfect`b_6_perfect`alert;
-    c[`Time] mustmatch(t0;t0+0D00:00:01);
+    cols[c] mustmatch`time`a_5_basic`b_6_basic`a_5_omega`b_6_omega`a_5_perfect`b_6_perfect`alert;
+    c[`time] mustmatch(t0;t0+0D00:00:01);
     c[`a_5_perfect] mustmatch .7 .9;
     c[`b_6_basic] mustmatch .2 0n;
     c[`alert] mustmatch .5 .5;

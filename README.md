@@ -114,7 +114,7 @@ h".pit.betTrend"
 h".pit.chart[]"     / suspicion scores over time, ready to chart
 ```
 
-`.pit.chart[]` gives one row per round, keyed by the time it was played, with
+`.pit.chart[]` gives one row per round, keyed by the `time` it was played, with
 a column per player and count (e.g. `alice_8_perfect`) holding that player's
 score: how closely their last 100 bets followed that count, from -1 to 1. An
 `alert` column holds the suspicion threshold (0.5) to draw as a line.

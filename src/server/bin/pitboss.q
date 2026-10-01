@@ -8,7 +8,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.window:100;
 .pit.minHands:20;
 .pit.suspectCor:0.5;
-.pit.scores:([]Time:`timestamp$();Round:`long$();name:`symbol$();handle:`int$();hands:`long$();basic:`float$();omega:`float$();perfect:`float$();score:`float$());
+.pit.scores:([]time:`timestamp$();round:`long$();name:`symbol$();handle:`int$();hands:`long$();basic:`float$();omega:`float$();perfect:`float$();score:`float$());
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
 
@@ -31,7 +31,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
  };
 
 .pit.correlations:{update score:basic|omega|perfect from select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect by name,handle from .pit.bets};
-.pit.recordScores:{.pit.scores,:`Time`Round xcols update Time:.z.p,Round:.pit.rnd from 0!.pit.correlations[]};
+.pit.recordScores:{.pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[]};
 .pit.suspects:{0!select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor};
 
 .pit.report:{[s]
@@ -62,14 +62,14 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   .pit.insure,:select round,name,handle,cards,cnt,dealer,theCount,insurance from t where insureTell;
  };
 
-.pit.gcol:{`Time,`$string[x],\:"_",string y};
+.pit.gcol:{`time,`$string[x],\:"_",string y};
 
 .pit.chart:{
   if[not count .pit.scores;:()];
   u:exec distinct name from .pit.scores;
-  b:.pit.gcol[u;`basic]xcol exec u#name!basic by Time:Time from .pit.scores;
-  o:.pit.gcol[u;`omega]xcol exec u#name!omega by Time:Time from .pit.scores;
-  p:.pit.gcol[u;`perfect]xcol exec u#name!perfect by Time:Time from .pit.scores;
+  b:.pit.gcol[u;`basic]xcol exec u#name!basic by time:time from .pit.scores;
+  o:.pit.gcol[u;`omega]xcol exec u#name!omega by time:time from .pit.scores;
+  p:.pit.gcol[u;`perfect]xcol exec u#name!perfect by time:time from .pit.scores;
   :update alert:.pit.suspectCor from 0!(lj/)(b;o;p);
  };
 
