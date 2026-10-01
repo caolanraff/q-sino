@@ -33,7 +33,7 @@
   .bjk.giveTurn h;
  };
 
-.bjk.stand:{
+.bjk.stickHand:{
   update wait:1b,turn:0b from`.bjk.tab where turn;
   .bjk.nextTurn[];
  };
@@ -41,15 +41,15 @@
 stick:{
   if[not .bjk.checks[];:()];
   .bjk.pubMsg[string[.z.u]," has decided to stick";key .bjk.cp];
-  .bjk.stand[];
+  .bjk.stickHand[];
  };
 
 .bjk.turnTimer:{
   if[null[.bjk.turnDeadline]|.z.p<.bjk.turnDeadline;:()];
   .bjk.turnDeadline:0Np;
   if[not any exec turn from .bjk.tab;:()];
-  .bjk.pubMsg[string[first exec name from .bjk.tab where turn]," took too long - standing";key .bjk.cp];
-  .bjk.stand[];
+  .bjk.pubMsg[string[first exec name from .bjk.tab where turn]," took too long - sticking";key .bjk.cp];
+  .bjk.stickHand[];
  };
 
 .bjk.dealTo:{[p]
@@ -117,8 +117,8 @@ insure:{[amt]
   :q;
  };
 
-.bjk.standSplitAces:{[p;q]
-  .bjk.pubMsg["Split aces get one card each - both hands stand";key .bjk.cp];
+.bjk.stickSplitAces:{[p;q]
+  .bjk.pubMsg["Split aces get one card each - both hands stick";key .bjk.cp];
   update wait:1b,turn:0b from`.bjk.tab where player in(p;q);
   .bjk.nextTurn[];
  };
@@ -143,5 +143,5 @@ split:{
   update split:1b from`.bjk.tab where player=p;
   q:.bjk.split0 p;
   .bjk.dealTo each p,q;
-  $[aces;.bjk.standSplitAces[p;q];.bjk.hit1[]];
+  $[aces;.bjk.stickSplitAces[p;q];.bjk.hit1[]];
  };

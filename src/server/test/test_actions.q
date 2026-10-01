@@ -186,7 +186,7 @@
     (exec first turn from .bjk.tab where player=1.02) musteq 1b;
     .tst.dealerCalls musteq 0;
   };
-  should["refuses to hit a split ace hand, which stands on its one card"]{
+  should["refuses to hit a split ace hand, which sticks on its one card"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.excFunc mock {[x;y;z]};
@@ -302,7 +302,7 @@
     split[];
     count[select from .bjk.tab where handle=0i] musteq 3;
   };
-  should["deals each split ace one card, stands both hands, and passes the turn on"]{
+  should["deals each split ace one card, sticks both hands, and passes the turn on"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
@@ -395,20 +395,20 @@
 
 .tst.desc[".bjk.turnTimer"]{
   should["does nothing while no turn clock is running"]{
-    .tst.stands:0;
-    `.bjk.stand mock {.tst.stands+:1};
+    .tst.sticks:0;
+    `.bjk.stickHand mock {.tst.sticks+:1};
     .bjk.turnDeadline:0Np;
     .bjk.turnTimer[];
-    .tst.stands musteq 0;
+    .tst.sticks musteq 0;
   };
   should["does nothing before the deadline"]{
-    .tst.stands:0;
-    `.bjk.stand mock {.tst.stands+:1};
+    .tst.sticks:0;
+    `.bjk.stickHand mock {.tst.sticks+:1};
     .bjk.turnDeadline:.z.p+0D00:00:10;
     .bjk.turnTimer[];
-    .tst.stands musteq 0;
+    .tst.sticks musteq 0;
   };
-  should["stands the hand whose turn it is once the deadline passes, and says so"]{
+  should["sticks the hand whose turn it is once the deadline passes, and says so"]{
     .tst.msgs:();
     `.bjk.pubMsg mock {[x;y].tst.msgs,:enlist x};
     `.bjk.nextTurn mock {};
@@ -419,17 +419,17 @@
     .bjk.turnTimer[];
     (exec wait from .bjk.tab) musteq 01b;
     (exec turn from .bjk.tab) musteq 00b;
-    .tst.msgs mustmatch enlist"p2 took too long - standing";
+    .tst.msgs mustmatch enlist"p2 took too long - sticking";
     .bjk.turnDeadline musteq 0Np;
   };
   should["just clears the clock when no hand has the turn"]{
-    .tst.stands:0;
-    `.bjk.stand mock {.tst.stands+:1};
+    .tst.sticks:0;
+    `.bjk.stickHand mock {.tst.sticks+:1};
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bjk.tab:update out:00b,wait:00b,turn:00b from .bjk.tab;
     .bjk.turnDeadline:.z.p-0D00:00:01;
     .bjk.turnTimer[];
-    .tst.stands musteq 0;
+    .tst.sticks musteq 0;
     .bjk.turnDeadline musteq 0Np;
   };
   should["restarts after each move, since a hit that doesn't end the hand prompts again"]{

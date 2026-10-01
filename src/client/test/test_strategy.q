@@ -1,12 +1,12 @@
 .tst.desc[".stg.help"]{
   before{.utl.load`:src/client/lib/strategy.q};
-  should["A,A,9 vs dealer 6 is a made soft 21 and should Stand"]{
+  should["A,A,9 vs dealer 6 is a made soft 21 and should Stick"]{
     .stg.help[`A`A`9`6] musteq`S;
   };
-  should["A,9,+hit A vs dealer 2 is a soft 21 and should Stand"]{
+  should["A,9,+hit A vs dealer 2 is a soft 21 and should Stick"]{
     .stg.help[`A`9`A`2] musteq`S;
   };
-  should["still correctly recommends Stand on a plain made 20"]{
+  should["still correctly recommends Stick on a plain made 20"]{
     .stg.help[`10`Q`6] musteq`S;
   };
   should["still correctly recommends Hit on a hard 12 vs a strong dealer up-card"]{
@@ -46,7 +46,7 @@
     .stg.help[`A`8`6] musteq`D;                                                                    / soft 19 vs 6
     .stg.help[`6`5`A] musteq`D;                                                                    / 11 vs ace
   };
-  should["stands instead on a soft 18 or 19 that can no longer double"]{
+  should["sticks instead on a soft 18 or 19 that can no longer double"]{
     .stg.help[`A`3`4`4] musteq`S;                                                                  / 3-card soft 18 vs 4
     .stg.help[`A`5`3`6] musteq`S;                                                                  / 3-card soft 19 vs 6
   };
@@ -61,7 +61,7 @@
     .stg.help[`5`4`2] musteq`H;                                                                    / hard 9 vs 2: no double
     .stg.help[`A`2`4] musteq`H;                                                                    / soft 13 vs 4: no double
     .stg.help[`A`6`2] musteq`H;                                                                    / soft 17 vs 2: no double
-    .stg.help[`7`7`10] musteq`H;                                                                   / 7,7 vs 10: hit, not stand
+    .stg.help[`7`7`10] musteq`H;                                                                   / 7,7 vs 10: hit, not stick
     .stg.help[`7`7`8] musteq`H;                                                                    / 7,7 vs 8: hit, not split
     .stg.help[`4`4`4] musteq`H;                                                                    / 4,4 vs 4: hit, not split
   };

@@ -2,7 +2,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .utl.require"common";
 
 .pit.res:([]round:`long$());
-.pit.double:.pit.split:.pit.stand:.pit.insure:();
+.pit.double:.pit.split:.pit.stick:.pit.insure:();
 .pit.betTrend:flip`Round`Player`Handle`basic_cor`basic_cov`omega_cor`omega_cov`perfect_cor`perfect_cov!();
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                               / a full shoe - count .bjk.deck is only what's left mid-shoe
@@ -27,7 +27,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
     from t;
   :update doubleTell:double&(two within 18 20)&not soft&((two=18)&up within 2 6)|(two=19)&up=6,
     splitTell:split&(first each cards)in`10`J`Q`K,
-    standTell:(2=count each cards)&(cnt in 15 16)&(not split&`A=first each cards)&soft|up>=7,
+    stickTell:(2=count each cards)&(cnt in 15 16)&(not split&`A=first each cards)&soft|up>=7,
     insureTell:insurance>0
     from t;
  };
@@ -37,7 +37,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   t:.pit.handFacts t;
   .pit.double,:select round,name,handle,cards,cnt,dealer,theCount from t where doubleTell;
   .pit.split,:select round,name,handle,cards,cnt,dealer,theCount from t where splitTell;
-  .pit.stand,:select round,name,handle,cards,cnt,dealer,theCount from t where standTell;
+  .pit.stick,:select round,name,handle,cards,cnt,dealer,theCount from t where stickTell;
   .pit.insure,:select round,name,handle,cards,cnt,dealer,theCount,insurance from t where insureTell;
  };
 
