@@ -225,7 +225,7 @@
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.stake:([name:();handle:()]bet:());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.start[];
     .tst.excFuncCalls mustmatch ((`.plr.stake;5i);(`.plr.stake;6i));
@@ -432,7 +432,7 @@
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.stake:([name:();handle:()]bet:());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.tab:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();"j"$();();();();();());
     .bjk.start[];
     (.tst.sent[;0]) mustmatch `.plr.stake`.plr.stake;

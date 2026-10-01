@@ -79,7 +79,7 @@
     .stg.rules mustmatch`maxSplitHands`deckCnt!4 6;
   };
   should["uses the pushed split cap and deck count, not fixed ones"]{
-    .stg.recv[`tab`res`me`rules!(([]round:0#0;cards:();dealer:0#`);([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2)];
+    .stg.recv[`tab`res`me`rules!(([]round:"j"$();cards:();dealer:());([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2)];
     .stg.decide[`8`8`10;2] musteq`H;
     .stg.count[];
     .stg.trueCount musteq -1%(104-4)%52;
@@ -142,7 +142,7 @@
     .plr.h:0i;
     .plr.toth:1000;
     .stg.handsPlayed:0;
-    t:([]round:0#0;cards:();dealer:0#`);
+    t:([]round:"j"$();cards:();dealer:());
     .plr.stake`tab`res`me`rules!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500);
     .tst.staked mustmatch enlist 10;
   };

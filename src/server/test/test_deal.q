@@ -7,7 +7,7 @@
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.hd:1b;
-    .bjk.stake:([name:();handle:()]bet:"j"$());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake each 0 9 501;
     count[.bjk.stake] musteq 0;
     .tst.msgs mustmatch 3#enlist"Bets are $10 to $500";
@@ -19,7 +19,7 @@
     .bjk.hd:1b;
     .bjk.betDeadline:.z.p;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:"j"$());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake[10];
     (exec bet from .bjk.stake) mustmatch enlist 10;
     stake[500];
@@ -28,7 +28,7 @@
   should["refuses when the hand isn't done"]{
     `.bjk.sendMsg mock {[x;y]};
     .bjk.hd:0b;
-    .bjk.stake:([name:();handle:()]bet:());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake[10];
     count[.bjk.stake] musteq 0;
   };
@@ -41,7 +41,7 @@
     .bjk.bd:0b;
     .bjk.betDeadline:0Np;
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:2#0N;return:2#0n;profit:2#0n;split:00b;double:00b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake[10];
     (exec first bet from .bjk.tab where player=1) musteq 10;
     .bjk.bd musteq 1b;
@@ -56,7 +56,7 @@
     .bjk.bd:0b;
     .bjk.betDeadline:0Np;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake[10];
     .tst.dealCalls musteq 1;
   };
@@ -64,7 +64,7 @@
     .tst.sent:();
     `.bjk.sendMsg mock {[x;y].tst.sent,:enlist x};
     .bjk.hd:1b;
-    .bjk.stake:([name:();handle:()]bet:"j"$());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake[10.5];
     count[.bjk.stake] musteq 0;
     .tst.sent mustmatch enlist"Bets are whole dollars";
@@ -76,7 +76,7 @@
     .bjk.hd:1b;
     .bjk.betDeadline:.z.p;
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist();cnt:enlist 0Ni;dealer:enlist`;dealerCnt:enlist 0Ni;bet:enlist 0N;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:"j"$());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     stake[10i];
     (exec bet from .bjk.stake) mustmatch enlist 10;
     stake[20h];
@@ -96,7 +96,7 @@
     .bjk.betDeadline:0Np;
     .bjk.timeout:0D00:00:15;
     .bjk.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:0 1 2i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:3#0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:0f);
-    .bjk.stake:([name:();handle:()]bet:());
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     t0:.z.p;
     stake[10];
     (.bjk.betDeadline within t0+.bjk.timeout+0D00:00:00 0D00:00:01) musteq 1b;

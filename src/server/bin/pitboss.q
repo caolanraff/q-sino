@@ -3,8 +3,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 
 .pit.res:([]round:"j"$());                                                                         / hands seen this shoe
 .pit.double:.pit.split:.pit.stick:.pit.insure:();                                                  / tell plays caught, by kind
-.pit.betTrend:([]round:();name:();handle:();                                                       / each round's bet/count correlation and covariance by player
-  basic_cor:();basic_cov:();omega_cor:();omega_cov:();perfect_cor:();perfect_cov:());
+.pit.betTrend:([]round:"j"$();name:`$();handle:"i"$();basic_cor:"f"$();basic_cov:"f"$();           / each round's bet/count correlation and covariance by player
+  omega_cor:"f"$();omega_cov:"f"$();perfect_cor:"f"$();perfect_cov:"f"$());
 .pit.bets:([]name:`$();handle:"i"$();bet:"j"$();basic:"f"$();omega:"f"$();perfect:"f"$());         / each player's recent bets, with the counts when they bet
 .pit.window:100;                                                                                   / bets kept per player
 .pit.minHands:20;                                                                                  / bets needed before judging a player
