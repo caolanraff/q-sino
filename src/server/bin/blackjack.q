@@ -19,6 +19,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.turnDeadline:0Np;                                                                             / turn clock, null when not running
 
 .bjk.cp:()!();                                                                                     / handle to player name
+.bjk.users:(`int$())!`symbol$();                                                                   / handle to connecting username
+.bjk.banned:`symbol$();                                                                            / usernames banned this session
 .bjk.joined:(`int$())!`long$();                                                                    / round each handle joined; kdb reuses handle numbers
 .bjk.res:.bjk.tab:.bjk.hist:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); / hands in play, this shoe's results, earlier shoes' results
 .bjk.stake:([name:();handle:()]bet:`long$());                                                      / each player's bet for the next hand
@@ -69,6 +71,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.unseat:{[h]                                                                                   / [handle] remove a player from the table
   .bjk.cp:.bjk.cp _ h;                                                                             / drop the connection
+  .bjk.users:.bjk.users _ h;                                                                       / drop their username
   .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
   delete from`.bjk.tab where handle=h;                                                             / drop their hands
   delete from`.bjk.stake where handle=h;                                                           / drop their bet
@@ -85,7 +88,16 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.nextTurn[];                                                                                 / move to the next player
  };
 
+.bjk.isBanned:{.z.u in .bjk.banned};                                                               / is the caller banned
+
+.bjk.turnAway:{[h]                                                                                 / [handle] turn a banned user away
+  .log.info string[.z.u]," is banned from the table and was turned away";
+  .bjk.sendMsg["You've been asked to leave this table";h];                                         / tell them
+  .bjk.disconnect h;                                                                               / close their connection
+ };
+
 .z.po:{                                                                                            / new connection
+  if[.bjk.isBanned[];:.bjk.turnAway .z.w];                                                         / turn away banned users
   .bjk.regConn .z.w;                                                                               / register it
   if[.bjk.isPit[];:()];                                                                            / the pitboss doesn't play
   .bjk.start[];                                                                                    / seat players and ask for bets
@@ -113,6 +125,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   n:string .bjk.cp h;                                                                              / their name
   if[not .bjk.ejectCounters;:.log.info"The pitboss suspects ",n," of counting cards (run with --pitboss 1 to eject)"]; / only log unless ejecting is on
   .log.warn"The pitboss has ejected ",n," for suspected card counting";
+  .bjk.banned,:.bjk.users h;                                                                       / ban their username for the session
   .bjk.sendMsg["The pitboss has asked you to leave the table";h];                                  / tell them
   .bjk.leave h;                                                                                    / remove them from play
   .bjk.disconnect h;                                                                               / close their connection
