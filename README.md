@@ -120,8 +120,9 @@ score: how closely their last 100 bets followed that count, from -1 to 1. An
 `alert` column holds the suspicion threshold (0.5) to draw as a line.
 
 A player becomes a **suspected card counter** once they have at least 20
-hands in their last 100, and their bets follow one of the three counts with a
-correlation of 0.5 or more. The pitboss logs a warning and asks the server to
+hands in their last 100, and their bets have followed one of the three counts
+with a correlation of 0.5 or more for 5 rounds in a row (one round over the
+line can be chance). The pitboss logs a warning and asks the server to
 eject them. The server only does so when it was started with `--pitboss 1`:
 the player is told "The pitboss has asked you to leave the table", their hand
 is forfeited if one is in play, and they're disconnected. Their username is
