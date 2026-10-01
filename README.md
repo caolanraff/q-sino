@@ -118,8 +118,10 @@ hands in their last 100, and their bets follow one of the three counts with a
 correlation of 0.5 or more. The pitboss logs a warning and asks the server to
 eject them. The server only does so when it was started with `--pitboss 1`:
 the player is told "The pitboss has asked you to leave the table", their hand
-is forfeited if one is in play, and they're disconnected. Without the flag
-the server just logs the suspicion. In testing, the four counting strategies
+is forfeited if one is in play, and they're disconnected. Their username is
+then banned for the rest of the server's session: any later connection from
+it is told "You've been asked to leave this table" and closed. Without the
+flag the server just logs the suspicion. In testing, the four counting strategies
 were all flagged within 50 rounds, and the other three never were.
 
 ## Tests

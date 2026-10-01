@@ -19,6 +19,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.turnDeadline:0Np;
 
 .bjk.cp:()!();
+.bjk.users:(`int$())!`symbol$();
+.bjk.banned:`symbol$();
 .bjk.joined:(`int$())!`long$();                                                                     / kdb reuses handle numbers
 .bjk.res:.bjk.tab:.bjk.hist:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
 .bjk.stake:([name:();handle:()]bet:`long$());
@@ -69,6 +71,7 @@ hist:{.bjk.hist,.bjk.res};
 
 .bjk.unseat:{[h]
   .bjk.cp:.bjk.cp _ h;
+  .bjk.users:.bjk.users _ h;
   .bjk.joined:.bjk.joined _ h;
   delete from`.bjk.tab where handle=h;
   delete from`.bjk.stake where handle=h;
@@ -85,7 +88,16 @@ hist:{.bjk.hist,.bjk.res};
   .bjk.nextTurn[];
  };
 
+.bjk.isBanned:{.z.u in .bjk.banned};
+
+.bjk.turnAway:{[h]
+  .log.info string[.z.u]," is banned from the table and was turned away";
+  .bjk.sendMsg["You've been asked to leave this table";h];
+  .bjk.disconnect h;
+ };
+
 .z.po:{
+  if[.bjk.isBanned[];:.bjk.turnAway .z.w];
   .bjk.regConn .z.w;
   if[.bjk.isPit[];:()];
   .bjk.start[];
@@ -114,6 +126,7 @@ hist:{.bjk.hist,.bjk.res};
   n:string .bjk.cp h;
   if[not .bjk.ejectCounters;:.log.info"The pitboss suspects ",n," of counting cards (run with --pitboss 1 to eject)"];
   .log.warn"The pitboss has ejected ",n," for suspected card counting";
+  .bjk.banned,:.bjk.users h;
   .bjk.sendMsg["The pitboss has asked you to leave the table";h];
   .bjk.leave h;
   .bjk.disconnect h;
