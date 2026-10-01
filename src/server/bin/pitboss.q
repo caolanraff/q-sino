@@ -8,6 +8,9 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.window:100;                                                                                   / bets kept per player
 .pit.minHands:20;                                                                                  / bets needed before judging a player
 .pit.suspectCor:0.5;                                                                               / correlation that marks a counter
+.pit.persist:5;                                                                                    / rounds in a row a player must stay flagged
+.pit.streak:(`symbol$())!`long$();                                                                 / player to rounds flagged in a row
+.pit.scores:([]time:`timestamp$();round:`long$();name:`symbol$();handle:`int$();hands:`long$();basic:`float$();omega:`float$();perfect:`float$();score:`float$()); / each round's correlation scores, for charting
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                       / [handle] cards in a full shoe, from the server's rules
 
@@ -29,12 +32,21 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   delete from`.pit.bets where .pit.window<=({reverse til count x};i)fby name;                      / keep each player's last .pit.window bets; one shoe is too short to judge
  };
 
-.pit.correlations:{select hands:count i,score:max(0f^bet cor basic;0f^bet cor omega;0f^bet cor perfect)by name,handle from .pit.bets}; / per player: hands and best bet/count correlation
-.pit.suspects:{0!select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor}; / players whose bets follow the count
+.pit.correlations:{update score:basic|omega|perfect from select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect by name,handle from .pit.bets}; / per player: hands, bet/count correlation per system, and the best
+.pit.recordScores:{.pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[]}; / keep this round's scores
+.pit.flagged:{select from .pit.correlations[]where hands>=.pit.minHands,score>=.pit.suspectCor};   / players over the line this round
+
+.pit.updateStreaks:{                                                                               / count the rounds each player has been flagged in a row
+  n:exec name from .pit.correlations[];                                                            / players with bets
+  .pit.streak:n!(1+0^.pit.streak n)*n in exec name from .pit.flagged[];                            / extend a flagged player's streak, reset the rest
+ };
+
+.pit.suspects:{0!select from .pit.flagged[]where .pit.persist<=.pit.streak name};                  / players flagged .pit.persist rounds in a row; one round can be chance
 
 .pit.report:{[s]                                                                                   / [suspect] flag a suspected counter to the server
   .log.warn"Suspected card counter: ",string[s`name]," (bets follow the count, correlation ",.Q.f[2;s`score]," over ",string[s`hands]," hands)";
   delete from`.pit.bets where name=s`name;                                                         / start their record afresh
+  .pit.streak _:s`name;                                                                            / reset their streak
   neg[.pit.h](`.bjk.eject;s`handle);                                                               / ask the server to eject them
  };
 
@@ -60,22 +72,24 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   .pit.insure,:select round,name,handle,cards,cnt,dealer,theCount,insurance from t where insureTell; / insurance taken
  };
 
-.pit.gcol:{`Round,`$string[x except`Round],\:"_",string y};                                        / Round plus a <player>_<system> column per player
+.pit.gcol:{`time,`$string[x],\:"_",string y};                                                      / time plus a <player>_<system> column per player
 
-.pit.chart:{                                                                                       / covariance by round, per player and system, with alert lines
-  if[not count .pit.betTrend;:()];                                                                 / nothing yet
-  u:exec distinct Player from .pit.betTrend;                                                       / players
-  b:.pit.gcol[u;`basic]xcol exec u#Player!basic_cov by Round:.z.d+Round from .pit.betTrend;        / basic count covariance per player by round
-  o:.pit.gcol[u;`omega]xcol exec u#Player!omega_cov by Round:.z.d+Round from .pit.betTrend;        / omega count covariance
-  p:.pit.gcol[u;`perfect]xcol exec u#Player!perfect_cov by Round:.z.d+Round from .pit.betTrend;    / perfect count covariance
-  :update alert1:10,alert2:-10 from 0!(lj/)(b;o;p);                                                / join them, with alert lines at +/-10
+.pit.chart:{                                                                                       / suspicion scores over time, per player and system, with the alert line
+  if[not count .pit.scores;:()];                                                                   / nothing yet
+  u:exec distinct name from .pit.scores;                                                           / players
+  b:.pit.gcol[u;`basic]xcol exec u#name!basic by time:time from .pit.scores;                       / basic count correlation per player over time
+  o:.pit.gcol[u;`omega]xcol exec u#name!omega by time:time from .pit.scores;                       / omega count correlation
+  p:.pit.gcol[u;`perfect]xcol exec u#name!perfect by time:time from .pit.scores;                   / perfect count correlation
+  :update alert:.pit.suspectCor from 0!(lj/)(b;o;p);                                               / join them, with the alert line at .pit.suspectCor
  };
 
 .pit.shuffle:{.pit.res:0#.pit.res};                                                                / new shoe: forget the hands seen
 
 .pit.getDetect:{[rs]                                                                               / [rounds] run detection on newly finished rounds
   .pit.getBetTrend[];                                                                              / update bet trends
+  .pit.recordScores[];                                                                             / keep this round's scores
   .pit.getPlayTrend select from .pit.res where round in rs;                                        / tells in the new rounds only; a finished round's never change
+  .pit.updateStreaks[];                                                                            / update flag streaks
   .pit.report each .pit.suspects[];                                                                / report each suspect
  };
 
