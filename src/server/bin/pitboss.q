@@ -26,11 +26,9 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.count:{[pts;t].crd.trueCount[pts;.crd.cardsSeen t;.pit.startCards]};                          / [points;table] true count from the cards in a table
 
 .pit.getBetTrend:{                                                                                 / update each player's bet/count correlation
-  earlier:select from .pit.res where round<.pit.rnd;                                               / earlier hands: the count a player knew when betting
-  .pit.res:update basic_cnt:.pit.count[.crd.hiLo;earlier],                                         / this round's counts under each system
-    omega_cnt:.pit.count[.crd.omega;earlier],
-    perfect_cnt:.pit.count[.crd.perfect;earlier]
-    from .pit.res where round=.pit.rnd;
+  past:select from .pit.res where round<.pit.rnd;                                                  / earlier hands: the count a player knew when betting
+  .pit.res:update basic_cnt:.pit.count[.crd.hiLo;past],omega_cnt:.pit.count[.crd.omega;past],      / this round's counts under each system
+    perfect_cnt:.pit.count[.crd.perfect;past] from .pit.res where round=.pit.rnd;
   tab:0!select basic_cor:0f^bet cor basic_cnt,basic_cov:bet cov basic_cnt,                         / bet vs each system's count, per player; cor is 0 when either doesn't vary
     omega_cor:0f^bet cor omega_cnt,omega_cov:bet cov omega_cnt,
     perfect_cor:0f^bet cor perfect_cnt,perfect_cov:bet cov perfect_cnt
@@ -47,8 +45,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
  };
 
 .pit.correlations:{                                                                                / per player: hands, bet/count correlation per system, and the best
-  s:select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,                            / hands and correlation per system
-    perfect:0f^bet cor perfect
+  s:select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect  / hands and correlation per system
     by name,handle from .pit.bets;
   :update score:basic|omega|perfect from s;                                                        / the best of them
  };

@@ -15,14 +15,14 @@
 
 .tst.desc[".bjk.start player-table upsert"]{
   should["succeeds for exactly one connected player"]{
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.cp:enlist[5i]!enlist`alice;
     threw:@[{`.bjk.tab upsert ([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);0b};();{1b}];
     threw musteq 0b;
     (count .bjk.tab) musteq 1;
     };
   should["succeeds for two connected players"]{
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.cp:(5i;6i)!`alice`bob;
     threw:@[{`.bjk.tab upsert ([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);0b};();{1b}];
     threw musteq 0b;
@@ -33,8 +33,8 @@
 
 .tst.desc[".bjk.tab keeps a typed bet column"]{
   should["select ... where null bet doesn't throw before anyone has staked this round"]{
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
-    `.bjk.tab upsert ([]player:1 2i;name:`alice`bob;handle:10 11i);
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    `.bjk.tab upsert ([]player:1 2;name:`alice`bob;handle:10 11i);
     threw:@[{select from .bjk.tab where null bet;0b};();{1b}];
     threw musteq 0b;
     (count select from .bjk.tab where null bet) musteq 2;
@@ -108,7 +108,7 @@
 .tst.desc["leave removes the disconnecting handle from cp"]{
   should["drops only the disconnecting handle's key, leaving other connected players untouched"]{
     .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$()); .bjk.hist:.bjk.res;
     .bjk.hd:1b;
     .bjk.leave[5i];
@@ -213,7 +213,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
     .bjk.stake:([name:enlist`alice;handle:enlist 5i]bet:enlist 10);
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     (exec bet from .bjk.tab where handle=5i) musteq enlist 10;
     (exec handle from .bjk.tab where null bet) musteq 6 7i;
@@ -226,7 +226,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     .tst.excFuncCalls mustmatch ((`.plr.stake;5i);(`.plr.stake;6i));
     };
@@ -433,7 +433,7 @@
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     (.tst.sent[;0]) mustmatch `.plr.stake`.plr.stake;
     ({x[1]`me} each .tst.sent) musteq 5 6i;

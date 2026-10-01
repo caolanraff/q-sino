@@ -216,7 +216,7 @@ stake:{[bet]                                                                    
  };
 
 .bjk.endHand:{                                                                                     / end the hand and start the next round
-  update player:`int$player from`.bjk.tab;                                                         / player numbers back to ints
+  update"j"$player from`.bjk.tab;                                                                  / player numbers back to longs
   .bjk.bd:0b;                                                                                      / no bets in
   .bjk.hd:1b;                                                                                      / no hand in progress
   .bjk.stake:0#.bjk.stake;                                                                         / clear bets

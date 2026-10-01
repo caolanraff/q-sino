@@ -22,10 +22,9 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.users:("i"$())!`$();                                                                          / handle to connecting username
 .bjk.banned:`$();                                                                                  / usernames banned this session
 .bjk.joined:("i"$())!"j"$();                                                                       / round each handle joined; kdb reuses handle numbers
-.bjk.res:.bjk.hist:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();      / this shoe's results, earlier shoes' results
-  dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();
-  insurance:"f"$());
-.bjk.tab:update"i"$player from .bjk.res;                                                           / hands in play; player numbers are ints while seated
+.bjk.res:.bjk.tab:.bjk.hist:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();        / hands in play, this shoe's results, earlier shoes' results
+  cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();
+  double:"b"$();insurance:"f"$());
 .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());                                                  / each player's bet for the next hand
 
 .bjk.intro:{                                                                                       / help text sent to each new player

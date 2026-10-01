@@ -174,7 +174,7 @@
     `.bjk.pubMsg mock {[x;y]};
     .tst.getCardCalls:0;
     `.bjk.getCard mock {.tst.getCardCalls+:1;`5};
-    .bjk.tab:([]round:"j"$();player:"i"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.deal0[];
     .tst.getCardCalls musteq 0;
   };
