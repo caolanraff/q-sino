@@ -53,18 +53,22 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
     by name,handle from .pit.bets;
   :update score:basic|omega|perfect from s;                                                        / the best of them
  };
+
 .pit.recordScores:{                                                                                / keep this round's scores
   .pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[];       / stamped with the time and round
  };
+
 .pit.insurers:{                                                                                    / players who've only insured at a high count; basic strategy never insures
   :select insures:count i by name,handle from .pit.insured                                         / insured hands per player, if all at a high count
     where(all;basic>=.pit.insureCount)fby name;
  };
+
 .pit.ramps:{                                                                                       / per player: bets at a good and a bad count, and how much bigger the good-count ones are
   :select good:sum basic>=.pit.goodCount,bad:sum basic<=.pit.badCount,                             / bets at each count, and their average ratio
     ramp:(avg bet where basic>=.pit.goodCount)%avg bet where basic<=.pit.badCount
     by name,handle from .pit.bets;
  };
+
 .pit.flagged:{                                                                                     / players over the line this round, on any tell
   s:(lj/)(.pit.correlations[];.pit.insurers[];.pit.ramps[]);                                       / each player's scores, insurance record and bet ramp
   s:update follows:(hands>=.pit.minHands)&score>=.pit.suspectCor,                                  / bets follow the count; insures only at a high count
