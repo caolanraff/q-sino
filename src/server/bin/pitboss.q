@@ -26,10 +26,10 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.getBetTrend:{                                                                                 / update each player's bet/count correlation
   earlier:select from .pit.res where round<.pit.rnd;                                               / earlier hands: the count a player knew when betting
   .pit.res:update basic_cnt:.pit.count[.crd.hiLo;earlier],omega_cnt:.pit.count[.crd.omega;earlier],perfect_cnt:.pit.count[.crd.perfect;earlier] from .pit.res where round=.pit.rnd; / this round's counts under each system
-  tab:0!select basic_cor:0f^bet cor basic_cnt,basic_cov:bet cov basic_cnt,                         / bet vs basic count by player; 0 when either doesn't vary
-    omega_cor:0f^bet cor omega_cnt,omega_cov:bet cov omega_cnt,                                    / bet vs omega count
-    perfect_cor:0f^bet cor perfect_cnt,perfect_cov:bet cov perfect_cnt                             / bet vs perfect count
-    by name,handle from .pit.res;                                                                  / per player
+  tab:0!select basic_cor:0f^bet cor basic_cnt,basic_cov:bet cov basic_cnt,                         / bet vs each system's count, per player; cor is 0 when either doesn't vary
+    omega_cor:0f^bet cor omega_cnt,omega_cov:bet cov omega_cnt,
+    perfect_cor:0f^bet cor perfect_cnt,perfect_cov:bet cov perfect_cnt
+    by name,handle from .pit.res;
   upsert[`.pit.betTrend;`round xcols update round:.pit.rnd from tab];                              / add this round's row
   .pit.recordBets[];                                                                               / keep this round's bets
  };
@@ -67,16 +67,16 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
  };
 
 .pit.handFacts:{[t]                                                                                / [table] flag tells: plays 6-deck H17 basic strategy wouldn't make
-  t:update up:"I"$string .crd.cardDict first each dealer,                                          / dealer's up-card value
-    two:{sum"I"$string .crd.cardDict 2#x}each cards,                                               / first two cards' total
-    soft:{`A in 2#x}each cards,                                                                    / soft hand
-    theCount:basic_cnt                                                                             / count when the hand was bet
-    from t;                                                                                        / per hand
-  :update doubleTell:double&(two within 18 20)&not soft&((two=18)&up within 2 6)|(two=19)&up=6,    / doubled 18-20, except soft 18 v 2-6 and soft 19 v 6
-    splitTell:split&(first each cards)in`10`J`Q`K,                                                 / split tens
-    stickTell:(2=count each cards)&(cnt in 15 16)&(not split&`A=first each cards)&soft|up>=7,      / stuck on a two-card soft 15/16, or 15/16 v 7+
-    insureTell:insurance>0                                                                         / took insurance
-    from t;                                                                                        / per hand
+  t:update up:"I"$string .crd.cardDict first each dealer,                                          / add each hand's up-card value, two-card total, softness and count
+    two:{sum"I"$string .crd.cardDict 2#x}each cards,
+    soft:{`A in 2#x}each cards,
+    theCount:basic_cnt
+    from t;
+  :update doubleTell:double&(two within 18 20)&not soft&((two=18)&up within 2 6)|(two=19)&up=6,    / flag tells: doubling 18-20 (but not soft 18 v 2-6 or soft 19 v 6), splitting tens, sticking on two-card 15/16 that's soft or v 7+, insuring
+    splitTell:split&(first each cards)in`10`J`Q`K,
+    stickTell:(2=count each cards)&(cnt in 15 16)&(not split&`A=first each cards)&soft|up>=7,
+    insureTell:insurance>0
+    from t;
  };
 
 .pit.getPlayTrend:{[t]                                                                             / [table] record the tells in finished hands
