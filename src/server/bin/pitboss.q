@@ -38,7 +38,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 
 .pit.correlations:{update score:basic|omega|perfect from select hands:count i,basic:0f^bet cor basic,omega:0f^bet cor omega,perfect:0f^bet cor perfect by name,handle from .pit.bets}; / per player: hands, bet/count correlation per system, and the best
 .pit.recordScores:{.pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[]}; / keep this round's scores
-.pit.insurers:{select from(select insures:count i,highOnly:all basic>=.pit.insureCount by name,handle from .pit.insured)where highOnly}; / players who've only insured at a high count; basic strategy never insures
+.pit.insurers:{select insures:count i by name,handle from .pit.insured where(all;basic>=.pit.insureCount)fby name}; / players who've only insured at a high count; basic strategy never insures
 .pit.flagged:{                                                                                     / players over the line this round, on either tell
   s:.pit.correlations[]lj .pit.insurers[];                                                         / each player's scores and insurance record
   :select from s where((hands>=.pit.minHands)&score>=.pit.suspectCor)|.pit.minInsures<=0^insures;  / bets follow the count, or insures only at a high count
