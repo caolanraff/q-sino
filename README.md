@@ -71,7 +71,7 @@ code sent to it is refused and logged.
 ## Table rules
 Standard Las Vegas Strip rules:
 - Bets are $10 to $500, in whole dollars. Doubling and splitting can take a hand past $500.
-- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100). From a plain `q` session, call `buyin[amount]` before your first bet. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips.
+- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100). From a plain `q` session, call `buyin[amount]` before your first bet. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips. A player with no chips, or too few to bet, gets 15 seconds to buy some, then is asked to leave the table.
 - 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
 - Blackjack pays 3:2; other wins pay 1:1.
 - The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.

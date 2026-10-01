@@ -349,6 +349,7 @@
   should["drives the betting clock"]{
     .tst.timerCalls:0;
     `.bjk.betTimer mock {.tst.timerCalls+:1};
+    `.bjk.chipsTimer mock {};
     .z.ts[.z.p];
     .tst.timerCalls musteq 1;
     };
@@ -477,6 +478,7 @@
     .tst.insCalls:0;
     `.bjk.betTimer mock {.tst.betCalls+:1};
     `.bjk.insureTimer mock {.tst.insCalls+:1};
+    `.bjk.chipsTimer mock {};
     .z.ts[.z.p];
     (.tst.betCalls,.tst.insCalls) musteq 1 1;
     };
@@ -488,6 +490,7 @@
     `.bjk.betTimer mock {};
     `.bjk.insureTimer mock {};
     `.bjk.turnTimer mock {.tst.turnCalls+:1};
+    `.bjk.chipsTimer mock {};
     .z.ts[.z.p];
     .tst.turnCalls musteq 1;
   };
@@ -697,8 +700,11 @@
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.chips:enlist[7i]!enlist 8f;
+    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.timeout:0D00:00:15;
     .bjk.betPrompt 7i;
-    .tst.msgs mustmatch enlist"You're out of chips: buyin[amount] for more";
+    .tst.msgs mustmatch enlist"You're out of chips: buyin[amount] within 15 seconds, or you'll be asked to leave";
+    (.bjk.chipsDue[7i]>.z.p) musteq 1b;
   };
  };
 
@@ -742,7 +748,57 @@
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.chips:(`int$())!`float$();
+    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.timeout:0D00:00:15;
     .bjk.betPrompt 7i;
-    .tst.msgs mustmatch enlist"Please place your bets via the stake[] function, $10 to $500; buy some chips first: buyin[amount]";
+    .tst.msgs mustmatch enlist"Please buy some chips: buyin[amount] within 15 seconds, or you'll be asked to leave";
+    (.bjk.chipsDue[7i]>.z.p) musteq 1b;
+  };
+ };
+
+.tst.desc[".bjk.chipsTimer"]{
+  should["asks every player past their buy-in deadline to leave, and nobody else"]{
+    .tst.asked:();
+    `.bjk.askToLeave mock {.tst.asked,:x};
+    .bjk.chipsDue:(5 6i)!(.z.p-0D00:00:01;.z.p+0D00:00:10);
+    .bjk.chipsTimer[];
+    .tst.asked mustmatch enlist 5i;
+  };
+ };
+
+.tst.desc[".bjk.askToLeave"]{
+  should["tells the player why, takes them off the table and closes their connection"]{
+    `.log.info mock {[x]};
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    .tst.left:();
+    `.bjk.leave mock {.tst.left,:x};
+    .tst.closed:();
+    `.bjk.disconnect mock {.tst.closed,:x};
+    .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.askToLeave 5i;
+    .tst.msgs mustmatch enlist("You've been asked to leave the table: no chips";5i);
+    .tst.left mustmatch enlist 5i;
+    .tst.closed mustmatch enlist 5i;
+  };
+ };
+
+.tst.desc[".bjk.chipsDue"]{
+  should["forgets a player's buy-in deadline when they leave"]{
+    .bjk.chipsDue:enlist[42i]!enlist .z.p;
+    .bjk.unseat 42i;
+    (42i in key .bjk.chipsDue) musteq 0b;
+  };
+ };
+
+.tst.desc[".z.ts buy-in clock"]{
+  should["drives the buy-in clock"]{
+    .tst.calls:0;
+    `.bjk.betTimer mock {};
+    `.bjk.insureTimer mock {};
+    `.bjk.turnTimer mock {};
+    `.bjk.chipsTimer mock {.tst.calls+:1};
+    .z.ts[.z.p];
+    .tst.calls musteq 1;
   };
  };

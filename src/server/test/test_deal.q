@@ -977,6 +977,12 @@
     .bjk.chips[0i] musteq 500f;
     .tst.msgs mustmatch("You have $300.00 in chips";"You have $500.00 in chips");
   };
+  should["clears the player's deadline to buy in"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.chipsDue:enlist[0i]!enlist .z.p+0D00:00:10;
+    buyin 300;
+    (0i in key .bjk.chipsDue) musteq 0b;
+  };
   should["refuses a buy-in that isn't whole dollars, or is under the minimum"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};

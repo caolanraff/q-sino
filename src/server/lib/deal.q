@@ -11,6 +11,7 @@ buyin:{[amt]                                                                    
   if[amt<.bjk.rules`minBuyIn;.bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;.z.w];:()]; / at least the minimum
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / between hands only
   .bjk.buyIn[.z.w;"f"$amt];                                                                        / add the chips
+  .bjk.chipsDue _:.z.w;                                                                            / no longer due to leave
  };
 
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand
