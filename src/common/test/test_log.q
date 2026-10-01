@@ -28,10 +28,14 @@
   };
  };
 
-.tst.desc[".log.msg"]{
+.tst.desc[".log.line"]{
   should["stamps the line with the time and level"]{
-    .tst.line:"";
-    .log.msg[{.tst.line:x};"INFO ";("Shuffling";" the deck")];
-    .tst.line mustlike"20[0-9][0-9].[0-9][0-9].[0-9][0-9] [0-9][0-9]:[0-9][0-9]:*INFO Shuffling the deck";
+    .log.line["INFO ";("Shuffling";" the deck")] mustlike"20[0-9][0-9].[0-9][0-9].[0-9][0-9] [0-9][0-9]:[0-9][0-9]:*INFO Shuffling the deck";
+  };
+ };
+
+.tst.desc[".log.msg"]{
+  should["write the line to stdout"]{
+    .log.msg["INFO ";"dealing"] musteq -1i;
   };
  };
