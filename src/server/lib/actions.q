@@ -72,7 +72,7 @@ stick:{
     :.bjk.nextTurn[];
   ];
   if[.bjk.double;:stick[]];
-  .bjk.sendMsg["Hit or Stick?";d`handle];
+  .bjk.sendMsg["Hit or stick?";d`handle];
   .bjk.promptPlay d`handle;
  };
 

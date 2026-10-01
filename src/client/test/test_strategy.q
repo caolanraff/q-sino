@@ -1,12 +1,12 @@
 .tst.desc[".stg.help"]{
   before{.utl.load`:src/client/lib/strategy.q};
-  should["A,A,9 vs dealer 6 is a made soft 21 and should Stick"]{
+  should["A,A,9 vs dealer 6 is a made soft 21 and should stick"]{
     .stg.help[`A`A`9`6] musteq`S;
   };
-  should["A,9,+hit A vs dealer 2 is a soft 21 and should Stick"]{
+  should["A,9,+hit A vs dealer 2 is a soft 21 and should stick"]{
     .stg.help[`A`9`A`2] musteq`S;
   };
-  should["still correctly recommends Stick on a plain made 20"]{
+  should["still correctly recommends stick on a plain made 20"]{
     .stg.help[`10`Q`6] musteq`S;
   };
   should["still correctly recommends Hit on a hard 12 vs a strong dealer up-card"]{
