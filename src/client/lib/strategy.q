@@ -4,7 +4,8 @@
 .stg.insureAt:0w;                                                                                  / true count to insure at; never by default
 .stg.handsPlayed:0;                                                                                / hands played so far
 
-.stg.dealerDict:`2`3`4`5`6`7`8`9`10`J`Q`K`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`TEN`TEN`TEN`TEN`ACE; / dealer card to chart column
+.stg.dealerDict:`2`3`4`5`6`7`8`9`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`ACE;                 / dealer card to chart column
+.stg.dealerDict,:`10`J`Q`K!`TEN;                                                                   / tens
 
 .stg.hard:([hTotal:3+til 19]                                                                       / hard totals: 6-deck H17 DAS basic strategy
   TWO:`H`H`H`H`H`H`H`D`D`H`S`S`S`S`S`S`S`S`S;
@@ -92,7 +93,9 @@
  };
 
 .stg.tableBet:{.stg.rules[`minBet]|.stg.rules[`maxBet]&x};                                         / keep a bet within the table limits
-.stg.insureAmount:{$[.stg.trueCount>=.stg.insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f]}; / half the bet once the true count reaches .stg.insureAt, else 0
+.stg.insureAmount:{                                                                                / insurance to take
+  :$[.stg.trueCount>=.stg.insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f];      / half the bet once the true count reaches .stg.insureAt, else 0
+ };
 
 .plr.stake:{[s]                                                                                    / [state] bet by the count; replaces player.q's prompt
   .stg.recv s;                                                                                     / take the pushed state

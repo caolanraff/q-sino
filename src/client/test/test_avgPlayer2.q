@@ -6,20 +6,20 @@
  };
 
 .tst.desc["avgPlayer2 .stg.getBet"]{
-  before{.utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer2.q};
+  before{
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer2.q;
+    .stg.mh:5i;
+  };
   should["bets its own previous hand's profit, ignoring other players' rows"]{
     .stg.res:([]round:1 1 2 2;handle:5 6 5 6i;name:`bob_5`amy_6`bob_5`amy_6;profit:10 40 15 -10f);
-    .stg.mh:5i;
     .stg.getBet[] mustmatch 15;
   };
   should["falls back to 10 after a losing or push hand"]{
     .stg.res:([]round:1 2;handle:5 5i;name:`bob_5`bob_5;profit:15 -10f);
-    .stg.mh:5i;
     .stg.getBet[] musteq 10;
   };
   should["bets 10 before any hand has been played, when the pushed results are still untyped"]{
-    .stg.res:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
-    .stg.mh:5i;
+    .stg.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .stg.getBet[] musteq 10;
   };
  };

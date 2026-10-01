@@ -2,25 +2,23 @@
 .utl.load each .bjk.libs;
 
 .tst.desc["checks[]"]{
-  should["returns 0b and does not act when it isn't the caller's turn"]{
+  before{
     .tst.pubCalls:0;
     `.bjk.pubMsg mock {[x;y].tst.pubCalls+:1};
+  };
+  should["returns 0b and does not act when it isn't the caller's turn"]{
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;                                         / player2 (handle 1) has the turn, not .z.w (0)
     .bjk.checks[] musteq 0b;
     .tst.pubCalls musteq 1;
   };
   should["returns 0b when the turn holder's hand is already past 21"]{
-    .tst.pubCalls:0;
-    `.bjk.pubMsg mock {[x;y].tst.pubCalls+:1};
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:25 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.checks[] musteq 0b;
     .tst.pubCalls musteq 1;
   };
   should["returns 1b when it is the caller's turn and the hand isn't bust"]{
-    .tst.pubCalls:0;
-    `.bjk.pubMsg mock {[x;y].tst.pubCalls+:1};
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.checks[] musteq 1b;
@@ -29,9 +27,11 @@
  };
 
 .tst.desc["stick[]"]{
+  before{
+    `.bjk.pubMsg mock {[x;y]};
+  };
   should["does nothing when checks[] fails"]{
     `.bjk.checks mock {0b};
-    `.bjk.pubMsg mock {[x;y]};
     .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`8`8;cnt:enlist 16i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
     .bjk.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bjk.tab;
     stick[];
@@ -39,7 +39,6 @@
     (exec first turn from .bjk.tab) musteq 1b;
   };
   should["passes the turn to the next eligible player and doesn't call .bjk.dealer[]"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.excFunc mock {[x;y;z]};
     .tst.dealerCalls:0;
@@ -54,7 +53,6 @@
     .tst.dealerCalls musteq 0;
   };
   should["calls .bjk.dealer[] when the sticking player was the last one with a turn"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.dealerCalls:0;
     `.bjk.dealer mock {.tst.dealerCalls+:1};
@@ -66,7 +64,6 @@
     .tst.dealerCalls musteq 1;
   };
   should["triggers an async play prompt for the next player, addressed to their own handle"]{
-    `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
@@ -168,10 +165,12 @@
  };
 
 .tst.desc["hit[] on split hands"]{
-  should["busting one split hand leaves the player's other split hand live and gives it the turn"]{
+  before{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.sendMsg mock {[x;y]};
     `.bjk.excFunc mock {[x;y;z]};
+  };
+  should["busting one split hand leaves the player's other split hand live and gives it the turn"]{
     `.bjk.getCard mock {`10};
     .tst.dealerCalls:0;
     `.bjk.dealer mock {.tst.dealerCalls+:1};
@@ -187,9 +186,6 @@
     .tst.dealerCalls musteq 0;
   };
   should["refuses to hit a split ace hand, which sticks on its one card"]{
-    `.bjk.pubMsg mock {[x;y]};
-    `.bjk.sendMsg mock {[x;y]};
-    `.bjk.excFunc mock {[x;y;z]};
     .tst.cardseq:`5`A`10;                                                                          / hand 1 gets 5 (A,5), hand 2 gets A (A,A); the 10 must never be drawn
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
     .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`9;`9);dealerCnt:9 9i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);

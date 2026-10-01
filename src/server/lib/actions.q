@@ -4,7 +4,8 @@
     :0b;                                                                                           / refuse
   ];
   if[21<first exec cnt from .bjk.tab where turn;                                                   / hand already bust
-    .bjk.pubMsg["Too late, the game's already over. Please wait until next hand ",string .z.u;.z.w]; / tell them
+    m:"Too late, the game's already over. Please wait until next hand ",string .z.u;               / the notice
+    .bjk.pubMsg[m;.z.w];                                                                           / tell them
     :0b;                                                                                           / refuse
   ];
   :1b;                                                                                             / they can act
@@ -21,7 +22,8 @@
  };
 
 .bjk.nextTurn:{                                                                                    / move to the next hand still to play
-  update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out,not wait); / first hand neither out nor waiting
+  p:exec first player from .bjk.tab where not out,not wait;                                        / first hand neither out nor waiting
+  update turn:1b from`.bjk.tab where player=p;                                                     / give it the turn
   .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;  / the table as players see it
   if[not any exec turn from .bjk.tab;                                                              / nobody left to play
     .bjk.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bjk.cp];          / announce it
@@ -48,7 +50,8 @@ stick:{                                                                         
   if[null[.bjk.turnDeadline]|.z.p<.bjk.turnDeadline;:()];                                          / clock not running or not up
   .bjk.turnDeadline:0Np;                                                                           / stop the clock
   if[not any exec turn from .bjk.tab;:()];                                                         / nobody on turn
-  .bjk.pubMsg[string[first exec name from .bjk.tab where turn]," took too long - sticking";key .bjk.cp]; / announce it
+  n:first exec name from .bjk.tab where turn;                                                      / who's on turn
+  .bjk.pubMsg[string[n]," took too long - sticking";key .bjk.cp];                                  / announce it
   .bjk.stickHand[];                                                                                / stick
  };
 
@@ -98,12 +101,16 @@ double:{                                                                        
 
 insure:{[amt]                                                                                      / [amount] take insurance, 0 to decline
   if[not .bjk.insuring;.bjk.sendMsg["Insurance isn't on offer right now";.z.w];:()];               / insurance not on offer
-  if[not .z.w in exec handle from .bjk.tab where null insurance;.bjk.sendMsg["You've no hand waiting on insurance";.z.w];:()]; / no hand waiting on insurance
+  if[not .z.w in exec handle from .bjk.tab where null insurance;                                   / no hand waiting on insurance
+    .bjk.sendMsg["You've no hand waiting on insurance";.z.w];                                      / tell them
+    :();                                                                                           / refuse
+  ];
   if[any(null amt;amt<0;amt>0.5*first exec bet from .bjk.tab where handle=.z.w);                   / 0 to half the bet
     .bjk.sendMsg["Insurance is between 0 and half your bet";.z.w];                                 / tell them
     :();                                                                                           / refuse
   ];
-  .bjk.pubMsg[string[.z.u],$[amt=0;" declines insurance";" insures for $",string amt];key .bjk.cp]; / announce it
+  m:$[amt=0;" declines insurance";" insures for $",string amt];                                    / their answer
+  .bjk.pubMsg[string[.z.u],m;key .bjk.cp];                                                         / announce it
   update insurance:`float$amt from`.bjk.tab where handle=.z.w;                                     / record it
   .bjk.closeInsuranceIfDone[];                                                                     / close insurance if everyone has answered
  };
