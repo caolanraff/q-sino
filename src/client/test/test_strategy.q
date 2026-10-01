@@ -119,3 +119,31 @@
     .stg.insureAt musteq 0w;
   };
  };
+
+.tst.desc[".stg.tableBet"]{
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  should["keeps a bet inside the table limits"]{
+    .stg.tableBet[25] musteq 25;
+  };
+  should["raises a bet below the minimum, so it isn't refused"]{
+    .stg.tableBet[5] musteq 10;
+  };
+  should["caps a bet above the maximum"]{
+    .stg.tableBet[800] musteq 500;
+  };
+ };
+
+.tst.desc[".plr.stake table limits"]{
+  should["stakes the strategy's bet clamped to the pushed table limits"]{
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer2.q;
+    .tst.staked:();
+    `stake mock {.tst.staked,:x};
+    `.stg.getBet mock {5};
+    .plr.h:0i;
+    .plr.toth:1000;
+    .stg.handsPlayed:0;
+    t:([]round:0#0;cards:();dealer:0#`);
+    .plr.stake`tab`res`me`rules!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500);
+    .tst.staked mustmatch enlist 10;
+  };
+ };

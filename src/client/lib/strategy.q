@@ -91,6 +91,7 @@
   :r;
  };
 
+.stg.tableBet:{.stg.rules[`minBet]|.stg.rules[`maxBet]&x};
 .stg.insureAmount:{$[.stg.trueCount>=.stg.insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f]};
 
 / real auto-play hooks the server pushes to every connected handle; loaded whenever a
@@ -103,7 +104,7 @@
     exit 0;
   ];
   .stg.count[];
-  neg[.plr.h](`stake;.stg.getBet[]);
+  neg[.plr.h](`stake;.stg.tableBet .stg.getBet[]);
  };
 
 .plr.insure:{[s]

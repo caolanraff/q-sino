@@ -50,7 +50,7 @@ in its console:
 
 | Command | |
 |---|---|
-| `stake[bet]` | Bet on the next hand, in whole dollars. |
+| `stake[bet]` | Bet on the next hand: whole dollars, $10 to $500. |
 | `hit[]` | Take another card. |
 | `stick[]` | Stick with your hand. |
 | `double[]` | Double your bet and take exactly one more card (first two cards only). |
@@ -68,6 +68,7 @@ code sent to it is refused and logged.
 
 ## Table rules
 Standard Las Vegas Strip rules:
+- Bets are $10 to $500, in whole dollars. Doubling and splitting can take a hand past $500.
 - 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
 - Blackjack pays 3:2; other wins pay 1:1.
 - The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.
