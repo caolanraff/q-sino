@@ -1,6 +1,8 @@
+.bjk.limits:{"$",string[.bjk.rules`minBet]," to $",string .bjk.rules`maxBet};
+
 stake:{[bet]
   if[not type[bet]in -5 -6 -7h;.bjk.sendMsg["Bets are whole dollars";.z.w];:()];
-  if[1>bet;.bjk.sendMsg["Put some money down on the table or move on";.z.w];:()];
+  if[not bet within .bjk.rules`minBet`maxBet;.bjk.sendMsg["Bets are ",.bjk.limits[];.z.w];:()];
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];
   .log.info string[.z.u]," bets $",string bet;
   upsert[`.bjk.stake;(.bjk.user[];.z.w;"j"$bet)];

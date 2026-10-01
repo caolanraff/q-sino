@@ -10,7 +10,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;
 .bjk.shuffleCnt:0;
 .bjk.hitSoft17:1b;
-.bjk.rules:`maxSplitHands`deckCnt!4 6;
+.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
 .bjk.timeout:0D00:00:15;
 .bjk.betDeadline:0Np;
 .bjk.insuring:0b;
@@ -42,7 +42,7 @@ hist:{.bjk.hist,.bjk.res};
   .log.info $[.bjk.seated[]~.bjk.cp;"No new users have joined the table";"New users have joined the table"];
   .bjk.seat[];
   unbet:exec handle from .bjk.tab where null bet;
-  .bjk.sendMsg["Please place your bets via the stake[] function"]each unbet;
+  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[]]each unbet;
   .bjk.trigger[`.plr.stake]each unbet;
  };
 
