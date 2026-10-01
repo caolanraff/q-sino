@@ -57,6 +57,7 @@ in its console:
 | `double[]` | Double your bet and take exactly one more card (first two cards only). |
 | `split[]` | Split a pair into two hands. |
 | `insure[amount]` | When the dealer shows an ace: insure for up to half your bet, or `insure[0]` to decline. |
+| `buyin[amount]` | Buy chips (at least $100), between hands. |
 | `hist[]` | Results of every hand so far. |
 
 You can also play from a plain `q` session, with
@@ -70,7 +71,7 @@ code sent to it is refused and logged.
 ## Table rules
 Standard Las Vegas Strip rules:
 - Bets are $10 to $500, in whole dollars. Doubling and splitting can take a hand past $500.
-- Every player starts with $1,000. You can't bet, double, split or insure for more than you have left, and once you can't afford the $10 minimum you're out of money. Each bets prompt shows your balance.
+- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100), and a plain `q` session's first bet buys $1,000 unless it calls `buyin[amount]` first. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips.
 - 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
 - Blackjack pays 3:2; other wins pay 1:1.
 - The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.
@@ -95,7 +96,8 @@ Pass one of these to `--player`:
 | `perfectCardCounter` | Basic strategy | $10-$80 on a level-9 "perfect" count. |
 
 `--hands` (default `1000`) sets how many hands the client plays before it
-disconnects.
+disconnects, and `--buyin` (default `1000`) how many dollars of chips it buys
+when it joins. A strategy leaves the table once it's out of chips.
 
 ## Pitboss
 The pitboss records every hand and looks for two signs of counting:

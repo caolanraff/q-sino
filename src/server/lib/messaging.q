@@ -2,7 +2,7 @@
 .bjk.sendMsg:{[msg;h]@[neg first h;.bjk.display msg;{.log.warn"Couldn't send a message: ",x}]};    / [message;handle] send a client a message, logging a failure
 .bjk.pubMsg:{.log.info x;.bjk.sendMsg[x]each y};                                                   / log a message and send it to each handle
 .bjk.excFunc:{[f;arg;h]@[neg first h;(f;arg);{.log.warn"Couldn't send a trigger: ",x}]};           / [function;argument;handle] call a function on a client, logging a failure
-.bjk.clientState:{[h]`tab`res`me`rules`bank!(.bjk.tab;.bjk.res;h;.bjk.rules;0f^.bjk.bank h)};      / [handle] game state pushed to a client, with their balance
+.bjk.clientState:{[h]`tab`res`me`rules`chips!(.bjk.tab;.bjk.res;h;.bjk.rules;.bjk.chips h)};       / [handle] game state pushed to a client, with their chips
 .bjk.trigger:{[f;h].bjk.excFunc[f;.bjk.clientState h;h]};                                          / [function;handle] call a client's handler with its game state
 .bjk.user:{`$string[.z.u],"_",string .z.w};                                                        / player name: username_handle
 .bjk.isPit:{.z.u~`pitboss};                                                                        / is the caller the pitboss
@@ -12,5 +12,4 @@
   .bjk.cp[h]:.bjk.user[];                                                                          / name them
   .bjk.users[h]:.z.u;                                                                              / their username
   .bjk.joined[h]:.bjk.rnd;                                                                         / round they joined
-  .bjk.bank[h]:"f"$.bjk.rules`startBank;                                                           / their starting balance
  };

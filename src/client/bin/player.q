@@ -16,18 +16,21 @@ stick:{.plr.dispatch[`stick;x]};                                                
 double:{.plr.dispatch[`double;x]};                                                                 / double
 split:{.plr.dispatch[`split;x]};                                                                   / split
 insure:{.plr.dispatch[`insure;x]};                                                                 / take insurance, up to half the bet
+buyin:{.plr.dispatch[`buyin;x]};                                                                   / buy chips
 hist:{.plr.dispatch[`hist;x]};                                                                     / hand results so far
 
 .plr.init:{                                                                                        / start the client
   .utl.addOptDef["player";"S";`;`.plr.player];                                                     / --player: strategy to play; manual if omitted
   .utl.addOptDef["server";"S";`:localhost:5555;{`.plr.server set hsym x}];                         / --server: blackjack server address
   .utl.addOptDef["hands";"I";1000i;`.plr.toth];                                                    / --hands: hands to play before leaving; auto mode only
+  .utl.addOptDef["buyin";"J";1000;`.plr.buyin];                                                    / --buyin: chips to buy on joining
   .utl.parseArgs[];                                                                                / parse the command line
   if[not null .plr.player;                                                                         / a strategy was chosen
     if[not .plr.player in .plr.pt;.log.error"Unknown player, options - ",","sv string .plr.pt;exit 1]; / unknown strategy: exit
     .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
   .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];               / connect, or exit
+  neg[.plr.h](`buyin;.plr.buyin);                                                                  / buy in; async, so it reaches the server before my first bet
   .z.pc:{if[x=.plr.h;-1"Disconnected from the table";exit 0]};                                     / exit when the server disconnects
  };
 

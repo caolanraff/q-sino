@@ -6,13 +6,13 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.rnd:0;                                                                                        / round number
 .bjk.pit:0Ni;                                                                                      / pitboss's handle, null until it connects
 .bjk.ejectCounters:0b;                                                                             / eject players the pitboss flags (--pitboss)
-.bjk.public:`stake`hit`stick`double`split`insure`hist;                                             / the only functions players may call
+.bjk.public:`stake`hit`stick`double`split`insure`buyin`hist;                                       / the only commands a player can call
 
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;                                                 / one 52-card deck
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
-.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`startBank!4 6 10 500 1000;                         / table rules, pushed to clients
-.bjk.bank:(`int$())!`float$();                                                                     / each player's balance
+.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn`defaultBuyIn!4 6 10 500 100 1000;         / table rules, pushed to clients
+.bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
 .bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
@@ -41,12 +41,13 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 hist:{.bjk.hist,.bjk.res};                                                                         / every hand result so far
 
 .bjk.committed:{[h]exec sum(0^bet)+0^insurance from .bjk.tab where handle=h};                      / [handle] what a player has on the table this round
-.bjk.available:{[h](0^.bjk.bank h)-.bjk.committed h};                                              / [handle] what a player can still put on the table
-.bjk.broke:{[h].bjk.bank[h]<.bjk.rules`minBet};                                                    / [handle] can't afford the minimum bet
+.bjk.available:{[h](0^.bjk.chips h)-.bjk.committed h};                                             / [handle] chips a player can still put on the table
+.bjk.outOfChips:{[h]not[null c]&.bjk.rules[`minBet]>c:.bjk.chips h};                               / [handle] has chips, but not enough for the minimum bet
 
-.bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their balance
-  if[.bjk.broke h;:.bjk.sendMsg["You're out of money";h]];                                         / they can't bet any more
-  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],"; your balance is $",.Q.f[2;.bjk.bank h];h]; / ask them to bet
+.bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their chips
+  if[.bjk.outOfChips h;:.bjk.sendMsg["You're out of chips: buyin[amount] for more";h]];            / they need more chips to bet
+  m:$[null .bjk.chips h;"buyin[amount] first, or your first bet buys you $",string[.bjk.rules`defaultBuyIn]," in chips";"your chips: $",.Q.f[2;.bjk.chips h]]; / their chips, or how they get some
+  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],"; ",m;h];        / ask them to bet
  };
 
 .bjk.start:{                                                                                       / seat players and ask for bets
@@ -76,14 +77,14 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.logLeaver:{[h]                                                                                / [handle] log a leaver's net winnings
   won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;                           / net profit since they joined
-  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won],", leaving with $",.Q.f[2;$[.bjk.hd;.bjk.bank h;.bjk.available h]];
+  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won],", leaving with $",.Q.f[2;0^$[.bjk.hd;.bjk.chips h;.bjk.available h]]," in chips";
  };
 
 .bjk.unseat:{[h]                                                                                   / [handle] remove a player from the table
   .bjk.cp:.bjk.cp _ h;                                                                             / drop the connection
   .bjk.users:.bjk.users _ h;                                                                       / drop their username
   .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
-  .bjk.bank:.bjk.bank _ h;                                                                         / drop their balance
+  .bjk.chips:.bjk.chips _ h;                                                                       / drop their chips
   delete from`.bjk.tab where handle=h;                                                             / drop their hands
   delete from`.bjk.stake where handle=h;                                                           / drop their bet
  };
