@@ -229,6 +229,8 @@
   should["flags a player once they've enough hands and their bets follow the count closely enough"]{
     .pit.minHands:20;
     .pit.suspectCor:0.5;
+    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
     `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25 25 10;score:0.6 0.3 0.9)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
@@ -269,7 +271,7 @@
     .pit.bets:([]name:`a_5`b_6;handle:5 6i;bet:10 20;basic:0 0f;omega:0 0f;perfect:0 0f);
     .pit.streak:`a_5`b_6!5 3;
     .pit.insured:([]name:`a_5`b_6;handle:5 6i;basic:3 4f);
-    .pit.report`name`handle`hands`score`insures!(`a_5;5i;25;0.6;0N);
+    .pit.report`name`handle`hands`score`insures`ramp!(`a_5;5i;25;0.6;0N;2.5);
     .tst.ejected mustmatch enlist 5i;
     (exec name from .pit.insured) mustmatch enlist`b_6;
     .pit.streak mustmatch enlist[`b_6]!enlist 3;
@@ -281,8 +283,8 @@
     `.bjk.eject mock {};
     .pit.h:0i;
     .pit.bets:0#.pit.bets;
-    .pit.report`name`handle`hands`score`insures!(`a_5;5i;25;0.6;0N);
-    .tst.logged mustlike"Suspected card counter: a_5 (bet/count correlation 0.60 over 25 hands; insured only at a high count 0 times)";
+    .pit.report`name`handle`hands`score`insures`ramp!(`a_5;5i;25;0.6;0N;2.5);
+    .tst.logged mustlike"Suspected card counter: a_5 (bet/count correlation 0.60 over 25 hands; bets 2.5x as much at a good count; insured only at a high count 0 times)";
   };
  };
 
@@ -362,20 +364,57 @@
  };
 
 .tst.desc[".pit.flagged insurance"]{
-  before{.pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2};
+  before{.pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2;.pit.minRampHands:5;.pit.minRamp:1.5};
   should["flags a player who only insures at a high count, even if their bets don't follow the count"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.1)};
+    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
     `.pit.insurers mock {([name:enlist`a_5;handle:enlist 5i]insures:enlist 2;highOnly:enlist 1b)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
   should["doesn't flag a player with too few high-count insurances"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.1)};
+    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
     `.pit.insurers mock {([name:enlist`a_5;handle:enlist 5i]insures:enlist 1;highOnly:enlist 1b)};
     count[.pit.flagged[]] musteq 0;
   };
   should["still flags on the bet/count correlation alone"]{
     `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.6)};
+    `.pit.ramps mock {([name:`symbol$();handle:`int$()]good:`long$();bad:`long$();ramp:`float$())};
     `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$();highOnly:`boolean$())};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
+  };
+ };
+
+.tst.desc[".pit.ramps"]{
+  should["compares each player's average bet at a good count with a bad one"]{
+    .pit.goodCount:2;
+    .pit.badCount:0;
+    .pit.bets:([]name:6#`a_5;handle:6#5i;bet:10 10 20 40 40 20;basic:-1 0 1 2 3 0.5;omega:6#0f;perfect:6#0f);
+    s:0!.pit.ramps[];
+    (exec good from s) musteq enlist 2;
+    (exec bad from s) musteq enlist 2;
+    (exec ramp from s) musteq enlist 4f;
+  };
+ };
+
+.tst.desc[".pit.flagged bet ramp"]{
+  before{.pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2;.pit.minRampHands:5;.pit.minRamp:1.5};
+  should["flags a player who bets clearly more at a good count, even if they've never insured"]{
+    `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.2)};
+    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.ramps mock {([name:enlist`a_5;handle:enlist 5i]good:enlist 6;bad:enlist 9;ramp:enlist 3f)};
+    (exec name from .pit.flagged[]) mustmatch enlist`a_5;
+  };
+  should["doesn't flag on too few bets at a good or a bad count"]{
+    `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.2)};
+    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.ramps mock {([name:enlist`a_5;handle:enlist 5i]good:enlist 4;bad:enlist 9;ramp:enlist 3f)};
+    count[.pit.flagged[]] musteq 0;
+  };
+  should["doesn't flag a player whose bets barely change with the count"]{
+    `.pit.correlations mock {([name:enlist`a_5;handle:enlist 5i]hands:enlist 25;score:enlist 0.2)};
+    `.pit.insurers mock {([name:`symbol$();handle:`int$()]insures:`long$())};
+    `.pit.ramps mock {([name:enlist`a_5;handle:enlist 5i]good:enlist 6;bad:enlist 9;ramp:enlist 1.2)};
+    count[.pit.flagged[]] musteq 0;
   };
  };
