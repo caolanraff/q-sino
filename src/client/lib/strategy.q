@@ -55,7 +55,7 @@
   .stg.res:s`res;                                                                                  / this shoe's results
   .stg.mh:s`me;                                                                                    / my handle
   .stg.rules:s`rules;                                                                              / table rules
-  .stg.chips:$[null s`chips;"f"$.plr.buyin;s`chips];                                               / my chips; my buy-in until the server has it
+  .stg.chips:0f^s`chips;                                                                           / my chips; none if I haven't bought in
  };
 
 .stg.values:{[cards]                                                                               / [cards] card values, with aces as 1 where needed

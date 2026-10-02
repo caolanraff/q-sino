@@ -26,7 +26,7 @@ hist:{.plr.dispatch[`hist;x]};                                                  
   .utl.addOptDef["player";"S";`;`.plr.player];                                                     / --player: strategy to play; manual if omitted
   .utl.addOptDef["server";"S";`:localhost:5555;{`.plr.server set hsym x}];                         / --server: blackjack server address
   .utl.addOptDef["hands";"I";1000i;`.plr.toth];                                                    / --hands: hands to play before leaving; auto mode only
-  .utl.addOptDef["buyin";"J";1000;`.plr.buyin];                                                    / --buyin: chips to buy on joining
+  .utl.addOptDef["buyin";"J";1000;`.plr.buyin];                                                    / --buyin: chips to buy when I sit down
   .utl.parseArgs[];                                                                                / parse the command line
   if[not null .plr.player;                                                                         / a strategy was chosen
     if[not .plr.player in .plr.pt;                                                                 / unknown strategy: exit
@@ -35,8 +35,8 @@ hist:{.plr.dispatch[`hist;x]};                                                  
     ];
     .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
-  .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];               / connect, or exit
-  neg[.plr.h](`buyin;.plr.buyin);                                                                  / buy in; async, so it reaches the server before my first bet
+  s:`$string[.plr.server],":",string[.z.u],":",string .plr.buyin;                                  / server address, with my buy-in as the password
+  .plr.h:@[hopen;s;{-1"Sorry, no tables currently available: ",x;exit 1}];                         / connect, or exit
   .z.pc:{if[x=.plr.h;-1"Disconnected from the table";exit 0]};                                     / exit when the server disconnects
  };
 
