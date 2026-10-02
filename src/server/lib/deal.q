@@ -2,8 +2,10 @@
 
 .bjk.buyIn:{[h;amt]                                                                                / [handle;amount] add chips, and tell the player
   .log.info string[.bjk.users h]," buys $",string["j"$amt]," in chips";
+  firstBuy:null .bjk.chips h;                                                                      / their first buy-in: they've just sat down
   .bjk.chips[h]:amt+0^.bjk.chips h;                                                                / add them
-  .bjk.sendMsg["You have $",.Q.f[2;.bjk.chips h]," in chips";h];                                   / tell the player
+  m:"You have $",.Q.f[2;.bjk.chips h]," in chips";                                                 / their chips
+  .bjk.sendMsg[m,$[firstBuy;", please use buyin[amount] if you want more";""];h];                  / tell the player, with how to top up on joining
  };
 
 buyin:{[amt]                                                                                       / [amount] buy chips: the first buy-in sets them, later ones add more

@@ -915,7 +915,7 @@
     .tst.logged mustmatch enlist"alice buys $300 in chips";
     buyin 200;
     .bjk.chips[0i] musteq 500f;
-    .tst.msgs mustmatch("You have $300.00 in chips";"You have $500.00 in chips");
+    .tst.msgs mustmatch("You have $300.00 in chips, please use buyin[amount] if you want more";"You have $500.00 in chips");
   };
   should["clears the player's deadline to buy in"]{
     `.bjk.sendMsg mock {[x;y]};
