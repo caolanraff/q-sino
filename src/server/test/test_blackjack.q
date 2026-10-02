@@ -88,21 +88,24 @@
     .tst.startCalls:0;
     `.bjk.isBanned mock {0b};
     `.bjk.start mock {.tst.startCalls+:1};
+    .bjk.chipsDue:(`int$())!`timestamp$();
   };
-  should["registers the connection and starts the table for a plain client"]{
+  should["registers a player and starts their buy-in clock, without seating them or asking for bets"]{
     .bjk.cp:()!(); .bjk.pit:0Ni;
     .tst.regConnCalls:0;
     `.bjk.regConn mock {.tst.regConnCalls+:1};
     `.bjk.isPit mock {0b};
     .z.po[];
     .tst.regConnCalls musteq 1;
-    .tst.startCalls musteq 1;
+    .tst.startCalls musteq 0;
+    (.z.w in key .bjk.chipsDue) musteq 1b;
     };
-  should["skips .bjk.start for a pitboss connection"]{
+  should["gives a pitboss connection no buy-in clock"]{
     `.bjk.regConn mock {};
     `.bjk.isPit mock {1b};
     .z.po[];
     .tst.startCalls musteq 0;
+    (.z.w in key .bjk.chipsDue) musteq 0b;
     };
  };
 
@@ -199,6 +202,7 @@
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
+    .bjk.chips:5 6 7i!3#1000f;
   };
   should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
@@ -389,13 +393,27 @@
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.hd:1b;
-    .bjk.cp:(5i;6i)!`alice`bob;
+    .bjk.cp:5 6i!`alice`bob;
+    .bjk.chips:5 6i!2#1000f;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     (.tst.sent[;0]) mustmatch `.plr.stake`.plr.stake;
     ({x[1]`me} each .tst.sent) musteq 5 6i;
     ({x[1]`tab} each .tst.sent) mustmatch 2#enlist .bjk.tab;
+    };
+  should["skips players who haven't bought in yet"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .tst.sent:();
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
+    .bjk.hd:1b;
+    .bjk.cp:5 6i!`alice`bob;
+    .bjk.chips:enlist[6i]!enlist 1000f;
+    .bjk.chipsDue:enlist[5i]!enlist .z.p+0D00:00:15;
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.start[];
+    ({x[1]`me} each .tst.sent) musteq enlist 6i;
     };
  };
 

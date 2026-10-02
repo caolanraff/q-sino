@@ -2,8 +2,10 @@
 
 .bjk.buyIn:{[h;amt]                                                                                / [handle;amount] add chips, and tell the player
   .log.info string[.bjk.users h]," buys $",string["j"$amt]," in chips";
+  firstBuy:null .bjk.chips h;                                                                      / their first buy-in: they've just sat down
   .bjk.chips[h]:amt+0^.bjk.chips h;                                                                / add them
-  .bjk.sendMsg["You have $",.Q.f[2;.bjk.chips h]," in chips";h];                                   / tell the player
+  m:"You have $",.Q.f[2;.bjk.chips h]," in chips";                                                 / their chips
+  .bjk.sendMsg[m,$[firstBuy;", please use buyin[amount] if you want more";""];h];                  / tell the player, with how to top up on joining
  };
 
 buyin:{[amt]                                                                                       / [amount] buy chips: the first buy-in sets them, later ones add more
@@ -12,9 +14,14 @@ buyin:{[amt]                                                                    
     .bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;.z.w];                       / tell them
     :();                                                                                           / refuse
   ];
-  if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / between hands only
+  short:.bjk.needChips .z.w;                                                                       / no chips, or too few to bet: not in this hand
+  if[not[.bjk.hd]&not short;                                                                       / topping up mid-hand
+    .bjk.sendMsg["Please wait until the current hand is complete";.z.w];                           / tell them
+    :();                                                                                           / refuse
+  ];
   .bjk.buyIn[.z.w;"f"$amt];                                                                        / add the chips
   .bjk.chipsDue _:.z.w;                                                                            / no longer due to leave
+  if[.bjk.hd&short;.bjk.start[]];                                                                  / now they can bet: seat them and ask
  };
 
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand

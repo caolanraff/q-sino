@@ -71,7 +71,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.seat[];                                                                                     / seat everyone connected
   unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
   .bjk.betPrompt each unbet;                                                                       / ask them to bet
-  .bjk.trigger[`.plr.stake]each unbet;                                                             / prompt their stake handler
+  .bjk.trigger[`.plr.stake]each unbet where not null .bjk.chips unbet;                             / prompt the stake handler of those who've bought in
  };
 
 .bjk.seated:{exec first name by handle from .bjk.tab};                                             / handle to name of everyone seated
@@ -125,12 +125,12 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.disconnect h;                                                                               / close their connection
  };
 
-.z.po:{                                                                                            / new connection
+.z.po:{                                                                                            / new connection: they sit down, then buy in to play
   if[.bjk.isBanned[];:.bjk.turnAway .z.w];                                                         / turn away banned users
   .bjk.regConn .z.w;                                                                               / register it
   if[.bjk.isPit[];:()];                                                                            / the pitboss doesn't play
-  .bjk.start[];                                                                                    / seat players and ask for bets
   neg[.z.w](.bjk.intro;`);                                                                         / send the help text
+  .bjk.chipsDue[.z.w]:.z.p+.bjk.timeout;                                                           / their buy-in seats them; until then, the clock runs
  };
 
 .bjk.command:{                                                                                     / validate a player's message, e.g. .bjk.command"stake 10"
