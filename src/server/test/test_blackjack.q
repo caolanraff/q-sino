@@ -402,18 +402,34 @@
     ({x[1]`me} each .tst.sent) musteq 5 6i;
     ({x[1]`tab} each .tst.sent) mustmatch 2#enlist .bjk.tab;
     };
-  should["skips players who haven't bought in yet"]{
-    `.bjk.sendMsg mock {[x;y]};
+ };
+
+.tst.desc[".bjk.seat"]{
+  should["seats only connected players who have bought in, keeping their bets"]{
+    .bjk.cp:5 6 7i!`alice`bob`carol;
+    .bjk.chips:5 7i!100 5f;
+    .bjk.stake:([name:enlist`carol;handle:enlist 7i]bet:enlist 10);
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.seat[];
+    (select player,name,handle,bet from .bjk.tab) mustmatch ([]player:1 2;name:`alice`carol;handle:5 7i;bet:0N 10);
+    };
+ };
+
+.tst.desc[".bjk.sitIn"]{
+  should["seats the player and asks only them to bet"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     .tst.sent:();
-    `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
-    .bjk.hd:1b;
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.cp:5 6i!`alice`bob;
-    .bjk.chips:enlist[6i]!enlist 1000f;
-    .bjk.chipsDue:enlist[5i]!enlist .z.p+0D00:00:15;
+    .bjk.chips:5 6i!1000 300f;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
-    .bjk.start[];
-    ({x[1]`me} each .tst.sent) musteq enlist 6i;
+    .bjk.sitIn 6i;
+    (exec handle from .bjk.tab) musteq 5 6i;
+    .tst.msgs[;1] musteq enlist 6i;
+    .tst.sent mustmatch enlist(`.plr.stake;6i);
     };
  };
 

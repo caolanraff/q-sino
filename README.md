@@ -57,7 +57,7 @@ in its console:
 | `double[]` | Double your bet and take exactly one more card (first two cards only). |
 | `split[]` | Split a pair into two hands. |
 | `insure[amount]` | When the dealer shows an ace: insure for up to half your bet, or `insure[0]` to decline. |
-| `buyin[amount]` | Buy chips (at least $100), between hands. |
+| `buyin[amount]` | Buy chips (at least $100). Your first buy-in deals you in; top-ups are between hands. |
 | `hist[]` | Results of every hand so far. |
 
 You can also play from a plain `q` session, with
@@ -71,7 +71,7 @@ code sent to it is refused and logged.
 ## Table rules
 Standard Las Vegas Strip rules:
 - Bets are $10 to $500, in whole dollars. Doubling and splitting can take a hand past $500.
-- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100). From a plain `q` session, call `buyin[amount]` before your first bet. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips. A player with no chips, or too few to bet, gets 15 seconds to buy some, then is asked to leave the table.
+- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100). From a plain `q` session, call `buyin[amount]` to be dealt in: you're only seated, and asked to bet, once you've bought chips. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips. A player with no chips, or too few to bet, gets 15 seconds to buy some, then is asked to leave the table.
 - 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
 - Blackjack pays 3:2; other wins pay 1:1.
 - The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.

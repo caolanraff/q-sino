@@ -67,19 +67,25 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.start:{                                                                                       / seat players and ask for bets
   if[not .bjk.hd;:.bjk.sendMsg["Please wait until the hand is over";.z.w]];                        / a hand is in progress
   if[0=count .bjk.cp;:.log.info"No users are connected"];                                          / nobody to deal to
-  .log.info$[.bjk.seated[]~.bjk.cp;"No new users";"New users"]," have joined the table";
-  .bjk.seat[];                                                                                     / seat everyone connected
+  .bjk.seat[];                                                                                     / seat everyone who has bought in
   unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
   .bjk.betPrompt each unbet;                                                                       / ask them to bet
-  .bjk.trigger[`.plr.stake]each unbet where not null .bjk.chips unbet;                             / prompt the stake handler of those who've bought in
+  .bjk.trigger[`.plr.stake]each unbet;                                                             / prompt their stake handler
  };
 
-.bjk.seated:{exec first name by handle from .bjk.tab};                                             / handle to name of everyone seated
+.bjk.buyers:{h where not null .bjk.chips h:key .bjk.cp};                                           / connected players who have bought in
 
-.bjk.seat:{                                                                                        / reseat everyone connected, keeping their bets
+.bjk.seat:{                                                                                        / reseat everyone who has bought in, keeping their bets
+  p:.bjk.buyers[];                                                                                 / who's playing
   .bjk.tab:0#.bjk.tab;                                                                             / clear the table
-  `.bjk.tab upsert([]player:1+til count .bjk.cp;name:value .bjk.cp;handle:key .bjk.cp);            / one row per connection
+  `.bjk.tab upsert([]player:1+til count p;name:.bjk.cp p;handle:p);                                / one row per player
   .bjk.tab:.bjk.tab lj .bjk.stake;                                                                 / attach their bets
+ };
+
+.bjk.sitIn:{[h]                                                                                    / [handle] seat a player who can now bet, and ask them
+  .bjk.seat[];                                                                                     / seat them, keeping everyone's bets
+  .bjk.betPrompt h;                                                                                / ask them to bet
+  .bjk.trigger[`.plr.stake]h;                                                                      / prompt their stake handler
  };
 
 .bjk.forfeit:{[h]                                                                                  / [handle] record a leaver's unfinished hands as lost
