@@ -43,7 +43,7 @@ q src/client/bin/player.q --server otherhost:6000          # a server on another
 `--server` is the server's `host:port`, `localhost:5555` by default.
 
 The server deals a new hand as soon as everyone at the table has bet, and
-keeps going for as long as players are connected.
+keeps going for as long as players with chips are at the table.
 
 ### Playing by hand
 Without `--player`, the client prompts you when it's your turn and you answer
@@ -61,7 +61,8 @@ in its console:
 | `hist[]` | Results of every hand so far. |
 
 You can also play from a plain `q` session, with
-`` h:hopen`:localhost:5555 `` and then `h"stake 10"`, `h"hit[]"` and so on.
+`` h:hopen`:localhost:5555 ``, then `h"buyin 1000"` to buy chips, then
+`h"stake 10"`, `h"hit[]"` and so on.
 You won't get the turn prompts, and the server's pushes print a harmless
 error in that session.
 
@@ -97,7 +98,8 @@ Pass one of these to `--player`:
 
 `--hands` (default `1000`) sets how many hands the client plays before it
 disconnects, and `--buyin` (default `1000`) how many dollars of chips it buys
-when it joins. A strategy leaves the table once it's out of chips.
+when it joins. A strategy leaves the table once it's out of chips, and its last line says
+how many chips it leaves with (e.g. "Played 100 hands, leaving with $960.00").
 
 ## Pitboss
 The pitboss records every hand and looks for two signs of counting:
