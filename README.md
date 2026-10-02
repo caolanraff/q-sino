@@ -153,3 +153,7 @@ q test/run.q src/common/test src/server/test src/client/test -q
 No test starts a real server or client: each entry script only opens ports
 and connections when it's run directly, so the specs load the files and call
 their functions.
+
+## License
+
+[MIT](LICENSE). The vendored code under `vendor/` keeps its own licenses.
