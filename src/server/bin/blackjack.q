@@ -14,7 +14,6 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
 .bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
 .bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
-.bjk.joinBuyIn:(`int$())!`long$();                                                                 / buy-in each connection asked for when it sat down
 .bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
@@ -72,7 +71,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.seat[];                                                                                     / seat everyone connected
   unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
   .bjk.betPrompt each unbet;                                                                       / ask them to bet
-  .bjk.trigger[`.plr.stake]each unbet;                                                             / prompt their stake handler
+  .bjk.trigger[`.plr.stake]each unbet where not null .bjk.chips unbet;                             / prompt the stake handler of those who've bought in
  };
 
 .bjk.seated:{exec first name by handle from .bjk.tab};                                             / handle to name of everyone seated
@@ -121,31 +120,17 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.isBanned:{.z.u in .bjk.banned};                                                               / is the caller banned
 
 .bjk.turnAway:{[h]                                                                                 / [handle] turn a banned user away
-  .bjk.joinBuyIn _:h;                                                                              / they don't sit down
   .log.info string[.z.u]," is banned from the table and was turned away";
   .bjk.sendMsg["You've been asked to leave this table";h];                                         / tell them
   .bjk.disconnect h;                                                                               / close their connection
  };
 
-.bjk.pw:{[u;p]if[count p;.bjk.joinBuyIn[.z.w]:"J"$p];1b};                                          / [user;password] note the buy-in a player connects with; let everyone in
-
-.bjk.sitDown:{[h]                                                                                  / [handle] buy a newcomer the chips they connected with
-  amt:.bjk.joinBuyIn h;                                                                            / the buy-in they asked for
-  .bjk.joinBuyIn _:h;                                                                              / used up
-  if[null amt;:()];                                                                                / none: they'll need buyin[amount]
-  if[amt<.bjk.rules`minBuyIn;                                                                      / under the minimum
-    :.bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;h];                         / tell them
-  ];
-  .bjk.buyIn[h;"f"$amt];                                                                           / buy the chips
- };
-
-.z.po:{                                                                                            / new connection: a player sits down and buys in
+.z.po:{                                                                                            / new connection: they sit down, then buy in to play
   if[.bjk.isBanned[];:.bjk.turnAway .z.w];                                                         / turn away banned users
   .bjk.regConn .z.w;                                                                               / register it
   if[.bjk.isPit[];:()];                                                                            / the pitboss doesn't play
   neg[.z.w](.bjk.intro;`);                                                                         / send the help text
-  .bjk.sitDown .z.w;                                                                               / buy them the chips they sat down with
-  .bjk.start[];                                                                                    / seat players and ask for bets
+  .bjk.chipsDue[.z.w]:.z.p+.bjk.timeout;                                                           / their buy-in seats them; until then, the clock runs
  };
 .bjk.command:{                                                                                     / validate a player's message, e.g. .bjk.command"stake 10"
   c:$[10h=type x;parse x;x];                                                                       / parse a string command
@@ -210,7 +195,6 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.loadLibs[];
   .z.pg:.bjk.pg;                                                                                   / validate sync messages
   .z.ps:.bjk.ps;                                                                                   / validate async messages
-  .z.pw:.bjk.pw;                                                                                   / take each player's buy-in from how they connect
   .log.info"Welcome to Qsino Blackjack!";
   .bjk.buildDeck[];                                                                                / build the shoe
   .bjk.shuffle[];                                                                                  / shuffle it

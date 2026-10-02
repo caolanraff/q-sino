@@ -903,7 +903,13 @@
  };
 
 .tst.desc["buyin[]"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.chips:(`int$())!`float$()};
+  before{
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.hd:1b;
+    .bjk.chips:(`int$())!`float$();
+    .tst.startCalls:0;
+    `.bjk.start mock {.tst.startCalls+:1};
+  };
   should["sets a player's chips with their first buy-in, and adds to them with later ones"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -931,12 +937,44 @@
     (0i in key .bjk.chips) musteq 0b;
     .tst.msgs mustmatch("Buy-ins are whole dollars";"The minimum buy-in is $100");
   };
-  should["refuses a buy-in while a hand is being played"]{
-    `.bjk.sendMsg mock {[x;y]};
+  should["refuses a top-up while a hand is being played"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.chips:enlist[0i]!enlist 300f;
     .bjk.hd:0b;
     buyin 300;
     .bjk.hd:1b;
-    (0i in key .bjk.chips) musteq 0b;
+    .bjk.chips[0i] musteq 300f;
+    .tst.msgs mustmatch enlist"Please wait until the current hand is complete";
+  };
+  should["takes a newcomer's buy-in mid-hand, leaving the next hand to seat them"]{
+    `.bjk.sendMsg mock {[x;y]};
+    `.log.info mock {};
+    .bjk.hd:0b;
+    buyin 300;
+    .bjk.hd:1b;
+    .bjk.chips[0i] musteq 300f;
+    .tst.startCalls musteq 0;
+  };
+  should["seats a newcomer and asks for bets once they buy in between hands"]{
+    `.bjk.sendMsg mock {[x;y]};
+    `.log.info mock {};
+    buyin 300;
+    .tst.startCalls musteq 1;
+  };
+  should["seats a player who was out of chips once they top up"]{
+    `.bjk.sendMsg mock {[x;y]};
+    `.log.info mock {};
+    .bjk.chips:enlist[0i]!enlist 5f;
+    buyin 300;
+    .tst.startCalls musteq 1;
+  };
+  should["doesn't prompt again for a top-up by a player who can already bet"]{
+    `.bjk.sendMsg mock {[x;y]};
+    `.log.info mock {};
+    .bjk.chips:enlist[0i]!enlist 300f;
+    buyin 300;
+    .tst.startCalls musteq 0;
   };
  };
 

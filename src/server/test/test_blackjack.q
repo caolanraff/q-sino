@@ -88,74 +88,24 @@
     .tst.startCalls:0;
     `.bjk.isBanned mock {0b};
     `.bjk.start mock {.tst.startCalls+:1};
-    .tst.seated:();
-    `.bjk.sitDown mock {.tst.seated,:x};
+    .bjk.chipsDue:(`int$())!`timestamp$();
   };
-  should["registers the connection and starts the table for a plain client"]{
+  should["registers a player and starts their buy-in clock, without seating them or asking for bets"]{
     .bjk.cp:()!(); .bjk.pit:0Ni;
     .tst.regConnCalls:0;
     `.bjk.regConn mock {.tst.regConnCalls+:1};
     `.bjk.isPit mock {0b};
     .z.po[];
     .tst.regConnCalls musteq 1;
-    .tst.startCalls musteq 1;
+    .tst.startCalls musteq 0;
+    (.z.w in key .bjk.chipsDue) musteq 1b;
     };
-  should["buys the player in before asking for bets"]{
-    `.bjk.regConn mock {};
-    `.bjk.isPit mock {0b};
-    `.bjk.start mock {.tst.order,:`start};
-    `.bjk.sitDown mock {.tst.order,:`sitDown};
-    .tst.order:`$();
-    .z.po[];
-    .tst.order mustmatch `sitDown`start;
-    };
-  should["skips .bjk.start for a pitboss connection"]{
+  should["gives a pitboss connection no buy-in clock"]{
     `.bjk.regConn mock {};
     `.bjk.isPit mock {1b};
     .z.po[];
     .tst.startCalls musteq 0;
-    .tst.seated mustmatch ();
-    };
- };
-
-.tst.desc[".bjk.pw"]{
-  before{.bjk.joinBuyIn:("i"$())!"j"$()};
-  should["notes the buy-in a player connects with, and lets them in"]{
-    .bjk.pw[`alice;"1000"] musteq 1b;
-    .bjk.joinBuyIn mustmatch enlist[.z.w]!enlist 1000;
-    };
-  should["notes nothing for a connection with no password, and still lets it in"]{
-    .bjk.pw[`alice;""] musteq 1b;
-    .bjk.joinBuyIn mustmatch ("i"$())!"j"$();
-    };
- };
-
-.tst.desc[".bjk.sitDown"]{
-  before{
-    .tst.bought:();
-    `.bjk.buyIn mock {.tst.bought,:enlist(x;y)};
-    .tst.msgs:();
-    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
-    .bjk.rules:enlist[`minBuyIn]!enlist 100;
-  };
-  should["buys the player the chips they connected with, once"]{
-    .bjk.joinBuyIn:enlist[7i]!enlist 1000;
-    .bjk.sitDown 7i;
-    .tst.bought mustmatch enlist(7i;1000f);
-    .bjk.joinBuyIn mustmatch ("i"$())!"j"$();
-    };
-  should["refuses a buy-in under the minimum"]{
-    .bjk.joinBuyIn:enlist[7i]!enlist 50;
-    .bjk.sitDown 7i;
-    .tst.bought mustmatch ();
-    .tst.msgs mustmatch enlist("The minimum buy-in is $100";7i);
-    .bjk.joinBuyIn mustmatch ("i"$())!"j"$();
-    };
-  should["does nothing for a player who connected without a buy-in"]{
-    .bjk.joinBuyIn:("i"$())!"j"$();
-    .bjk.sitDown 7i;
-    .tst.bought mustmatch ();
-    .tst.msgs mustmatch ();
+    (.z.w in key .bjk.chipsDue) musteq 0b;
     };
  };
 
@@ -252,6 +202,7 @@
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
+    .bjk.chips:(5 6 7i)!3#1000f;
   };
   should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
@@ -443,12 +394,26 @@
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.hd:1b;
     .bjk.cp:(5i;6i)!`alice`bob;
+    .bjk.chips:(5 6i)!1000 1000f;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
     (.tst.sent[;0]) mustmatch `.plr.stake`.plr.stake;
     ({x[1]`me} each .tst.sent) musteq 5 6i;
     ({x[1]`tab} each .tst.sent) mustmatch 2#enlist .bjk.tab;
+    };
+  should["skips players who haven't bought in yet"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .tst.sent:();
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
+    .bjk.hd:1b;
+    .bjk.cp:(5i;6i)!`alice`bob;
+    .bjk.chips:enlist[6i]!enlist 1000f;
+    .bjk.chipsDue:enlist[5i]!enlist .z.p+0D00:00:15;
+    .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
+    .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.start[];
+    ({x[1]`me} each .tst.sent) musteq enlist 6i;
     };
  };
 
@@ -650,11 +615,9 @@
     `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     .tst.closed:();
     `.bjk.disconnect mock {.tst.closed,:x};
-    .bjk.joinBuyIn:enlist[7i]!enlist 1000;
     .bjk.turnAway 7i;
     .tst.msgs mustmatch enlist("You've been asked to leave this table";7i);
     .tst.closed mustmatch enlist 7i;
-    .bjk.joinBuyIn mustmatch ("i"$())!"j"$();
   };
  };
 

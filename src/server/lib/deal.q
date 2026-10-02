@@ -14,9 +14,14 @@ buyin:{[amt]                                                                    
     .bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;.z.w];                       / tell them
     :();                                                                                           / refuse
   ];
-  if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / between hands only
+  short:.bjk.needChips .z.w;                                                                       / no chips, or too few to bet: not in this hand
+  if[not[.bjk.hd]&not short;                                                                       / topping up mid-hand
+    .bjk.sendMsg["Please wait until the current hand is complete";.z.w];                           / tell them
+    :();                                                                                           / refuse
+  ];
   .bjk.buyIn[.z.w;"f"$amt];                                                                        / add the chips
   .bjk.chipsDue _:.z.w;                                                                            / no longer due to leave
+  if[.bjk.hd&short;.bjk.start[]];                                                                  / now they can bet: seat them and ask
  };
 
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand
