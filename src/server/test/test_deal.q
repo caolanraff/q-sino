@@ -364,7 +364,7 @@
     .bjk.deal[];
     null[.bjk.betDeadline] musteq 1b;
   };
-  should["sets the first player's turn, rebuilds .bjk.turn and prompts them, when the hand isn't already decided"]{
+  should["sets the first player's turn and prompts them, when the hand isn't already decided"]{
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     `.bjk.sendMsg mock {[x;y]};
@@ -378,7 +378,6 @@
     .bjk.deal[];
     (exec first turn from .bjk.tab where player=1) musteq 1b;
     (exec first turn from .bjk.tab where player=2) musteq 0b;
-    (exec turn from .bjk.turn) musteq 10b;
     .tst.excFuncCalls mustmatch enlist(`.plr.play;0i);
   };
   should["leaves the turn untouched when .bjk.deal0 already decided the hand"]{

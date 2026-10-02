@@ -147,7 +147,7 @@ stake:{[bet]                                                                    
 
 .bjk.deal1:{[h]                                                                                    / [handle] show a player their hand, and pay a natural
   hand:first exec cards from .bjk.tab where handle=h;                                              / their cards
-  .bjk.sendMsg["Your hand is ",","sv string hand;h];                                               / show them
+  .bjk.sendMsg["Your hand is ",.bjk.showHand hand;h];                                              / show them, with its count
   if[21=first exec cnt from .bjk.tab where handle=h;.bjk.payNatural h];                            / the dealer has already peeked, so a natural can't lose
  };
 
@@ -170,8 +170,6 @@ stake:{[bet]                                                                    
   if[.bjk.hd;:()];                                                                                 / hand already over
   update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out);       / first player still in
   .log.info .bjk.tab;
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,turn from .bjk.tab;                  / the table as players see it
-  .bjk.sendMsg[.bjk.turn]each key .bjk.cp;                                                         / show everyone
   .bjk.giveTurn first exec handle from .bjk.tab where turn;                                        / start their turn
  };
 

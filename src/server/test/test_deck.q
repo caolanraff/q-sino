@@ -146,3 +146,11 @@
     .bjk.isSoft[`K`7] musteq 0b;
   };
  };
+
+.tst.desc[".bjk.showHand"]{
+  should["shows the cards and the count, marking a soft count"]{
+    .bjk.showHand[`3`5] mustmatch "3,5 (8)";
+    .bjk.showHand[`A`6] mustmatch "A,6 (soft 17)";
+    .bjk.showHand[`A`6`K] mustmatch "A,6,K (17)";
+  };
+ };

@@ -28,8 +28,10 @@
  };
 
 .bjk.giveTurn:{[h]                                                                                 / [handle] give a player the turn
+  d:first select name,cards from .bjk.tab where turn;                                              / the hand on turn
+  hand:d`cards;                                                                                    / its cards
+  .bjk.pubMsg["It's ",string[d`name],"'s turn: ",.bjk.showHand hand;key .bjk.cp];                  / tell the table whose turn, with their hand
   .bjk.sendMsg["You have ",string["j"$.bjk.timeout%0D00:00:01]," seconds per move";h];             / tell them the time per move
-  hand:first exec cards from .bjk.tab where turn;                                                  / the hand on turn
   pair:(2=count hand)&1=count distinct .crd.cardDict hand;                                         / two cards of the same value can split
   .bjk.prompt[$[pair;"Hit, stick or split?";"Hit or stick?"];h];                                   / what they can do
   .bjk.promptPlay h;                                                                               / prompt them
@@ -38,14 +40,11 @@
 .bjk.nextTurn:{                                                                                    / move to the next hand still to play
   p:exec first player from .bjk.tab where not out,not wait;                                        / first hand neither out nor waiting
   update turn:1b from`.bjk.tab where player=p;                                                     / give it the turn
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,turn from .bjk.tab;                  / the table as players see it
   if[not any exec turn from .bjk.tab;                                                              / nobody left to play
     .bjk.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bjk.cp];          / announce it
     :.bjk.dealer[];                                                                                / dealer's turn
   ];
   h:first exec handle from .bjk.tab where turn;                                                    / handle on turn
-  .bjk.pubMsg["It's ",string[first exec name from .bjk.tab where handle=h],"'s turn";h];           / announce whose turn
-  .bjk.sendMsg[.bjk.turn]each key .bjk.cp;                                                         / show everyone the table
   .bjk.giveTurn h;                                                                                 / give them the turn
  };
 

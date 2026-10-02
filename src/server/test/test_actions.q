@@ -386,10 +386,12 @@
     .tst.prompted:();
     `.bjk.promptPlay mock {.tst.prompted,:x};
     `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
+    `.bjk.pubMsg mock {.tst.msgs,:enlist(x;y)};
+    .bjk.cp:7 8i!`alice`bob;
     .bjk.timeout:0D00:00:15;
-    .bjk.tab:([]handle:7 8i;cards:(`9`7;`8`8);turn:10b);
+    .bjk.tab:([]name:`alice`bob;handle:7 8i;cards:(`9`7;`8`8);turn:10b);
     .bjk.giveTurn 7i;
-    .tst.msgs mustmatch (("You have 15 seconds per move";7i);("Hit or stick?";7i));
+    .tst.msgs mustmatch (("It's alice's turn: 9,7 (16)";7 8i);("You have 15 seconds per move";7i);("Hit or stick?";7i));
     .tst.prompted mustmatch enlist 7i;
   };
   should["offers a split on a pair"]{
@@ -397,7 +399,8 @@
     .tst.msgs:();
     `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
     `.bjk.promptPlay mock {};
-    .bjk.tab:([]handle:7 8i;cards:(`9`7;`K`Q);turn:01b);
+    `.bjk.pubMsg mock {[x;y]};
+    .bjk.tab:([]name:`alice`bob;handle:7 8i;cards:(`9`7;`K`Q);turn:01b);
     .bjk.giveTurn 8i;
     .tst.msgs mustmatch enlist("Hit, stick or split?";8i);
   };
