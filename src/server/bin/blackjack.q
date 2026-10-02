@@ -132,6 +132,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   neg[.z.w](.bjk.intro;`);                                                                         / send the help text
   .bjk.chipsDue[.z.w]:.z.p+.bjk.timeout;                                                           / their buy-in seats them; until then, the clock runs
  };
+
 .bjk.command:{                                                                                     / validate a player's message, e.g. .bjk.command"stake 10"
   c:$[10h=type x;parse x;x];                                                                       / parse a string command
   if[not(type[c]in 0 11h)&2=count c;'"Send a command, e.g. stake[10] or hit[]"];                   / must be one function and one argument

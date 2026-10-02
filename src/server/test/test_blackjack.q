@@ -202,7 +202,7 @@
     .tst.excFuncCalls:();
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .bjk.hd:1b;
-    .bjk.chips:(5 6 7i)!3#1000f;
+    .bjk.chips:5 6 7i!3#1000f;
   };
   should["keeps bets already placed when a player joins mid-betting, and only prompts players yet to bet"]{
     .bjk.cp:(5i;6i;7i)!`alice`bob`carol;
@@ -393,8 +393,8 @@
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.hd:1b;
-    .bjk.cp:(5i;6i)!`alice`bob;
-    .bjk.chips:(5 6i)!1000 1000f;
+    .bjk.cp:5 6i!`alice`bob;
+    .bjk.chips:5 6i!2#1000f;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
     .bjk.tab:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.start[];
@@ -407,7 +407,7 @@
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
     .bjk.hd:1b;
-    .bjk.cp:(5i;6i)!`alice`bob;
+    .bjk.cp:5 6i!`alice`bob;
     .bjk.chips:enlist[6i]!enlist 1000f;
     .bjk.chipsDue:enlist[5i]!enlist .z.p+0D00:00:15;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
