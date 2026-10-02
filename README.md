@@ -98,8 +98,9 @@ Pass one of these to `--player`:
 
 `--hands` (default `1000`) sets how many hands the client plays before it
 disconnects, and `--buyin` (default `1000`) how many dollars of chips it buys
-when it joins. A strategy leaves the table once it's out of chips, and its last line says
-how many chips it leaves with (e.g. "Played 100 hands, leaving with $960.00").
+when it joins. A strategy leaves the table once it's out of chips. However a player
+leaves, the client says what they leave with and their return, e.g. "Thanks
+for playing q-sino blackjack! You leave with $990.00 in chips, down $10.00".
 
 ## Pitboss
 The pitboss records every hand and looks for two signs of counting:
