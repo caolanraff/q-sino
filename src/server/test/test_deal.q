@@ -957,6 +957,7 @@
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.hd:1b;
     .bjk.chips:(`int$())!`float$();
+    .bjk.bought:(`int$())!`float$();
     .tst.seated:();
     `.bjk.sitIn mock {.tst.seated,:x};
   };
@@ -972,6 +973,7 @@
     .bjk.chips[0i] musteq 500f;
     .tst.logged mustmatch("alice joins the table with $300 in chips";"alice buys $200 in chips");
     .tst.msgs mustmatch("You have $300.00 in chips, please use buyin[amount] if you want more";"You have $500.00 in chips");
+    .bjk.bought[0i] musteq 500f;
   };
   should["clears the player's deadline to buy in"]{
     `.bjk.sendMsg mock {[x;y]};

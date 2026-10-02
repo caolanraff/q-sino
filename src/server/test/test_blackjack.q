@@ -696,6 +696,10 @@
     .bjk.chips:(5 6i)!250 80f;
     .bjk.clientState[6i][`chips] musteq 80f;
   };
+  should["pushes the player what they've bought in total"]{
+    .bjk.bought:5 6i!1000 300f;
+    .bjk.clientState[6i][`bought] musteq 300f;
+  };
  };
 
 .tst.desc[".bjk.logLeaver chips"]{

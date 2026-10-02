@@ -5,11 +5,21 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .plr.pt,:`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;        / and card counters
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;                                                   / strategy chart code to server action
 
-/ manual play: the server's own prompts say what to do; a loaded strategy replaces these
-.plr.stake:{};
-.plr.play:{};
-.plr.insure:{};
+/ manual play: just keep the pushed state, as the server's prompts say what to do; a strategy replaces these
+.plr.stake:{.plr.state:x};
+.plr.play:{.plr.state:x};
+.plr.insure:{.plr.state:x};
 .plr.shuffle:{-1"Deck reshuffled"};                                                                / note a reshuffle; a loaded strategy replaces it
+
+.plr.state:()!();                                                                                  / the last state the server pushed; none until I've bought in
+
+.plr.goodbye:{                                                                                     / the parting line, with what I leave with and my return
+  m:"Thanks for playing q-sino blackjack!";                                                        / the thanks
+  if[0=count s:.plr.state;:m];                                                                     / never bought in
+  left:s[`chips]-exec sum(0^bet)+0^insurance from s[`tab]where handle=s`me;                        / less any bets still on the table, which leaving forfeits
+  net:left-s`bought;                                                                               / my return
+  :m," You leave with $",.Q.f[2;left]," in chips, ",$[net<0;"down";"up"]," $",.Q.f[2;abs net];     / say so
+ };
 
 .plr.dispatch:{[f;arg].plr.h(f;arg)};                                                              / [function;argument] call a server function and return its result
 stake:{.plr.dispatch[`stake;x]};                                                                   / place a bet
@@ -37,6 +47,7 @@ hist:{.plr.dispatch[`hist;x]};                                                  
   .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];               / connect, or exit
   neg[.plr.h](`buyin;.plr.buyin);                                                                  / buy in; async, so it reaches the server before my first bet
   .z.pc:{if[x=.plr.h;-1"Disconnected from the table";exit 0]};                                     / exit when the server disconnects
+  .z.exit:{-1 .plr.goodbye[]};                                                                     / say goodbye however I leave
  };
 
 .util.run[`player.q;`.plr.init];                                                                   / init when run as the entry script
