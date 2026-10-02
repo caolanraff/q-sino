@@ -21,11 +21,13 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.turnDeadline:0Np;                                                                             / turn clock, null when not running
 
 .bjk.cp:()!();                                                                                     / handle to player name
-.bjk.users:(`int$())!`symbol$();                                                                   / handle to connecting username
-.bjk.banned:`symbol$();                                                                            / usernames banned this session
-.bjk.joined:(`int$())!`long$();                                                                    / round each handle joined; kdb reuses handle numbers
-.bjk.res:.bjk.tab:.bjk.hist:flip`round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();()); / hands in play, this shoe's results, earlier shoes' results
-.bjk.stake:([name:();handle:()]bet:`long$());                                                      / each player's bet for the next hand
+.bjk.users:("i"$())!`$();                                                                          / handle to connecting username
+.bjk.banned:`$();                                                                                  / usernames banned this session
+.bjk.joined:("i"$())!"j"$();                                                                       / round each handle joined; kdb reuses handle numbers
+.bjk.res:.bjk.tab:.bjk.hist:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();        / hands in play, this shoe's results, earlier shoes' results
+  cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();
+  double:"b"$();insurance:"f"$());
+.bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());                                                  / each player's bet for the next hand
 
 .bjk.intro:{                                                                                       / help text sent to each new player
   show"Welcome to Qsino Blackjack!";
@@ -49,20 +51,23 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.needChips:{[h]null[.bjk.chips h]|.bjk.outOfChips h};                                          / [handle] no chips, or not enough to bet
 
 .bjk.chipsWindow:{[h]                                                                              / [handle] give a player without chips the timeout to buy some
+  if[h in key .bjk.chipsDue;:()];                                                                  / window already open: don't move the deadline
   .bjk.chipsDue[h]:.z.p+.bjk.timeout;                                                              / their deadline
   m:$[null .bjk.chips h;"Please buy some chips";"You're out of chips"];                            / no chips yet, or run out
-  .bjk.sendMsg[m,": buyin[amount] within ",string["j"$.bjk.timeout%0D00:00:01]," seconds, or you'll be asked to leave";h]; / tell them
+  s:string["j"$.bjk.timeout%0D00:00:01];                                                           / the timeout in seconds
+  .bjk.sendMsg[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];           / tell them
  };
 
 .bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their chips
   if[.bjk.needChips h;:.bjk.chipsWindow h];                                                        / they need chips first
-  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],"; your chips: $",.Q.f[2;.bjk.chips h];h]; / ask them to bet
+  m:"; your chips: $",.Q.f[2;.bjk.chips h];                                                        / their chips
+  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],m;h];             / ask them to bet
  };
 
 .bjk.start:{                                                                                       / seat players and ask for bets
   if[not .bjk.hd;:.bjk.sendMsg["Please wait until the hand is over";.z.w]];                        / a hand is in progress
   if[0=count .bjk.cp;:.log.info"No users are connected"];                                          / nobody to deal to
-  .log.info $[.bjk.seated[]~.bjk.cp;"No new users have joined the table";"New users have joined the table"];
+  .log.info$[.bjk.seated[]~.bjk.cp;"No new users";"New users"]," have joined the table";
   .bjk.seat[];                                                                                     / seat everyone connected
   unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
   .bjk.betPrompt each unbet;                                                                       / ask them to bet
@@ -86,7 +91,9 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.logLeaver:{[h]                                                                                / [handle] log a leaver's net winnings
   won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;                           / net profit since they joined
-  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",$[won<0;"-$";"$"],.Q.f[2;abs won],", leaving with $",.Q.f[2;0^$[.bjk.hd;.bjk.chips h;.bjk.available h]]," in chips";
+  dlr:$[won<0;"-$";"$"],.Q.f[2;abs won];                                                           / net winnings as dollars, with the sign
+  left:.Q.f[2;0^$[.bjk.hd;.bjk.chips h;.bjk.available h]];                                         / chips they leave with; a hand in play is lost
+  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",dlr,", leaving with $",left," in chips";
  };
 
 .bjk.unseat:{[h]                                                                                   / [handle] remove a player from the table
@@ -129,8 +136,12 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.command:{                                                                                     / validate a player's message, e.g. .bjk.command"stake 10"
   c:$[10h=type x;parse x;x];                                                                       / parse a string command
   if[not(type[c]in 0 11h)&2=count c;'"Send a command, e.g. stake[10] or hit[]"];                   / must be one function and one argument
-  if[not$[-11h=type first c;first[c]in .bjk.public;0b];'"Only ",(", "sv string .bjk.public)," can be called"]; / function must be public
-  if[not(a~(::))|(a~`)|type[a:last c]in -5 -6 -7 -8 -9h;'"A command takes a single number, or nothing"]; / argument must be a number, :: or `
+  if[not$[-11h=type first c;first[c]in .bjk.public;0b];                                            / function must be public
+    '"Only ",.util.clist[.bjk.public]," can be called";                                            / reject it
+  ];
+  if[not(a~(::))|(a~`)|type[a:last c]in -5 -6 -7 -8 -9h;                                           / argument must be a number, :: or `
+    '"A command takes a single number, or nothing";                                                / reject it
+  ];
   :c;                                                                                              / validated parse tree
  };
 
@@ -154,7 +165,9 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.eject:{[h]                                                                                    / [handle] remove a suspected card counter
   if[not h in key .bjk.cp;:()];                                                                    / not seated
   n:string .bjk.cp h;                                                                              / their name
-  if[not .bjk.ejectCounters;:.log.info"The pitboss suspects ",n," of counting cards (run with --pitboss 1 to eject)"]; / only log unless ejecting is on
+  if[not .bjk.ejectCounters;                                                                       / only log unless ejecting is on
+    :.log.info"The pitboss suspects ",n," of counting cards (run with --pitboss 1 to eject)";
+  ];
   .log.warn"The pitboss has ejected ",n," for suspected card counting";
   .bjk.banned,:.bjk.users h;                                                                       / ban their username for the session
   .bjk.sendMsg["The pitboss has asked you to leave the table";h];                                  / tell them
@@ -170,7 +183,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[];.bjk.chipsTimer[]};                     / run the bet, insurance, turn and buy-in clocks
 
-.bjk.libs:`:src/server/lib/messaging.q`:src/server/lib/deck.q`:src/server/lib/deal.q`:src/server/lib/actions.q; / server libraries, loaded at init
+.bjk.libs:` sv'`:src/server/lib,'`messaging.q`deck.q`deal.q`actions.q;                             / server libraries, loaded at init
 .bjk.loadLibs:{.utl.require each .bjk.libs};
 
 .bjk.init:{                                                                                        / start the server

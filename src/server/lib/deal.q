@@ -8,7 +8,10 @@
 
 buyin:{[amt]                                                                                       / [amount] buy chips: the first buy-in sets them, later ones add more
   if[not type[amt]in -5 -6 -7h;.bjk.sendMsg["Buy-ins are whole dollars";.z.w];:()];                / whole dollars only
-  if[amt<.bjk.rules`minBuyIn;.bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;.z.w];:()]; / at least the minimum
+  if[amt<.bjk.rules`minBuyIn;                                                                      / at least the minimum
+    .bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;.z.w];                       / tell them
+    :();                                                                                           / refuse
+  ];
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / between hands only
   .bjk.buyIn[.z.w;"f"$amt];                                                                        / add the chips
   .bjk.chipsDue _:.z.w;                                                                            / no longer due to leave
@@ -19,7 +22,10 @@ stake:{[bet]                                                                    
   if[null .bjk.chips .z.w;.bjk.sendMsg["Please buy some chips first: buyin[amount]";.z.w];:()];    / no chips yet
   if[.bjk.outOfChips .z.w;.bjk.sendMsg["You're out of chips: buyin[amount] for more";.z.w];:()];   / not enough chips for the minimum
   if[not bet within .bjk.rules`minBet`maxBet;.bjk.sendMsg["Bets are ",.bjk.limits[];.z.w];:()];    / within the table limits
-  if[bet>.bjk.chips .z.w;.bjk.sendMsg["You can't afford that: you have $",.Q.f[2;.bjk.chips .z.w]," in chips";.z.w];:()]; / no more than their chips
+  if[bet>.bjk.chips .z.w;                                                                          / no more than their chips
+    .bjk.sendMsg["You can't afford that: you have $",.Q.f[2;.bjk.chips .z.w]," in chips";.z.w];    / tell them
+    :();                                                                                           / refuse
+  ];
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / not mid-hand
   .log.info string[.z.u]," bets $",string bet;
   upsert[`.bjk.stake;(.bjk.user[];.z.w;"j"$bet)];                                                  / record the bet
@@ -31,7 +37,8 @@ stake:{[bet]                                                                    
 
 .bjk.armBetTimer:{                                                                                 / start the betting clock
   .bjk.betDeadline:.z.p+.bjk.timeout;                                                              / betting closes after .bjk.timeout
-  .bjk.sendMsg["Betting closes in ",string["j"$.bjk.timeout%0D00:00:01]," seconds"]each exec handle from .bjk.tab where null bet; / warn anyone without a bet
+  m:"Betting closes in ",string["j"$.bjk.timeout%0D00:00:01]," seconds";                           / the warning
+  .bjk.sendMsg[m]each exec handle from .bjk.tab where null bet;                                    / warn anyone without a bet
  };
 
 .bjk.betTimer:{                                                                                    / close betting once the clock runs out
@@ -51,7 +58,8 @@ stake:{[bet]                                                                    
 .bjk.newRound:{                                                                                    / start a new round
   .bjk.hd:.bjk.wwch:0b;                                                                            / hand in progress; dealer still to play
   .bjk.rnd+:1;                                                                                     / next round number
-  update round:.bjk.rnd,cnt:0Ni,out:0b,wait:0b,turn:0b,split:0b,double:0b,insurance:0f from`.bjk.tab; / reset every hand's state
+  update round:.bjk.rnd,cnt:0Ni,out:0b,wait:0b,turn:0b,split:0b,double:0b,insurance:0f             / reset every hand's state
+    from`.bjk.tab;
  };
 
 .bjk.dealUpCard:{                                                                                  / deal the dealer's up-card
@@ -88,7 +96,9 @@ stake:{[bet]                                                                    
   .bjk.insuring:1b;                                                                                / window open
   .bjk.insureDeadline:.z.p+.bjk.timeout;                                                           / insurance clock
   update insurance:0n from`.bjk.tab;                                                               / nobody has answered yet
-  .bjk.pubMsg["Dealer shows an ace - insurance? insure[amount] up to half your bet, or insure[0] to decline";key .bjk.cp]; / ask everyone
+  m:"Dealer shows an ace - insurance? insure[amount] up to half your bet, ";                       / the offer
+  m,:"or insure[0] to decline";                                                                    / and how to decline
+  .bjk.pubMsg[m;key .bjk.cp];                                                                      / ask everyone
   .bjk.trigger[`.plr.insure]each exec handle from .bjk.tab;                                        / prompt their insurance handlers
  };
 
@@ -134,7 +144,8 @@ stake:{[bet]                                                                    
  };
 
 .bjk.sitOutUnbet:{                                                                                 / sit out anyone without a bet
-  .bjk.sendMsg["No bet placed, please wait until the next hand"]each exec handle from .bjk.tab where null bet; / tell them
+  m:"No bet placed, please wait until the next hand";                                              / the notice
+  .bjk.sendMsg[m]each exec handle from .bjk.tab where null bet;                                    / tell them
   delete from`.bjk.tab where null bet;                                                             / take them off the table
  };
 
@@ -220,14 +231,16 @@ stake:{[bet]                                                                    
 .bjk.recordRound:{                                                                                 / record the round's results
   .log.info"Hand stats;\n",.Q.s .bjk.tab;
   if[.bjk.wwch;update dealer:enlist each dealer from`.bjk.tab];                                    / dealer has only the up-card: make it a list
-  t:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from delete out,wait,turn from .bjk.tab; / each hand's result; insurance pays 2:1 on a dealer blackjack, else is lost
-  upsert[`.bjk.res;t];                                                                             / add to results
-  .bjk.chips+:exec sum profit by handle from t;                                                    / settle each player's chips
-  .bjk.sendMsg["Results table for the round;\n",.Q.s select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab]each key .bjk.cp; / show everyone the results
+  r:delete out,wait,turn from .bjk.tab;                                                            / the round's hands, without the turn state
+  r:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
+  `.bjk.res upsert r;                                                                              / add to results
+  .bjk.chips+:exec sum profit by handle from r;                                                    / settle each player's chips
+  t:select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab;                        / the results as players see them
+  .bjk.sendMsg["Results table for the round;\n",.Q.s t]each key .bjk.cp;                           / show everyone the results
  };
 
 .bjk.endHand:{                                                                                     / end the hand and start the next round
-  update player:`int$player from`.bjk.tab;                                                         / player numbers back to ints
+  update"j"$player from`.bjk.tab;                                                                  / player numbers back to longs
   .bjk.bd:0b;                                                                                      / no bets in
   .bjk.hd:1b;                                                                                      / no hand in progress
   .bjk.stake:0#.bjk.stake;                                                                         / clear bets

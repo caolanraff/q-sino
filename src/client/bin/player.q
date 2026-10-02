@@ -1,12 +1,15 @@
 if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .utl.require"common";
 
-.plr.pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter; / valid --player strategies
+.plr.pt:`avgPlayer1`avgPlayer2`avgPlayer3;                                                         / valid --player strategies: average players
+.plr.pt,:`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;        / and card counters
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;                                                   / strategy chart code to server action
 
 .plr.stake:{-1"It's your turn to stake - run stake[bet] when ready"};                              / prompt to stake; a loaded strategy replaces it
 .plr.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};            / prompt to play; a loaded strategy replaces it
-.plr.insure:{-1"Dealer shows an ace - run insure[amount] (up to half your bet, or insure[0] to decline) when ready"}; / prompt to insure; a loaded strategy replaces it
+.plr.insure:{                                                                                      / prompt to insure; a loaded strategy replaces it
+  -1"Dealer shows an ace - run insure[amount] (up to half your bet, or insure[0] to decline) when ready";
+ };
 .plr.shuffle:{-1"Deck reshuffled"};                                                                / note a reshuffle; a loaded strategy replaces it
 
 .plr.dispatch:{[f;arg].plr.h(f;arg)};                                                              / [function;argument] call a server function and return its result
@@ -26,7 +29,10 @@ hist:{.plr.dispatch[`hist;x]};                                                  
   .utl.addOptDef["buyin";"J";1000;`.plr.buyin];                                                    / --buyin: chips to buy on joining
   .utl.parseArgs[];                                                                                / parse the command line
   if[not null .plr.player;                                                                         / a strategy was chosen
-    if[not .plr.player in .plr.pt;.log.error"Unknown player, options - ",","sv string .plr.pt;exit 1]; / unknown strategy: exit
+    if[not .plr.player in .plr.pt;                                                                 / unknown strategy: exit
+      .log.error"Unknown player, options - ",.util.clist .plr.pt;
+      exit 1;                                                                                      / quit
+    ];
     .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
   ];
   .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];               / connect, or exit
