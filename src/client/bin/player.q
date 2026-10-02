@@ -5,9 +5,10 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .plr.pt,:`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;        / and card counters
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;                                                   / strategy chart code to server action
 
-.plr.stake:{};                                                                                     / the server's bets prompt says what to do; a loaded strategy replaces it
-.plr.play:{};                                                                                      / the server's prompt says what to do; a loaded strategy replaces it
-.plr.insure:{};                                                                                    / the server's insurance offer says what to do; a loaded strategy replaces it
+/ manual play: the server's own prompts say what to do; a loaded strategy replaces these
+.plr.stake:{};
+.plr.play:{};
+.plr.insure:{};
 .plr.shuffle:{-1"Deck reshuffled"};                                                                / note a reshuffle; a loaded strategy replaces it
 
 .plr.dispatch:{[f;arg].plr.h(f;arg)};                                                              / [function;argument] call a server function and return its result

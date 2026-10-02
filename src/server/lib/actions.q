@@ -29,8 +29,7 @@
 
 .bjk.giveTurn:{[h]                                                                                 / [handle] give a player the turn
   d:first select name,cards from .bjk.tab where turn;                                              / the hand on turn
-  hand:d`cards;                                                                                    / its cards
-  .bjk.pubMsg["It's ",string[d`name],"'s turn: ",.bjk.showHand hand;key .bjk.cp];                  / tell the table whose turn, with their hand
+  .bjk.pubMsg["It's ",string[d`name],"'s turn: ",.bjk.showHand hand:d`cards;key .bjk.cp];          / tell the table whose turn, with their hand
   .bjk.sendMsg["You have ",string["j"$.bjk.timeout%0D00:00:01]," seconds per move";h];             / tell them the time per move
   pair:(2=count hand)&1=count distinct .crd.cardDict hand;                                         / two cards of the same value can split
   .bjk.prompt[$[pair;"Hit, stick or split?";"Hit or stick?"];h];                                   / what they can do

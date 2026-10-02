@@ -198,8 +198,7 @@ stake:{[bet]                                                                    
  };
 
 .bjk.result:{[n;bet;ret;why]                                                                       / [name;bet;return;reason] a hand's result, e.g. "bob wins $10.00 (20 against the dealer's 18)"
-  w:ret-bet;                                                                                       / what they won
-  r:$[w>0;" wins $",.Q.f[2;w];w<0;" loses $",.Q.f[2;neg w];" pushes"];                             / win, loss or push
+  r:$[0<w:ret-bet;" wins $",.Q.f[2;w];w<0;" loses $",.Q.f[2;neg w];" pushes"];                     / win, loss or push
   :string[n],r," (",why,")";                                                                       / with why
  };
 
@@ -213,9 +212,7 @@ stake:{[bet]                                                                    
   s:.bjk.settleHand[p;d];                                                                          / settle it with a reason and return
   dBJ:.bjk.isBJ d`dealer;                                                                          / dealer blackjack
   pBJ:not[d`split]&.bjk.isBJ d`cards;                                                              / player blackjack; not on a split hand
-  c:string d`cnt;                                                                                  / their total
-  dc:string .bjk.dealerCount;                                                                      / the dealer's total
-  totals:c," against the dealer's ",dc;                                                            / e.g. "20 against the dealer's 18"
+  totals:(c:string d`cnt)," against the dealer's ",dc:string .bjk.dealerCount;                     / e.g. "20 against the dealer's 18"
   if[d[`cnt]>21;:s["bust with ",c;0f]];                                                            / player bust
   if[dBJ&pBJ;:s["blackjack against the dealer's blackjack";"f"$d`bet]];                            / both blackjack: push
   if[dBJ;:s["the dealer has blackjack";0f]];                                                       / dealer blackjack
