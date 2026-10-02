@@ -72,16 +72,16 @@ code sent to it is refused and logged.
 ## Table rules
 Standard Las Vegas Strip rules:
 - Bets are $10 to $500, in whole dollars. Doubling and splitting can take a hand past $500.
-- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100). From a plain `q` session, call `buyin[amount]` to be dealt in: you're only seated, and asked to bet, once you've bought chips. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips. A player with no chips, or too few to bet, gets 15 seconds to buy some, then is asked to leave the table.
+- You play with chips, bought in at the table: `player.q` buys $1,000 when it joins (`--buyin` to choose, minimum $100). From a plain `q` session, call `buyin[amount]` to be dealt in: you're only seated, and asked to bet, once you've bought chips. You can't bet, double, split or insure for more than your chips, and can top up with `buyin[amount]` between hands. Each bets prompt shows your chips. A player with no chips, or too few to bet, gets 30 seconds to buy some, then is asked to leave the table.
 - 6-deck shoe, reshuffled automatically once fewer than 78 cards remain.
 - Blackjack pays 3:2; other wins pay 1:1.
 - The dealer hits soft 17 and peeks for blackjack. A dealer blackjack ends the hand at once, and beats everything except a player blackjack, which pushes.
 - Double on any first two cards, including after a split.
 - Split any two cards of equal value (so K,Q splits), up to 4 hands. Split aces get one card each, and a two-card 21 after a split isn't a blackjack.
-- Insurance (even money on a blackjack) is offered whenever the dealer shows an ace.
+- Insurance (even money on a blackjack) is offered whenever the dealer shows an ace. Playing your hand without answering declines it.
 - No surrender.
-- Betting closes 15 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
-- You have 15 seconds per move on your turn; a hand that isn't played in time sticks.
+- Betting closes 30 seconds after the first bet of a round; anyone who hasn't bet sits that hand out.
+- You have 30 seconds per move on your turn; a hand that isn't played in time sticks.
 
 ## Strategies
 Pass one of these to `--player`:

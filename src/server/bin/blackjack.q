@@ -14,7 +14,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
 .bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
 .bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
-.bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
+.bjk.timeout:0D00:00:30;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
 .bjk.insureDeadline:0Np;                                                                           / insurance clock, null when not running
@@ -55,13 +55,13 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.chipsDue[h]:.z.p+.bjk.timeout;                                                              / their deadline
   m:$[null .bjk.chips h;"Please buy some chips";"You're out of chips"];                            / no chips yet, or run out
   s:string"j"$.bjk.timeout%0D00:00:01;                                                             / the timeout in seconds
-  .bjk.sendMsg[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];           / tell them
+  .bjk.prompt[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];            / ask them to buy in
  };
 
 .bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their chips
   if[.bjk.needChips h;:.bjk.chipsWindow h];                                                        / they need chips first
   m:"; your chips: $",.Q.f[2;.bjk.chips h];                                                        / their chips
-  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],m;h];             / ask them to bet
+  .bjk.prompt["Please place your bets via the stake[] function, ",.bjk.limits[],m;h];              / ask them to bet
  };
 
 .bjk.start:{                                                                                       / seat players and ask for bets

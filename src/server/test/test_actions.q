@@ -385,10 +385,24 @@
     `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
     .tst.prompted:();
     `.bjk.promptPlay mock {.tst.prompted,:x};
+    `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
+    `.bjk.pubMsg mock {.tst.msgs,:enlist(x;y)};
+    .bjk.cp:7 8i!`alice`bob;
     .bjk.timeout:0D00:00:15;
+    .bjk.tab:([]name:`alice`bob;handle:7 8i;cards:(`9`7;`8`8);turn:10b);
     .bjk.giveTurn 7i;
-    .tst.msgs mustmatch enlist("You have 15 seconds per move";7i);
+    .tst.msgs mustmatch (("It's alice's turn: 9,7 (16)";7 8i);("You have 15 seconds per move";7i);("Hit or stick?";7i));
     .tst.prompted mustmatch enlist 7i;
+  };
+  should["offers a split on a pair"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .tst.msgs:();
+    `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
+    `.bjk.promptPlay mock {};
+    `.bjk.pubMsg mock {[x;y]};
+    .bjk.tab:([]name:`alice`bob;handle:7 8i;cards:(`9`7;`K`Q);turn:01b);
+    .bjk.giveTurn 8i;
+    .tst.msgs mustmatch enlist("Hit, stick or split?";8i);
   };
  };
 
@@ -473,4 +487,33 @@
     (exec first insurance from .bjk.tab where handle=0) musteq 0n;
     .tst.msgs mustmatch enlist"You can't afford that much insurance";
   };
+ };
+
+.tst.desc[".bjk.checks during insurance"]{
+  before{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    `.bjk.pubMsg mock {[x;y]};
+    .tst.declined:();
+    .bjk.hd:0b;
+    .bjk.insuring:1b;
+    .bjk.tab:([]player:1 2f;name:`alice`bob;handle:.z.w,0Wi;cnt:18 16i;bet:10 10;insurance:2#0n;turn:10b;out:00b);
+  };
+  after{.bjk.insuring:0b};
+  should["declines insurance for a player who plays on, then lets them play once insurance closes on their turn"]{
+    `insure mock {.tst.declined,:x;.bjk.insuring:0b};
+    .bjk.checks[] musteq 1b;
+    .tst.declined musteq enlist 0;
+    };
+  should["declines insurance, then asks them to wait while others still have to answer"]{
+    `insure mock {.tst.declined,:x};
+    .bjk.checks[] musteq 0b;
+    .tst.declined musteq enlist 0;
+    .tst.msgs mustmatch enlist("Waiting for the other players to answer insurance";.z.w);
+    };
+  should["stops quietly when the decline closes insurance and the dealer's blackjack ends the hand"]{
+    `insure mock {.bjk.insuring:0b;.bjk.hd:1b};
+    .bjk.checks[] musteq 0b;
+    .tst.msgs mustmatch ();
+    };
  };

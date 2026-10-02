@@ -418,7 +418,7 @@
 .tst.desc[".bjk.sitIn"]{
   should["seats the player and asks only them to bet"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;z)};
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
@@ -674,14 +674,14 @@
   before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100};
   should["asks for a bet and shows the player's chips"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bjk.prompt mock {[x;y].tst.msgs,:enlist x};
     .bjk.chips:enlist[7i]!enlist 512.5;
     .bjk.betPrompt 7i;
     .tst.msgs mustmatch enlist"Please place your bets via the stake[] function, $10 to $500; your chips: $512.50";
   };
   should["tells a player who can't afford the minimum bet that they're out of chips"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bjk.prompt mock {[x;y].tst.msgs,:enlist x};
     .bjk.chips:enlist[7i]!enlist 8f;
     .bjk.chipsDue:(`int$())!`timestamp$();
     .bjk.timeout:0D00:00:15;
@@ -728,7 +728,7 @@
 .tst.desc[".bjk.betPrompt before buying in"]{
   should["tells a player without chips how to get them"]{
     .tst.msgs:();
-    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    `.bjk.prompt mock {[x;y].tst.msgs,:enlist x};
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.chips:(`int$())!`float$();
     .bjk.chipsDue:(`int$())!`timestamp$();

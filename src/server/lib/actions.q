@@ -1,4 +1,15 @@
+.bjk.playOnInsurance:{                                                                             / a player plays while insurance is offered: decline it for them; can they act
+  if[.z.w in exec handle from .bjk.tab where null insurance;insure 0];                             / playing on declines insurance
+  if[.bjk.hd;:0b];                                                                                 / the dealer's blackjack has ended the hand
+  if[.bjk.insuring;                                                                                / others still to answer insurance
+    .bjk.sendMsg["Waiting for the other players to answer insurance";.z.w];                        / tell them
+    :0b;                                                                                           / refuse
+  ];
+  :1b;                                                                                             / insurance closed: carry on
+ };
+
 .bjk.checks:{                                                                                      / can the caller act now
+  if[$[.bjk.insuring;not .bjk.playOnInsurance[];0b];:0b];                                          / insurance is still on offer
   if[.z.w<>first exec handle from .bjk.tab where turn,not out;                                     / not their turn
     .bjk.pubMsg[string[.z.u]," is trying to play ahead of their turn";.z.w];                       / tell them
     :0b;                                                                                           / refuse
@@ -17,21 +28,22 @@
  };
 
 .bjk.giveTurn:{[h]                                                                                 / [handle] give a player the turn
+  d:first select name,cards from .bjk.tab where turn;                                              / the hand on turn
+  .bjk.pubMsg["It's ",string[d`name],"'s turn: ",.bjk.showHand hand:d`cards;key .bjk.cp];          / tell the table whose turn, with their hand
   .bjk.sendMsg["You have ",string["j"$.bjk.timeout%0D00:00:01]," seconds per move";h];             / tell them the time per move
+  pair:(2=count hand)&1=count distinct .crd.cardDict hand;                                         / two cards of the same value can split
+  .bjk.prompt[$[pair;"Hit, stick or split?";"Hit or stick?"];h];                                   / what they can do
   .bjk.promptPlay h;                                                                               / prompt them
  };
 
 .bjk.nextTurn:{                                                                                    / move to the next hand still to play
   p:exec first player from .bjk.tab where not out,not wait;                                        / first hand neither out nor waiting
   update turn:1b from`.bjk.tab where player=p;                                                     / give it the turn
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;  / the table as players see it
   if[not any exec turn from .bjk.tab;                                                              / nobody left to play
     .bjk.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bjk.cp];          / announce it
     :.bjk.dealer[];                                                                                / dealer's turn
   ];
   h:first exec handle from .bjk.tab where turn;                                                    / handle on turn
-  .bjk.pubMsg["It's ",string[first exec name from .bjk.tab where handle=h],"'s turn";h];           / announce whose turn
-  .bjk.sendMsg[.bjk.turn]each key .bjk.cp;                                                         / show everyone the table
   .bjk.giveTurn h;                                                                                 / give them the turn
  };
 
@@ -64,18 +76,18 @@ stick:{                                                                         
  };
 
 .bjk.hit1:{                                                                                        / carry on after a card: stick on 21, out on bust, else prompt
-  d:first select handle,cnt from .bjk.tab where turn;                                              / hand on turn
+  d:first select handle,name,cnt,bet from .bjk.tab where turn;                                     / hand on turn
   if[21=d`cnt;                                                                                     / on 21
     .bjk.pubMsg[string[.z.u]," is on 21";key .bjk.cp];                                             / announce it
     :stick[];                                                                                      / stick
   ];
   if[21<d`cnt;                                                                                     / bust
-    .bjk.pubMsg[string[.z.u]," is now bust!";key .bjk.cp];                                         / announce it
+    .bjk.pubMsg[.bjk.result[d`name;d`bet;0f;"bust with ",string d`cnt];key .bjk.cp];               / announce it
     update return:0f,out:1b,turn:0b from`.bjk.tab where turn;                                      / lose the bet, out of play
     :.bjk.nextTurn[];                                                                              / next hand
   ];
   if[.bjk.double;:stick[]];                                                                        / a doubled hand gets one card
-  .bjk.sendMsg["Hit or stick?";d`handle];                                                          / ask for the next play
+  .bjk.prompt["Hit or stick?";d`handle];                                                           / ask for the next play
   .bjk.promptPlay d`handle;                                                                        / prompt them
  };
 
