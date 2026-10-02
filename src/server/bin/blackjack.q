@@ -55,13 +55,13 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.chipsDue[h]:.z.p+.bjk.timeout;                                                              / their deadline
   m:$[null .bjk.chips h;"Please buy some chips";"You're out of chips"];                            / no chips yet, or run out
   s:string"j"$.bjk.timeout%0D00:00:01;                                                             / the timeout in seconds
-  .bjk.sendMsg[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];           / tell them
+  .bjk.prompt[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];            / ask them to buy in
  };
 
 .bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their chips
   if[.bjk.needChips h;:.bjk.chipsWindow h];                                                        / they need chips first
   m:"; your chips: $",.Q.f[2;.bjk.chips h];                                                        / their chips
-  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],m;h];             / ask them to bet
+  .bjk.prompt["Please place your bets via the stake[] function, ",.bjk.limits[],m;h];              / ask them to bet
  };
 
 .bjk.start:{                                                                                       / seat players and ask for bets

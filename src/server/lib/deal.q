@@ -65,6 +65,7 @@ stake:{[bet]                                                                    
 .bjk.newRound:{                                                                                    / start a new round
   .bjk.hd:.bjk.wwch:0b;                                                                            / hand in progress; dealer still to play
   .bjk.rnd+:1;                                                                                     / next round number
+  .bjk.pubPrompt[.bjk.banner["Hand ",string .bjk.rnd];key .bjk.cp];                                / head the hand
   update round:.bjk.rnd,cnt:0Ni,out:0b,wait:0b,turn:0b,split:0b,double:0b,insurance:0f             / reset every hand's state
     from`.bjk.tab;
  };
@@ -105,7 +106,7 @@ stake:{[bet]                                                                    
   update insurance:0n from`.bjk.tab;                                                               / nobody has answered yet
   m:"Dealer shows an ace - insurance? insure[amount] up to half your bet, ";                       / the offer
   m,:"or insure[0] to decline";                                                                    / and how to decline
-  .bjk.pubMsg[m;key .bjk.cp];                                                                      / ask everyone
+  .bjk.pubPrompt[m;key .bjk.cp];                                                                   / ask everyone
   .bjk.trigger[`.plr.insure]each exec handle from .bjk.tab;                                        / prompt their insurance handlers
  };
 
@@ -144,12 +145,10 @@ stake:{[bet]                                                                    
   ];
  };
 
-.bjk.deal1:{[h]                                                                                    / [handle] show a player their hand and options
+.bjk.deal1:{[h]                                                                                    / [handle] show a player their hand, and pay a natural
   hand:first exec cards from .bjk.tab where handle=h;                                              / their cards
   .bjk.sendMsg["Your hand is ",","sv string hand;h];                                               / show them
-  if[21=first exec cnt from .bjk.tab where handle=h;:.bjk.payNatural h];                           / the dealer has already peeked, so a natural can't be beaten
-  if[(~/).crd.cardDict hand;:.bjk.sendMsg["Hit, stick or split?";h]];                              / a pair can split
-  .bjk.sendMsg["Hit or stick?";h];                                                                 / otherwise hit or stick
+  if[21=first exec cnt from .bjk.tab where handle=h;.bjk.payNatural h];                            / the dealer has already peeked, so a natural can't lose
  };
 
 .bjk.sitOutUnbet:{                                                                                 / sit out anyone without a bet
@@ -171,7 +170,7 @@ stake:{[bet]                                                                    
   if[.bjk.hd;:()];                                                                                 / hand already over
   update turn:1b from`.bjk.tab where player=(exec first player from .bjk.tab where not out);       / first player still in
   .log.info .bjk.tab;
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;  / the table as players see it
+  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,turn from .bjk.tab;                  / the table as players see it
   .bjk.sendMsg[.bjk.turn]each key .bjk.cp;                                                         / show everyone
   .bjk.giveTurn first exec handle from .bjk.tab where turn;                                        / start their turn
  };
@@ -251,8 +250,6 @@ stake:{[bet]                                                                    
   r:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
   `.bjk.res upsert r;                                                                              / add to results
   .bjk.chips+:exec sum profit by handle from r;                                                    / settle each player's chips
-  t:select player,name,cards,cnt,dealer,dealerCnt,bet,profit from r;                               / the results as players see them, with what each won
-  .bjk.sendMsg["Results table for the round;\n",.Q.s t]each key .bjk.cp;                           / show everyone the results
  };
 
 .bjk.endHand:{                                                                                     / end the hand and start the next round
@@ -260,7 +257,7 @@ stake:{[bet]                                                                    
   .bjk.bd:0b;                                                                                      / no bets in
   .bjk.hd:1b;                                                                                      / no hand in progress
   .bjk.stake:0#.bjk.stake;                                                                         / clear bets
-  .bjk.pubMsg["~~~~~~~~~~~~ Game over ~~~~~~~~~~~~~~~";key .bjk.cp];                               / announce it
+  .bjk.pubPrompt[.bjk.banner["Game over"],"\n";key .bjk.cp];                                       / announce it, with a gap before the next hand
   if[not null .bjk.pit;.bjk.excFunc[`.pit.gameover;`res`rnd!(.bjk.res;.bjk.rnd);.bjk.pit]];        / send the pitboss the results
   .bjk.start[];                                                                                    / next round
  };

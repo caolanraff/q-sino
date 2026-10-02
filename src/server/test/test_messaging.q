@@ -13,23 +13,48 @@
   before{
     .tst.lgCalls:();
   };
-  should["sends the message to the handle to be displayed there"]{
+  should["sends the message, indented, to the handle to be displayed there"]{
     .tst.rec:{.tst.lgCalls,:enlist x};
     `.bjk.display mock {[msg](`.tst.rec;msg)};
     .bjk.sendMsg["hello";0i];
-    .tst.lgCalls mustmatch enlist"hello";
+    .tst.lgCalls mustmatch enlist"  hello";
   };
   should["targets only the first handle when given a list of handles"]{
     .tst.rec:{.tst.lgCalls,:enlist x};
     `.bjk.display mock {[msg](`.tst.rec;msg)};
     .bjk.sendMsg["hi";0 1i];
-    .tst.lgCalls mustmatch enlist"hi";
+    .tst.lgCalls mustmatch enlist"  hi";
   };
   should["logs instead of throwing when the handle can't be written to"]{
     `.log.warn mock {.tst.lgCalls,:enlist x};
     .bjk.sendMsg["hi";999i];
     count[.tst.lgCalls] musteq 1;
     first[.tst.lgCalls] mustlike "Couldn't send a message: *";
+  };
+ };
+
+.tst.desc[".bjk.prompt"]{
+  should["sends the message flush left, for the player to answer"]{
+    .tst.lgCalls:();
+    .tst.rec:{.tst.lgCalls,:enlist x};
+    `.bjk.display mock {[msg](`.tst.rec;msg)};
+    .bjk.prompt["Hit or stick?";0i];
+    .tst.lgCalls mustmatch enlist"Hit or stick?";
+  };
+ };
+
+.tst.desc[".bjk.indent"]{
+  should["indents every line of a string by two spaces"]{
+    .bjk.indent["one\ntwo"] mustmatch "  one\n  two";
+  };
+  should["renders anything else as text first, then indents it"]{
+    .bjk.indent[([]a:1 2)] mustmatch "  a\n  -\n  1\n  2";
+  };
+ };
+
+.tst.desc[".bjk.banner"]{
+  should["frames a heading"]{
+    .bjk.banner["Hand 3"] mustmatch "~~~~~~~~~~~~ Hand 3 ~~~~~~~~~~~~";
   };
  };
 

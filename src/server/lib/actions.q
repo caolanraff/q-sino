@@ -29,13 +29,16 @@
 
 .bjk.giveTurn:{[h]                                                                                 / [handle] give a player the turn
   .bjk.sendMsg["You have ",string["j"$.bjk.timeout%0D00:00:01]," seconds per move";h];             / tell them the time per move
+  hand:first exec cards from .bjk.tab where turn;                                                  / the hand on turn
+  pair:(2=count hand)&1=count distinct .crd.cardDict hand;                                         / two cards of the same value can split
+  .bjk.prompt[$[pair;"Hit, stick or split?";"Hit or stick?"];h];                                   / what they can do
   .bjk.promptPlay h;                                                                               / prompt them
  };
 
 .bjk.nextTurn:{                                                                                    / move to the next hand still to play
   p:exec first player from .bjk.tab where not out,not wait;                                        / first hand neither out nor waiting
   update turn:1b from`.bjk.tab where player=p;                                                     / give it the turn
-  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,return,out,wait,turn from .bjk.tab;  / the table as players see it
+  .bjk.turn:select player,name,cards,cnt,dealer,dealerCnt,bet,turn from .bjk.tab;                  / the table as players see it
   if[not any exec turn from .bjk.tab;                                                              / nobody left to play
     .bjk.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bjk.cp];          / announce it
     :.bjk.dealer[];                                                                                / dealer's turn
@@ -86,7 +89,7 @@ stick:{                                                                         
     :.bjk.nextTurn[];                                                                              / next hand
   ];
   if[.bjk.double;:stick[]];                                                                        / a doubled hand gets one card
-  .bjk.sendMsg["Hit or stick?";d`handle];                                                          / ask for the next play
+  .bjk.prompt["Hit or stick?";d`handle];                                                           / ask for the next play
   .bjk.promptPlay d`handle;                                                                        / prompt them
  };
 
