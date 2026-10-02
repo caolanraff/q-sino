@@ -192,7 +192,7 @@
     .stg.handsPlayed:0;
     t:([]round:0#0;cards:();dealer:0#`);
     .plr.stake`tab`res`me`rules`chips!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;8f);
-    .tst.left mustmatch enlist"Out of chips, disconnecting";
+    .tst.left mustmatch enlist"Out of chips";
     count[.tst.staked] musteq 0;
   };
  };

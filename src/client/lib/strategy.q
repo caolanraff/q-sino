@@ -102,14 +102,14 @@
   :$[.stg.trueCount>=.stg.insureAt;0.5*first exec bet from .stg.tab where handle=.stg.mh;0f];      / half the bet once the true count reaches .stg.insureAt, else 0
  };
 
-.plr.leave:{[msg] -1 msg;hclose .plr.h;exit 0};                                                    / [message] say why, disconnect and exit
+.plr.leave:{[msg] -1 msg,", leaving with $",.Q.f[2;.stg.chips];hclose .plr.h;exit 0};              / [message] say why, with my chips, then disconnect and exit
 
 .plr.stake:{[s]                                                                                    / [state] bet by the count; replaces player.q's prompt
   .stg.recv s;                                                                                     / take the pushed state
-  if[.stg.chips<.stg.rules`minBet;:.plr.leave"Out of chips, disconnecting"];                       / can't afford the minimum: leave
+  if[.stg.chips<.stg.rules`minBet;:.plr.leave"Out of chips"];                                      / can't afford the minimum: leave
   if[.plr.toth<.stg.handsPlayed+:1;                                                                / count this hand; past --hands, leave
     n:string[.plr.toth]," hand",$[.plr.toth=1;"";"s"];                                             / hands played, e.g. "100 hands"
-    :.plr.leave"Played ",n,", disconnecting";                                                      / leave
+    :.plr.leave"Played ",n;                                                                        / leave
   ];
   .stg.count[];                                                                                    / update the true count
   neg[.plr.h](`stake;.stg.tableBet .stg.getBet[]);                                                 / bet within the table limits and my chips
