@@ -5,11 +5,9 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .plr.pt,:`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;        / and card counters
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;                                                   / strategy chart code to server action
 
-.plr.stake:{-1"It's your turn to stake - run stake[bet] when ready"};                              / prompt to stake; a loaded strategy replaces it
-.plr.play:{-1"It's your turn to play - run hit[]/stick[]/double[]/split[] when ready"};            / prompt to play; a loaded strategy replaces it
-.plr.insure:{                                                                                      / prompt to insure; a loaded strategy replaces it
-  -1"Dealer shows an ace - run insure[amount] (up to half your bet, or insure[0] to decline) when ready";
- };
+.plr.stake:{};                                                                                     / the server's bets prompt says what to do; a loaded strategy replaces it
+.plr.play:{};                                                                                      / the server's prompt says what to do; a loaded strategy replaces it
+.plr.insure:{};                                                                                    / the server's insurance offer says what to do; a loaded strategy replaces it
 .plr.shuffle:{-1"Deck reshuffled"};                                                                / note a reshuffle; a loaded strategy replaces it
 
 .plr.dispatch:{[f;arg].plr.h(f;arg)};                                                              / [function;argument] call a server function and return its result

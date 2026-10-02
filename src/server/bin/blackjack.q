@@ -14,7 +14,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
 .bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
 .bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
-.bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
+.bjk.timeout:0D00:00:30;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
 .bjk.insureDeadline:0Np;                                                                           / insurance clock, null when not running

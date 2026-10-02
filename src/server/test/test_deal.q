@@ -570,6 +570,57 @@
   };
  };
 
+.tst.desc[".bjk.result"]{
+  should["says who won or lost how much, and why"]{
+    .bjk.result[`bob;10;20f;"20 against the dealer's 18"] mustmatch "bob wins $10.00 (20 against the dealer's 18)";
+    .bjk.result[`bob;10;25f;"blackjack"] mustmatch "bob wins $15.00 (blackjack)";
+    .bjk.result[`bob;20;0f;"bust with 24"] mustmatch "bob loses $20.00 (bust with 24)";
+    .bjk.result[`bob;10;10f;"19 against the dealer's 19"] mustmatch "bob pushes (19 against the dealer's 19)";
+    };
+ };
+
+.tst.desc[".bjk.dealer1 announcements"]{
+  before{
+    .tst.msgs:();
+    `.bjk.pubMsg mock {.tst.msgs,:enlist(x;y)};
+    .bjk.cp:5 6i!`bob`carol;
+  };
+  should["tells the whole table who won, how much and why"]{
+    .bjk.dealerCount:18;
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`bob;handle:enlist 5i;cards:enlist `10`Q;cnt:enlist 20i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+    .bjk.dealer1 1f;
+    .tst.msgs mustmatch enlist("bob wins $10.00 (20 against the dealer's 18)";5 6i);
+    };
+  should["names the dealer's bust as the reason for a win"]{
+    .bjk.dealerCount:26;
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`bob;handle:enlist 5i;cards:enlist `10`6;cnt:enlist 16i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+    .bjk.dealer1 1f;
+    .tst.msgs mustmatch enlist("bob wins $10.00 (the dealer busts with 26)";5 6i);
+    };
+  should["says when a hand loses or pushes against the dealer"]{
+    .bjk.dealerCount:18;
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`bob;handle:enlist 5i;cards:enlist `10`7;cnt:enlist 17i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+    .bjk.dealer1 1f;
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`bob;handle:enlist 5i;cards:enlist `10`8;cnt:enlist 18i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+    .bjk.dealer1 1f;
+    .tst.msgs[;0] mustmatch ("bob loses $10.00 (17 against the dealer's 18)";"bob pushes (18 against the dealer's 18)");
+    };
+ };
+
+.tst.desc[".bjk.payNatural"]{
+  should["announces the blackjack win to the table"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .tst.msgs:();
+    `.bjk.pubMsg mock {.tst.msgs,:enlist(x;y)};
+    .bjk.cp:5 6i!`bob`carol;
+    .bjk.tab:update out:0b,wait:0b,turn:0b from ([]round:enlist 1;player:enlist 1f;name:enlist`bob;handle:enlist 5i;cards:enlist `A`K;cnt:enlist 21i;dealer:enlist`K`8;dealerCnt:enlist 18i;bet:enlist 10;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:0f);
+    .bjk.tab:.bjk.tab,update player:2f,name:`carol,handle:6i,cards:enlist`9`7,cnt:16i from .bjk.tab;
+    .bjk.payNatural 5i;
+    .tst.msgs mustmatch enlist("bob wins $15.00 (blackjack)";5 6i);
+    (exec return from .bjk.tab where handle=5i) musteq enlist 25f;
+    };
+ };
+
 .tst.desc[".bjk.dealer"]{
   before{
     .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());

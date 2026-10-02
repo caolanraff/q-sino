@@ -135,6 +135,8 @@ stake:{[bet]                                                                    
 
 .bjk.payNatural:{[h]                                                                               / [handle] pay a player's natural 3:2
   .bjk.sendMsg["Winner winner chicken dinner!";h];                                                 / tell them
+  d:first select from .bjk.tab where handle=h;                                                     / their hand
+  .bjk.pubMsg[.bjk.result[d`name;d`bet;2.5*d`bet;"blackjack"];key .bjk.cp];                        / announce it to the table
   update return:2.5*bet,out:1b,turn:0b from`.bjk.tab where handle=h;                               / pay out and take the hand out of play
   if[all exec out from .bjk.tab;                                                                   / every hand was a natural
     .bjk.hd:.bjk.wwch:1b;                                                                          / hand over; the dealer doesn't play
@@ -198,25 +200,33 @@ stake:{[bet]                                                                    
   .bjk.dealerCount:last .bjk.dealerHit/[{.bjk.dealerDraws first x};(.bjk.dc;total)];               / draw until the dealer stands; keep the final total
  };
 
-.bjk.settleHand:{[p;h;msg;ret]                                                                     / [player;handle;message;return] announce a hand's result and record its return
-  .bjk.pubMsg[msg;h];                                                                              / announce it
+.bjk.result:{[n;bet;ret;why]                                                                       / [name;bet;return;reason] a hand's result, e.g. "bob wins $10.00 (20 against the dealer's 18)"
+  w:ret-bet;                                                                                       / what they won
+  r:$[w>0;" wins $",.Q.f[2;w];w<0;" loses $",.Q.f[2;neg w];" pushes"];                             / win, loss or push
+  :string[n],r," (",why,")";                                                                       / with why
+ };
+
+.bjk.settleHand:{[p;d;why;ret]                                                                     / [player;hand;reason;return] announce a hand's result to the table and record it
+  .bjk.pubMsg[.bjk.result[d`name;d`bet;ret;why];key .bjk.cp];                                      / announce it
   update return:ret from`.bjk.tab where player=p;                                                  / record the return
  };
 
 .bjk.dealer1:{[p]                                                                                  / [player] settle a hand against the dealer
   d:first select from .bjk.tab where player=p;                                                     / the hand
-  s:.bjk.settleHand[p;d`handle];                                                                   / settle it with a message and return
+  s:.bjk.settleHand[p;d];                                                                          / settle it with a reason and return
   dBJ:.bjk.isBJ d`dealer;                                                                          / dealer blackjack
   pBJ:not[d`split]&.bjk.isBJ d`cards;                                                              / player blackjack; not on a split hand
-  push:"Push! ",string[d`name]," gets their money back!";                                          / push message
-  if[d[`cnt]>21;:s["Dealer wins!";0f]];                                                            / player bust
-  if[dBJ&pBJ;:s[push;"f"$d`bet]];                                                                  / both blackjack: push
-  if[dBJ;:s["Dealer has blackjack, dealer wins!";0f]];                                             / dealer blackjack
-  if[pBJ;:s[string[d`name]," gets Blackjack!";2.5*d`bet]];                                         / player blackjack pays 3:2
-  if[.bjk.dealerCount>21;:s["Dealer busts! Player wins!";2f*d`bet]];                               / dealer bust
-  if[.bjk.dealerCount=d`cnt;:s[push;"f"$d`bet]];                                                   / same total: push
-  if[.bjk.dealerCount>d`cnt;:s["Dealer wins!";0f]];                                                / dealer higher
-  s[string[d`name]," wins";2f*d`bet];                                                              / player higher
+  c:string d`cnt;                                                                                  / their total
+  dc:string .bjk.dealerCount;                                                                      / the dealer's total
+  totals:c," against the dealer's ",dc;                                                            / e.g. "20 against the dealer's 18"
+  if[d[`cnt]>21;:s["bust with ",c;0f]];                                                            / player bust
+  if[dBJ&pBJ;:s["blackjack against the dealer's blackjack";"f"$d`bet]];                            / both blackjack: push
+  if[dBJ;:s["the dealer has blackjack";0f]];                                                       / dealer blackjack
+  if[pBJ;:s["blackjack";2.5*d`bet]];                                                               / player blackjack pays 3:2
+  if[.bjk.dealerCount>21;:s["the dealer busts with ",dc;2f*d`bet]];                                / dealer bust
+  if[.bjk.dealerCount=d`cnt;:s[totals;"f"$d`bet]];                                                 / same total: push
+  if[.bjk.dealerCount>d`cnt;:s[totals;0f]];                                                        / dealer higher
+  s[totals;2f*d`bet];                                                                              / player higher
  };
 
 .bjk.settleWaiting:{[p]                                                                            / [player] settle a waiting hand and take it out of play
@@ -227,8 +237,7 @@ stake:{[bet]                                                                    
 .bjk.resolveHands:{                                                                                / play the dealer and settle every waiting hand
   if[.bjk.wwch;:()];                                                                               / every hand was a natural, already paid
   if[all exec out from .bjk.tab;                                                                   / every hand is out of play: bust or already paid
-    .bjk.pubMsg["Everyone's out!";key .bjk.cp];                                                    / announce it
-    .bjk.pubMsg["Dealer wins!";key .bjk.cp];                                                       / dealer wins
+    .bjk.pubMsg["Every hand is settled - the dealer doesn't play";key .bjk.cp];                    / announce it
     :update dealer:(dealer,'last .bjk.dc)from`.bjk.tab;                                            / reveal the hole card and stop
   ];
   .bjk.dealer0[];                                                                                  / play the dealer's hand
@@ -242,7 +251,7 @@ stake:{[bet]                                                                    
   r:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
   `.bjk.res upsert r;                                                                              / add to results
   .bjk.chips+:exec sum profit by handle from r;                                                    / settle each player's chips
-  t:select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab;                        / the results as players see them
+  t:select player,name,cards,cnt,dealer,dealerCnt,bet,profit from r;                               / the results as players see them, with what each won
   .bjk.sendMsg["Results table for the round;\n",.Q.s t]each key .bjk.cp;                           / show everyone the results
  };
 
