@@ -145,7 +145,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.init:{                                                                                        / start the detection process
   .utl.addOptDef["server";"S";`:localhost:5555;{`.pit.server set hsym x}];                         / --server: blackjack server address
   .utl.parseArgs[];                                                                                / parse the command line
-  .log.info"Loading detection algorithm";
+  .log.info"Loading pitboss";
   if[not system"p";system"p 5556"];
   s:`$string[.pit.server],":pitboss";                                                              / the server, as the pitboss user
   .pit.h:@[hopen;s;{.log.error"Unable to connect to blackjack.q: ",x;exit 1}];                     / connect, or exit
