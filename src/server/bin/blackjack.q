@@ -14,6 +14,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
 .bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
 .bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
+.bjk.joining:(`int$())!`timestamp$();                                                              / players who've just connected, and when; not yet asked to bet
+.bjk.joinDelay:0D00:00:00.5;                                                                       / time a newcomer gets to buy in before being asked to bet
 .bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
@@ -69,7 +71,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   if[0=count .bjk.cp;:.log.info"No users are connected"];                                          / nobody to deal to
   .log.info$[.bjk.seated[]~.bjk.cp;"No new users";"New users"]," have joined the table";
   .bjk.seat[];                                                                                     / seat everyone connected
-  unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
+  unbet:(exec handle from .bjk.tab where null bet)except key .bjk.joining;                         / players without a bet, bar newcomers
   .bjk.betPrompt each unbet;                                                                       / ask them to bet
   .bjk.trigger[`.plr.stake]each unbet;                                                             / prompt their stake handler
  };
@@ -102,6 +104,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
   .bjk.chips:.bjk.chips _ h;                                                                       / drop their chips
   .bjk.chipsDue:.bjk.chipsDue _ h;                                                                 / drop any buy-in deadline
+  .bjk.joining:.bjk.joining _ h;                                                                   / drop them as a newcomer
   delete from`.bjk.tab where handle=h;                                                             / drop their hands
   delete from`.bjk.stake where handle=h;                                                           / drop their bet
  };
@@ -129,6 +132,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   if[.bjk.isBanned[];:.bjk.turnAway .z.w];                                                         / turn away banned users
   .bjk.regConn .z.w;                                                                               / register it
   if[.bjk.isPit[];:()];                                                                            / the pitboss doesn't play
+  .bjk.joining[.z.w]:.z.p;                                                                         / a newcomer: asked to bet once they've had time to buy in
   .bjk.start[];                                                                                    / seat players and ask for bets
   neg[.z.w](.bjk.intro;`);                                                                         / send the help text
  };
@@ -181,7 +185,22 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.leave x;                                                                                    / remove them from play
  };
 
-.z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[];.bjk.chipsTimer[]};                     / run the bet, insurance, turn and buy-in clocks
+.bjk.promptJoiners:{                                                                               / ask newcomers to bet once they've had time to buy in
+  if[not .bjk.hd;:()];                                                                             / mid-hand: wait for the hand to end
+  h:where .bjk.joining<=.z.p-.bjk.joinDelay;                                                       / newcomers who've had their time
+  .bjk.joining:h _ .bjk.joining;                                                                   / no longer newcomers
+  h:h inter exec handle from .bjk.tab where null bet;                                              / still seated without a bet
+  .bjk.betPrompt each h;                                                                           / ask them to bet
+  .bjk.trigger[`.plr.stake]each h;                                                                 / prompt their stake handler
+ };
+
+.z.ts:{                                                                                            / each second: run the clocks
+  .bjk.betTimer[];                                                                                 / betting
+  .bjk.insureTimer[];                                                                              / insurance
+  .bjk.turnTimer[];                                                                                / turns
+  .bjk.chipsTimer[];                                                                               / buy-ins
+  .bjk.promptJoiners[];                                                                            / newcomers
+ };
 
 .bjk.libs:` sv'`:src/server/lib,'`messaging.q`deck.q`deal.q`actions.q;                             / server libraries, loaded at init
 .bjk.loadLibs:{.utl.require each .bjk.libs};

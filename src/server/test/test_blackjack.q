@@ -321,6 +321,7 @@
     .tst.timerCalls:0;
     `.bjk.betTimer mock {.tst.timerCalls+:1};
     `.bjk.chipsTimer mock {};
+    `.bjk.promptJoiners mock {};
     .z.ts[.z.p];
     .tst.timerCalls musteq 1;
     };
@@ -432,6 +433,7 @@
     `.bjk.betTimer mock {.tst.betCalls+:1};
     `.bjk.insureTimer mock {.tst.insCalls+:1};
     `.bjk.chipsTimer mock {};
+    `.bjk.promptJoiners mock {};
     .z.ts[.z.p];
     (.tst.betCalls,.tst.insCalls) musteq 1 1;
     };
@@ -444,6 +446,7 @@
     `.bjk.insureTimer mock {};
     `.bjk.turnTimer mock {.tst.turnCalls+:1};
     `.bjk.chipsTimer mock {};
+    `.bjk.promptJoiners mock {};
     .z.ts[.z.p];
     .tst.turnCalls musteq 1;
   };
@@ -747,6 +750,7 @@
     `.bjk.insureTimer mock {};
     `.bjk.turnTimer mock {};
     `.bjk.chipsTimer mock {.tst.calls+:1};
+    `.bjk.promptJoiners mock {};
     .z.ts[.z.p];
     .tst.calls musteq 1;
   };
@@ -763,5 +767,88 @@
     .bjk.chipsWindow 7i;
     .bjk.chipsDue[7i] musteq due;
     count[.tst.msgs] musteq 0;
+  };
+ };
+
+.tst.desc[".z.po newcomers"]{
+  should["marks a new player as a newcomer before seating them"]{
+    `.bjk.isBanned mock {0b};
+    `.bjk.regConn mock {};
+    `.bjk.isPit mock {0b};
+    `.bjk.start mock {};
+    .bjk.joining:(`int$())!`timestamp$();
+    .z.po[];
+    (.z.w in key .bjk.joining) musteq 1b;
+  };
+ };
+
+.tst.desc[".bjk.start newcomers"]{
+  should["seats a newcomer but leaves asking them to bet until they've had time to buy in"]{
+    `.bjk.seat mock {};
+    `.bjk.seated mock {.bjk.cp};
+    .tst.prompted:();
+    `.bjk.betPrompt mock {.tst.prompted,:x};
+    `.bjk.trigger mock {[x;y]};
+    .bjk.hd:1b;
+    .bjk.cp:(5 6 7i)!`p1`p2`p3;
+    .bjk.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:5 6 7i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:3#0f);
+    .bjk.joining:enlist[7i]!enlist .z.p;
+    .bjk.start[];
+    .tst.prompted mustmatch enlist 6i;
+  };
+ };
+
+.tst.desc[".bjk.promptJoiners"]{
+  before{
+    .tst.prompted:();
+    `.bjk.betPrompt mock {.tst.prompted,:x};
+    .tst.triggered:();
+    `.bjk.trigger mock {[x;y].tst.triggered,:y};
+    .bjk.joinDelay:0D00:00:00.5;
+    .bjk.tab:([]round:1 1 1;player:1 2 3f;name:`p1`p2`p3;handle:5 6 7i;cards:3#enlist();cnt:3#0Ni;dealer:3#`;dealerCnt:3#0Ni;bet:10 0N 0N;return:3#0n;profit:3#0n;split:000b;double:000b;insurance:3#0f);
+  };
+  should["asks newcomers who've had time to buy in to bet, and stops treating them as new"]{
+    .bjk.hd:1b;
+    .bjk.joining:(6 7i)!(.z.p-0D00:00:01;.z.p);
+    .bjk.promptJoiners[];
+    .tst.prompted mustmatch enlist 6i;
+    .tst.triggered mustmatch enlist 6i;
+    key[.bjk.joining] mustmatch enlist 7i;
+  };
+  should["doesn't ask a newcomer who has already bet"]{
+    .bjk.hd:1b;
+    .bjk.joining:enlist[5i]!enlist .z.p-0D00:00:01;
+    .bjk.promptJoiners[];
+    count[.tst.prompted] musteq 0;
+    count[.bjk.joining] musteq 0;
+  };
+  should["waits for the hand in play to end"]{
+    .bjk.hd:0b;
+    .bjk.joining:enlist[6i]!enlist .z.p-0D00:00:01;
+    .bjk.promptJoiners[];
+    .bjk.hd:1b;
+    count[.tst.prompted] musteq 0;
+    key[.bjk.joining] mustmatch enlist 6i;
+  };
+ };
+
+.tst.desc[".bjk.joining"]{
+  should["forgets a newcomer who leaves"]{
+    .bjk.joining:enlist[42i]!enlist .z.p;
+    .bjk.unseat 42i;
+    (42i in key .bjk.joining) musteq 0b;
+  };
+ };
+
+.tst.desc[".z.ts newcomers"]{
+  should["asks newcomers to bet each tick"]{
+    .tst.calls:0;
+    `.bjk.betTimer mock {};
+    `.bjk.insureTimer mock {};
+    `.bjk.turnTimer mock {};
+    `.bjk.chipsTimer mock {};
+    `.bjk.promptJoiners mock {.tst.calls+:1};
+    .z.ts[.z.p];
+    .tst.calls musteq 1;
   };
  };
