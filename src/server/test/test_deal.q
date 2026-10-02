@@ -907,8 +907,8 @@
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.hd:1b;
     .bjk.chips:(`int$())!`float$();
-    .tst.startCalls:0;
-    `.bjk.start mock {.tst.startCalls+:1};
+    .tst.seated:();
+    `.bjk.sitIn mock {.tst.seated,:x};
   };
   should["sets a player's chips with their first buy-in, and adds to them with later ones"]{
     .tst.msgs:();
@@ -918,9 +918,9 @@
     .bjk.users:enlist[0i]!enlist`alice;
     buyin 300;
     .bjk.chips[0i] musteq 300f;
-    .tst.logged mustmatch enlist"alice buys $300 in chips";
     buyin 200;
     .bjk.chips[0i] musteq 500f;
+    .tst.logged mustmatch("alice joins the table with $300 in chips";"alice buys $200 in chips");
     .tst.msgs mustmatch("You have $300.00 in chips, please use buyin[amount] if you want more";"You have $500.00 in chips");
   };
   should["clears the player's deadline to buy in"]{
@@ -954,27 +954,27 @@
     buyin 300;
     .bjk.hd:1b;
     .bjk.chips[0i] musteq 300f;
-    .tst.startCalls musteq 0;
+    .tst.seated mustmatch ();
   };
   should["seats a newcomer and asks for bets once they buy in between hands"]{
     `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {};
     buyin 300;
-    .tst.startCalls musteq 1;
+    .tst.seated mustmatch enlist 0i;
   };
   should["seats a player who was out of chips once they top up"]{
     `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {};
     .bjk.chips:enlist[0i]!enlist 5f;
     buyin 300;
-    .tst.startCalls musteq 1;
+    .tst.seated mustmatch enlist 0i;
   };
   should["doesn't prompt again for a top-up by a player who can already bet"]{
     `.bjk.sendMsg mock {[x;y]};
     `.log.info mock {};
     .bjk.chips:enlist[0i]!enlist 300f;
     buyin 300;
-    .tst.startCalls musteq 0;
+    .tst.seated mustmatch ();
   };
  };
 

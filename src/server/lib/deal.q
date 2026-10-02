@@ -1,8 +1,8 @@
 .bjk.limits:{"$",string[.bjk.rules`minBet]," to $",string .bjk.rules`maxBet};                      / bet limits as text
 
 .bjk.buyIn:{[h;amt]                                                                                / [handle;amount] add chips, and tell the player
-  .log.info string[.bjk.users h]," buys $",string["j"$amt]," in chips";
   firstBuy:null .bjk.chips h;                                                                      / their first buy-in: they've just sat down
+  .log.info string[.bjk.users h],$[firstBuy;" joins the table with $";" buys $"],string["j"$amt]," in chips";
   .bjk.chips[h]:amt+0^.bjk.chips h;                                                                / add them
   m:"You have $",.Q.f[2;.bjk.chips h]," in chips";                                                 / their chips
   .bjk.sendMsg[m,$[firstBuy;", please use buyin[amount] if you want more";""];h];                  / tell the player, with how to top up on joining
@@ -21,7 +21,7 @@ buyin:{[amt]                                                                    
   ];
   .bjk.buyIn[.z.w;"f"$amt];                                                                        / add the chips
   .bjk.chipsDue _:.z.w;                                                                            / no longer due to leave
-  if[.bjk.hd&short;.bjk.start[]];                                                                  / now they can bet: seat them and ask
+  if[.bjk.hd&short;.bjk.sitIn .z.w];                                                               / now they can bet: seat them and ask
  };
 
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand
