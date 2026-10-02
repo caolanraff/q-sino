@@ -92,6 +92,10 @@ double:{                                                                        
     .bjk.pubMsg["You can't double after getting a third card ",string .z.u;.z.w];                  / tell them
     :();                                                                                           / refuse
   ];
+  if[.bjk.available[.z.w]<first exec bet from .bjk.tab where turn;                                 / the double needs as much again
+    .bjk.pubMsg["You can't afford to double ",string .z.u;.z.w];                                   / tell them
+    :();                                                                                           / refuse
+  ];
   .bjk.pubMsg["Bet doubled by ",string .z.u;key .bjk.cp];                                          / announce it
   update bet:bet*2,double:1b from`.bjk.tab where turn;                                             / double the bet
   .bjk.double:1b;                                                                                  / mid-double
@@ -109,6 +113,7 @@ insure:{[amt]                                                                   
     .bjk.sendMsg["Insurance is between 0 and half your bet";.z.w];                                 / tell them
     :();                                                                                           / refuse
   ];
+  if[amt>.bjk.available .z.w;.bjk.sendMsg["You can't afford that much insurance";.z.w];:()];       / no more than they have left
   m:$[amt=0;" declines insurance";" insures for $",string amt];                                    / their answer
   .bjk.pubMsg[string[.z.u],m;key .bjk.cp];                                                         / announce it
   update insurance:`float$amt from`.bjk.tab where handle=.z.w;                                     / record it
@@ -136,6 +141,9 @@ insure:{[amt]                                                                   
   c:first exec cards from .bjk.tab where turn;                                                     / its cards
   if[2<>count c;:.bjk.refuseSplit"You can only split your first two cards"];                       / two cards only
   if[1<count distinct .crd.cardDict c;:.bjk.refuseSplit"You can't split this hand"];               / same value only
+  if[.bjk.available[.z.w]<first exec bet from .bjk.tab where turn;                                 / the new hand needs as much again
+    :.bjk.refuseSplit"You can't afford to split";                                                  / refuse
+  ];
   if[.bjk.rules[`maxSplitHands]<=count select from .bjk.tab where handle=.z.w;                     / already at maxSplitHands hands
     :.bjk.refuseSplit"You can't split more than ",string[.bjk.rules[`maxSplitHands]-1]," times";   / refuse
   ];

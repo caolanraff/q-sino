@@ -17,14 +17,14 @@
 .tst.desc[".stg.decide"]{
   before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt!4 6};
   should["passes .stg.help's split through while the player is under the hand cap"]{
-    .stg.decide[`8`8`10;3] musteq`SP;
+    .stg.decide[`8`8`10;3;1b] musteq`SP;
   };
   should["plays a pair as its hard total once the player is at the hand cap"]{
-    .stg.decide[`8`8`10;4] musteq`H;                                                               / hard 16 vs 10
-    .stg.decide[`10`10`6;4] musteq`S;                                                              / hard 20 vs 6
+    .stg.decide[`8`8`10;4;1b] musteq`H;                                                               / hard 16 vs 10
+    .stg.decide[`10`10`6;4;1b] musteq`S;                                                              / hard 20 vs 6
   };
   should["leaves non-split decisions alone at the hand cap"]{
-    .stg.decide[`5`6`6;4] musteq`D;
+    .stg.decide[`5`6`6;4;1b] musteq`D;
   };
  };
 
@@ -72,15 +72,15 @@
   should["takes the table, results, this client's handle and the table rules from the state the server pushed"]{
     t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
     r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
-    .stg.recv[`tab`res`me`rules!(t;r;7i;`maxSplitHands`deckCnt!4 6)];
+    .stg.recv[`tab`res`me`rules`chips!(t;r;7i;`maxSplitHands`deckCnt!4 6;800f)];
     .stg.tab mustmatch t;
     .stg.res mustmatch r;
     .stg.mh musteq 7i;
     .stg.rules mustmatch`maxSplitHands`deckCnt!4 6;
   };
   should["uses the pushed split cap and deck count, not fixed ones"]{
-    .stg.recv[`tab`res`me`rules!(([]round:"j"$();cards:();dealer:());([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2)];
-    .stg.decide[`8`8`10;2] musteq`H;
+    .stg.recv[`tab`res`me`rules`chips!(([]round:"j"$();cards:();dealer:());([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2;800f)];
+    .stg.decide[`8`8`10;2;1b] musteq`H;
     .stg.count[];
     .stg.trueCount musteq -1%(104-4)%52;
   };
@@ -122,7 +122,7 @@
  };
 
 .tst.desc[".stg.tableBet"]{
-  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;.stg.chips:1000f};
   should["keeps a bet inside the table limits"]{
     .stg.tableBet[25] musteq 25;
   };
@@ -144,7 +144,66 @@
     .plr.toth:1000;
     .stg.handsPlayed:0;
     t:([]round:"j"$();cards:();dealer:());
-    .plr.stake`tab`res`me`rules!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500);
+    .plr.stake`tab`res`me`rules`chips!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;1000f);
     .tst.staked mustmatch enlist 10;
+  };
+ };
+
+.tst.desc[".stg.decide short of money"]{
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt!4 6};
+  should["hits instead of doubling when it can't cover another bet"]{
+    .stg.decide[`5`6`6;1;0b] musteq`H;                                                             / hard 11 vs 6 doubles, else hit
+  };
+  should["sticks instead of doubling where the chart says double, else stick"]{
+    .stg.decide[`A`7`4;1;0b] musteq`S;                                                             / soft 18 vs 4: double, else stick
+  };
+  should["plays a pair as its hard total instead of splitting"]{
+    .stg.decide[`8`8`10;1;0b] musteq`H;                                                            / 8,8 vs 10 as hard 16: hit
+  };
+ };
+
+.tst.desc[".stg.tableBet chips"]{
+  before{.utl.load`:src/client/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500};
+  should["never bets more than its chips, in whole dollars"]{
+    .stg.chips:35.5;
+    .stg.tableBet[80] mustmatch 35;
+  };
+ };
+
+.tst.desc[".stg.available"]{
+  should["is its chips less this round's bets and insurance"]{
+    .utl.load`:src/client/lib/strategy.q;
+    .stg.mh:5i;
+    .stg.chips:100f;
+    .stg.tab:([]handle:5 5 6i;bet:20 20 40;insurance:10 0 0f);
+    .stg.available[] musteq 50f;
+  };
+ };
+
+.tst.desc[".plr.stake out of chips"]{
+  should["leaves instead of staking once it can't afford the minimum bet"]{
+    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer1.q;
+    .tst.left:();
+    `.plr.leave mock {.tst.left,:enlist x};
+    .tst.staked:();
+    `stake mock {.tst.staked,:x};
+    .plr.h:0i;
+    .plr.toth:1000;
+    .stg.handsPlayed:0;
+    t:([]round:0#0;cards:();dealer:0#`);
+    .plr.stake`tab`res`me`rules`chips!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;8f);
+    .tst.left mustmatch enlist"Out of chips, disconnecting";
+    count[.tst.staked] musteq 0;
+  };
+ };
+
+.tst.desc[".stg.recv chips"]{
+  should["assumes its own buy-in until the server has chips for it"]{
+    .utl.load`:src/client/lib/strategy.q;
+    .plr.buyin:1000;
+    .stg.recv`tab`res`me`rules`chips!(();();7i;`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;0n);
+    .stg.chips musteq 1000f;
+    .stg.recv`tab`res`me`rules`chips!(();();7i;`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;420f);
+    .stg.chips musteq 420f;
   };
  };

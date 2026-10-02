@@ -6,12 +6,14 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.rnd:0;                                                                                        / round number
 .bjk.pit:0Ni;                                                                                      / pitboss's handle, null until it connects
 .bjk.ejectCounters:0b;                                                                             / eject players the pitboss flags (--pitboss)
-.bjk.public:`stake`hit`stick`double`split`insure`hist;                                             / the only functions players may call
+.bjk.public:`stake`hit`stick`double`split`insure`buyin`hist;                                       / the only commands a player can call
 
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;                                                 / one 52-card deck
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
-.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;                                        / table rules, pushed to clients
+.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
+.bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
+.bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
 .bjk.timeout:0D00:00:15;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
@@ -36,10 +38,31 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   show" split     - Split your hand";
   show" double    - Double your hand.";
   show" insure    - Take insurance when the dealer shows an ace";
+  show" buyin     - Buy chips, at least $100 (do this before you bet)";
   show" hist      - Hand results so far";
  };
 
 hist:{.bjk.hist,.bjk.res};                                                                         / every hand result so far
+
+.bjk.committed:{[h]exec sum(0^bet)+0^insurance from .bjk.tab where handle=h};                      / [handle] what a player has on the table this round
+.bjk.available:{[h](0^.bjk.chips h)-.bjk.committed h};                                             / [handle] chips a player can still put on the table
+.bjk.outOfChips:{[h]not[null c]&.bjk.rules[`minBet]>c:.bjk.chips h};                               / [handle] has chips, but not enough for the minimum bet
+
+.bjk.needChips:{[h]null[.bjk.chips h]|.bjk.outOfChips h};                                          / [handle] no chips, or not enough to bet
+
+.bjk.chipsWindow:{[h]                                                                              / [handle] give a player without chips the timeout to buy some
+  if[h in key .bjk.chipsDue;:()];                                                                  / window already open: don't move the deadline
+  .bjk.chipsDue[h]:.z.p+.bjk.timeout;                                                              / their deadline
+  m:$[null .bjk.chips h;"Please buy some chips";"You're out of chips"];                            / no chips yet, or run out
+  s:string"j"$.bjk.timeout%0D00:00:01;                                                             / the timeout in seconds
+  .bjk.sendMsg[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];           / tell them
+ };
+
+.bjk.betPrompt:{[h]                                                                                / [handle] ask a player to bet, with their chips
+  if[.bjk.needChips h;:.bjk.chipsWindow h];                                                        / they need chips first
+  m:"; your chips: $",.Q.f[2;.bjk.chips h];                                                        / their chips
+  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[],m;h];             / ask them to bet
+ };
 
 .bjk.start:{                                                                                       / seat players and ask for bets
   if[not .bjk.hd;:.bjk.sendMsg["Please wait until the hand is over";.z.w]];                        / a hand is in progress
@@ -47,7 +70,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .log.info$[.bjk.seated[]~.bjk.cp;"No new users";"New users"]," have joined the table";
   .bjk.seat[];                                                                                     / seat everyone connected
   unbet:exec handle from .bjk.tab where null bet;                                                  / players without a bet
-  .bjk.sendMsg["Please place your bets via the stake[] function, ",.bjk.limits[]]each unbet;       / ask them to bet
+  .bjk.betPrompt each unbet;                                                                       / ask them to bet
   .bjk.trigger[`.plr.stake]each unbet;                                                             / prompt their stake handler
  };
 
@@ -69,13 +92,16 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.logLeaver:{[h]                                                                                / [handle] log a leaver's net winnings
   won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;                           / net profit since they joined
   dlr:$[won<0;"-$";"$"],.Q.f[2;abs won];                                                           / net winnings as dollars, with the sign
-  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",dlr;
+  left:.Q.f[2;0^$[.bjk.hd;.bjk.chips;.bjk.available]h];                                            / chips they leave with; a hand in play is lost
+  .log.info string[.bjk.cp h]," has left the table, net winnings this session ",dlr,", leaving with $",left," in chips";
  };
 
 .bjk.unseat:{[h]                                                                                   / [handle] remove a player from the table
   .bjk.cp:.bjk.cp _ h;                                                                             / drop the connection
   .bjk.users:.bjk.users _ h;                                                                       / drop their username
   .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
+  .bjk.chips:.bjk.chips _ h;                                                                       / drop their chips
+  .bjk.chipsDue:.bjk.chipsDue _ h;                                                                 / drop any buy-in deadline
   delete from`.bjk.tab where handle=h;                                                             / drop their hands
   delete from`.bjk.stake where handle=h;                                                           / drop their bet
  };
@@ -127,6 +153,15 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.disconnect:{[h]@[neg h;::;{}];hclose h};                                                      / [handle] flush pending messages and close
 
+.bjk.askToLeave:{[h]                                                                               / [handle] see off a player who didn't buy chips in time
+  .log.info string[.bjk.cp h]," was asked to leave: no chips";
+  .bjk.sendMsg["You've been asked to leave the table: no chips";h];                                / tell them
+  .bjk.leave h;                                                                                    / take them off the table
+  .bjk.disconnect h;                                                                               / close their connection
+ };
+
+.bjk.chipsTimer:{.bjk.askToLeave each where .z.p>=.bjk.chipsDue};                                  / see off anyone past their buy-in deadline
+
 .bjk.eject:{[h]                                                                                    / [handle] remove a suspected card counter
   if[not h in key .bjk.cp;:()];                                                                    / not seated
   n:string .bjk.cp h;                                                                              / their name
@@ -146,7 +181,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.leave x;                                                                                    / remove them from play
  };
 
-.z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[]};                                       / run the bet, insurance and turn clocks
+.z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[];.bjk.chipsTimer[]};                     / run the bet, insurance, turn and buy-in clocks
 
 .bjk.libs:` sv'`:src/server/lib,'`messaging.q`deck.q`deal.q`actions.q;                             / server libraries, loaded at init
 .bjk.loadLibs:{.utl.require each .bjk.libs};

@@ -1,8 +1,31 @@
 .bjk.limits:{"$",string[.bjk.rules`minBet]," to $",string .bjk.rules`maxBet};                      / bet limits as text
 
+.bjk.buyIn:{[h;amt]                                                                                / [handle;amount] add chips, and tell the player
+  .log.info string[.bjk.users h]," buys $",string["j"$amt]," in chips";
+  .bjk.chips[h]:amt+0^.bjk.chips h;                                                                / add them
+  .bjk.sendMsg["You have $",.Q.f[2;.bjk.chips h]," in chips";h];                                   / tell the player
+ };
+
+buyin:{[amt]                                                                                       / [amount] buy chips: the first buy-in sets them, later ones add more
+  if[not type[amt]in -5 -6 -7h;.bjk.sendMsg["Buy-ins are whole dollars";.z.w];:()];                / whole dollars only
+  if[amt<.bjk.rules`minBuyIn;                                                                      / at least the minimum
+    .bjk.sendMsg["The minimum buy-in is $",string .bjk.rules`minBuyIn;.z.w];                       / tell them
+    :();                                                                                           / refuse
+  ];
+  if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / between hands only
+  .bjk.buyIn[.z.w;"f"$amt];                                                                        / add the chips
+  .bjk.chipsDue _:.z.w;                                                                            / no longer due to leave
+ };
+
 stake:{[bet]                                                                                       / [bet] place a bet for the next hand
   if[not type[bet]in -5 -6 -7h;.bjk.sendMsg["Bets are whole dollars";.z.w];:()];                   / whole dollars only
+  if[null .bjk.chips .z.w;.bjk.sendMsg["Please buy some chips first: buyin[amount]";.z.w];:()];    / no chips yet
+  if[.bjk.outOfChips .z.w;.bjk.sendMsg["You're out of chips: buyin[amount] for more";.z.w];:()];   / not enough chips for the minimum
   if[not bet within .bjk.rules`minBet`maxBet;.bjk.sendMsg["Bets are ",.bjk.limits[];.z.w];:()];    / within the table limits
+  if[bet>.bjk.chips .z.w;                                                                          / no more than their chips
+    .bjk.sendMsg["You can't afford that: you have $",.Q.f[2;.bjk.chips .z.w]," in chips";.z.w];    / tell them
+    :();                                                                                           / refuse
+  ];
   if[not .bjk.hd;.bjk.sendMsg["Please wait until the current hand is complete";.z.w];:()];         / not mid-hand
   .log.info string[.z.u]," bets $",string bet;
   upsert[`.bjk.stake;(.bjk.user[];.z.w;"j"$bet)];                                                  / record the bet
@@ -211,6 +234,7 @@ stake:{[bet]                                                                    
   r:delete out,wait,turn from .bjk.tab;                                                            / the round's hands, without the turn state
   r:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
   `.bjk.res upsert r;                                                                              / add to results
+  .bjk.chips+:exec sum profit by handle from r;                                                    / settle each player's chips
   t:select player,name,cards,cnt,dealer,dealerCnt,bet,return from .bjk.tab;                        / the results as players see them
   .bjk.sendMsg["Results table for the round;\n",.Q.s t]each key .bjk.cp;                           / show everyone the results
  };

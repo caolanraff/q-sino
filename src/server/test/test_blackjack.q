@@ -259,7 +259,7 @@
     .bjk.hist:([]round:1 1;handle:5 6i;profit:10 50f);
     .bjk.res:([]round:2 3 3;handle:5 5 6i;profit:-5 15 -50f);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $20.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $20.00*") musteq 1b;
     };
   should["shows a net loss with a leading minus sign"]{
     .tst.msgs:();
@@ -269,7 +269,7 @@
     .bjk.hist:([]round:0#0;handle:0#0i;profit:0#0f);
     .bjk.res:([]round:1 2;handle:5 5i;profit:-10 -2.5);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session -$12.50") musteq 1b;
+    (any .tst.msgs like "*net winnings this session -$12.50*") musteq 1b;
     };
   should["ignores results from an earlier connection that had the same handle"]{
     .tst.msgs:();
@@ -279,7 +279,7 @@
     .bjk.hist:([]round:1 2;handle:5 5i;profit:100 100f);
     .bjk.res:([]round:enlist 3;handle:enlist 5i;profit:enlist 10f);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $10.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $10.00*") musteq 1b;
     };
   should["reports zero for a player who never finished a hand"]{
     .tst.msgs:();
@@ -288,7 +288,7 @@
     .bjk.joined:enlist[5i]!enlist 0;
     .bjk.hist:.bjk.res:([]round:0#0;handle:0#0i;profit:0#0f);
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $0.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $0.00*") musteq 1b;
     };
   should["forgets the session's join round"]{
     .bjk.cp:(5i;6i)!`alice`bob;
@@ -320,6 +320,7 @@
   should["drives the betting clock"]{
     .tst.timerCalls:0;
     `.bjk.betTimer mock {.tst.timerCalls+:1};
+    `.bjk.chipsTimer mock {};
     .z.ts[.z.p];
     .tst.timerCalls musteq 1;
     };
@@ -370,7 +371,7 @@
     .bjk.tab:([]round:2 2;player:1 2f;name:`alice`bob;handle:5 6i;cards:(`K`6;`9`7);cnt:16 16i;dealer:`9`9;dealerCnt:9 9i;bet:10 10;return:(();());profit:0n 0n;split:00b;double:00b;insurance:0f);
     .bjk.tab:update out:00b,wait:00b,turn:01b from .bjk.tab;
     .bjk.leave[5i];
-    (any .tst.msgs like "*net winnings this session $5.00") musteq 1b;
+    (any .tst.msgs like "*net winnings this session $5.00*") musteq 1b;
     };
   should["records nothing for a player who leaves between hands"]{
     `.bjk.deal mock {};
@@ -430,6 +431,7 @@
     .tst.insCalls:0;
     `.bjk.betTimer mock {.tst.betCalls+:1};
     `.bjk.insureTimer mock {.tst.insCalls+:1};
+    `.bjk.chipsTimer mock {};
     .z.ts[.z.p];
     (.tst.betCalls,.tst.insCalls) musteq 1 1;
     };
@@ -441,6 +443,7 @@
     `.bjk.betTimer mock {};
     `.bjk.insureTimer mock {};
     `.bjk.turnTimer mock {.tst.turnCalls+:1};
+    `.bjk.chipsTimer mock {};
     .z.ts[.z.p];
     .tst.turnCalls musteq 1;
   };
@@ -609,5 +612,156 @@
     .bjk.users[42i] musteq .z.u;
     .bjk.unseat 42i;
     (42i in key .bjk.users) musteq 0b;
+  };
+ };
+
+.tst.desc[".bjk.chips"]{
+  should["gives a player no chips until they buy in, and forgets them when they leave"]{
+    `.bjk.isPit mock {0b};
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.cp:()!();
+    .bjk.chips:(`int$())!`float$();
+    .bjk.regConn[42i];
+    (42i in key .bjk.chips) musteq 0b;
+    .bjk.buyIn[42i;500f];
+    .bjk.chips[42i] musteq 500f;
+    .bjk.unseat 42i;
+    (42i in key .bjk.chips) musteq 0b;
+  };
+  should["counts what a player has on the table, bets and insurance, against their chips"]{
+    .bjk.chips:(0 1i)!100 50f;
+    .bjk.tab:update insurance:5 0f from ([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    .bjk.committed[0i] musteq 15f;
+    .bjk.available[0i] musteq 85f;
+  };
+ };
+
+.tst.desc[".bjk.betPrompt"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100};
+  should["asks for a bet and shows the player's chips"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.chips:enlist[7i]!enlist 512.5;
+    .bjk.betPrompt 7i;
+    .tst.msgs mustmatch enlist"Please place your bets via the stake[] function, $10 to $500; your chips: $512.50";
+  };
+  should["tells a player who can't afford the minimum bet that they're out of chips"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.chips:enlist[7i]!enlist 8f;
+    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.timeout:0D00:00:15;
+    .bjk.betPrompt 7i;
+    .tst.msgs mustmatch enlist"You're out of chips: buyin[amount] within 15 seconds, or you'll be asked to leave";
+    (.bjk.chipsDue[7i]>.z.p) musteq 1b;
+  };
+ };
+
+.tst.desc[".bjk.clientState chips"]{
+  should["pushes the player their own chips"]{
+    .bjk.chips:(5 6i)!250 80f;
+    .bjk.clientState[6i][`chips] musteq 80f;
+  };
+ };
+
+.tst.desc[".bjk.logLeaver chips"]{
+  should["says what a player leaves with, less anything lost on a hand in play"]{
+    .tst.msgs:();
+    `.log.info mock {.tst.msgs,:enlist raze x};
+    .bjk.hist:.bjk.res:0#.bjk.res;
+    .bjk.joined:enlist[0i]!enlist 0;
+    .bjk.cp:enlist[0i]!enlist`p1;
+    .bjk.chips:enlist[0i]!enlist 300f;
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 20;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:0 0f;out:00b;wait:00b;turn:10b);
+    .bjk.hd:1b;
+    .bjk.logLeaver 0i;
+    .bjk.hd:0b;
+    .bjk.logLeaver 0i;
+    .bjk.hd:1b;
+    .tst.msgs[0] mustlike"*leaving with $300.00 in chips";
+    .tst.msgs[1] mustlike"*leaving with $290.00 in chips";
+  };
+ };
+
+.tst.desc[".bjk.outOfChips"]{
+  should["is only true for a player with chips, but fewer than the minimum bet"]{
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.chips:(5 6i)!8 50f;
+    (.bjk.outOfChips each 5 6 7i) mustmatch 100b;
+  };
+ };
+
+.tst.desc[".bjk.betPrompt before buying in"]{
+  should["tells a player without chips how to get them"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.chips:(`int$())!`float$();
+    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.timeout:0D00:00:15;
+    .bjk.betPrompt 7i;
+    .tst.msgs mustmatch enlist"Please buy some chips: buyin[amount] within 15 seconds, or you'll be asked to leave";
+    (.bjk.chipsDue[7i]>.z.p) musteq 1b;
+  };
+ };
+
+.tst.desc[".bjk.chipsTimer"]{
+  should["asks every player past their buy-in deadline to leave, and nobody else"]{
+    .tst.asked:();
+    `.bjk.askToLeave mock {.tst.asked,:x};
+    .bjk.chipsDue:(5 6i)!(.z.p-0D00:00:01;.z.p+0D00:00:10);
+    .bjk.chipsTimer[];
+    .tst.asked mustmatch enlist 5i;
+  };
+ };
+
+.tst.desc[".bjk.askToLeave"]{
+  should["tells the player why, takes them off the table and closes their connection"]{
+    `.log.info mock {[x]};
+    .tst.msgs:();
+    `.bjk.sendMsg mock {.tst.msgs,:enlist(x;y)};
+    .tst.left:();
+    `.bjk.leave mock {.tst.left,:x};
+    .tst.closed:();
+    `.bjk.disconnect mock {.tst.closed,:x};
+    .bjk.cp:enlist[5i]!enlist`a_5;
+    .bjk.askToLeave 5i;
+    .tst.msgs mustmatch enlist("You've been asked to leave the table: no chips";5i);
+    .tst.left mustmatch enlist 5i;
+    .tst.closed mustmatch enlist 5i;
+  };
+ };
+
+.tst.desc[".bjk.chipsDue"]{
+  should["forgets a player's buy-in deadline when they leave"]{
+    .bjk.chipsDue:enlist[42i]!enlist .z.p;
+    .bjk.unseat 42i;
+    (42i in key .bjk.chipsDue) musteq 0b;
+  };
+ };
+
+.tst.desc[".z.ts buy-in clock"]{
+  should["drives the buy-in clock"]{
+    .tst.calls:0;
+    `.bjk.betTimer mock {};
+    `.bjk.insureTimer mock {};
+    `.bjk.turnTimer mock {};
+    `.bjk.chipsTimer mock {.tst.calls+:1};
+    .z.ts[.z.p];
+    .tst.calls musteq 1;
+  };
+ };
+
+.tst.desc[".bjk.chipsWindow"]{
+  should["opens once: a later round's prompt doesn't move the deadline or repeat the warning"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.timeout:0D00:00:15;
+    .bjk.chips:(`int$())!`float$();
+    due:.z.p+0D00:00:02;
+    .bjk.chipsDue:enlist[7i]!enlist due;
+    .bjk.chipsWindow 7i;
+    .bjk.chipsDue[7i] musteq due;
+    count[.tst.msgs] musteq 0;
   };
  };

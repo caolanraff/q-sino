@@ -3,7 +3,8 @@
 
 .tst.desc["stake[]"]{
   before{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.chips:enlist[0i]!enlist 1000f;
     .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());
   };
   should["refuses a bet outside the table limits, and says what they are"]{
@@ -82,7 +83,8 @@
 
 .tst.desc["stake[] betting clock"]{
   before{
-    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.chips:enlist[0i]!enlist 1000f;
     `.bjk.deal mock {};
     .bjk.hd:1b;
   };
@@ -738,6 +740,7 @@
  };
 
 .tst.desc["insure[]"]{
+  before{.bjk.chips:0 1 2i!3#1000f};
   should["records the side bet"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.closeInsurance mock {};
@@ -864,5 +867,90 @@
     .bjk.turnDeadline:.z.p+0D00:00:10;
     .bjk.dealer[];
     .bjk.turnDeadline musteq 0Np;
+  };
+ };
+
+.tst.desc["stake[] chips"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.stake:([name:();handle:()]bet:`long$())};
+  should["refuses a bet bigger than the player's chips"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.chips:enlist[0i]!enlist 40f;
+    stake[50];
+    count[.bjk.stake] musteq 0;
+    .tst.msgs mustmatch enlist"You can't afford that: you have $40.00 in chips";
+  };
+  should["refuses any bet from a player who can't afford the minimum"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.chips:enlist[0i]!enlist 8f;
+    stake[10];
+    .tst.msgs mustmatch enlist"You're out of chips: buyin[amount] for more";
+  };
+ };
+
+.tst.desc[".bjk.recordRound chips"]{
+  should["settles each player's chips with the round's profit, insurance included"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.wwch:0b;
+    .bjk.dc:`K`5;
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .bjk.tab:([]round:1 1 1;player:1 1.01 2;name:`p1`p1`p2;handle:0 0 1i;cards:(`8`3;`8`10;`9`7);cnt:11 18 16i;dealer:3#enlist`K`5`Q;dealerCnt:25 25 25i;bet:10 10 20;return:20 20 40f;profit:3#0n;split:110b;double:000b;insurance:5 0 0f;out:000b;wait:000b;turn:000b);
+    .bjk.chips:(0 1i)!100 100f;
+    .bjk.recordRound[];
+    .bjk.chips mustmatch(0 1i)!115 120f;
+  };
+ };
+
+.tst.desc["buyin[]"]{
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.chips:(`int$())!`float$()};
+  should["sets a player's chips with their first buy-in, and adds to them with later ones"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .tst.logged:();
+    `.log.info mock {.tst.logged,:enlist x};
+    .bjk.users:enlist[0i]!enlist`alice;
+    buyin 300;
+    .bjk.chips[0i] musteq 300f;
+    .tst.logged mustmatch enlist"alice buys $300 in chips";
+    buyin 200;
+    .bjk.chips[0i] musteq 500f;
+    .tst.msgs mustmatch("You have $300.00 in chips";"You have $500.00 in chips");
+  };
+  should["clears the player's deadline to buy in"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.chipsDue:enlist[0i]!enlist .z.p+0D00:00:10;
+    buyin 300;
+    (0i in key .bjk.chipsDue) musteq 0b;
+  };
+  should["refuses a buy-in that isn't whole dollars, or is under the minimum"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    buyin 150.5;
+    buyin 50;
+    (0i in key .bjk.chips) musteq 0b;
+    .tst.msgs mustmatch("Buy-ins are whole dollars";"The minimum buy-in is $100");
+  };
+  should["refuses a buy-in while a hand is being played"]{
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.hd:0b;
+    buyin 300;
+    .bjk.hd:1b;
+    (0i in key .bjk.chips) musteq 0b;
+  };
+ };
+
+.tst.desc["stake[] before buying in"]{
+  should["refuses a bet from a player who hasn't bought any chips, and tells them how"]{
+    .tst.msgs:();
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.hd:1b;
+    .bjk.chips:(`int$())!`float$();
+    .bjk.stake:([name:();handle:()]bet:`long$());
+    stake[50];
+    count[.bjk.stake] musteq 0;
+    (0i in key .bjk.chips) musteq 0b;
+    .tst.msgs mustmatch enlist"Please buy some chips first: buyin[amount]";
   };
  };
