@@ -54,7 +54,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   if[h in key .bjk.chipsDue;:()];                                                                  / window already open: don't move the deadline
   .bjk.chipsDue[h]:.z.p+.bjk.timeout;                                                              / their deadline
   m:$[null .bjk.chips h;"Please buy some chips";"You're out of chips"];                            / no chips yet, or run out
-  s:string["j"$.bjk.timeout%0D00:00:01];                                                           / the timeout in seconds
+  s:string"j"$.bjk.timeout%0D00:00:01;                                                             / the timeout in seconds
   .bjk.sendMsg[m,": buyin[amount] within ",s," seconds, or you'll be asked to leave";h];           / tell them
  };
 
@@ -92,7 +92,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.logLeaver:{[h]                                                                                / [handle] log a leaver's net winnings
   won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;                           / net profit since they joined
   dlr:$[won<0;"-$";"$"],.Q.f[2;abs won];                                                           / net winnings as dollars, with the sign
-  left:.Q.f[2;0^$[.bjk.hd;.bjk.chips h;.bjk.available h]];                                         / chips they leave with; a hand in play is lost
+  left:.Q.f[2;0^$[.bjk.hd;.bjk.chips;.bjk.available]h];                                            / chips they leave with; a hand in play is lost
   .log.info string[.bjk.cp h]," has left the table, net winnings this session ",dlr,", leaving with $",left," in chips";
  };
 

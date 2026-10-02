@@ -740,7 +740,7 @@
  };
 
 .tst.desc["insure[]"]{
-  before{.bjk.chips:(0 1 2i)!3#1000f};
+  before{.bjk.chips:0 1 2i!3#1000f};
   should["records the side bet"]{
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.closeInsurance mock {};
@@ -894,7 +894,7 @@
     `.bjk.sendMsg mock {[x;y]};
     .bjk.wwch:0b;
     .bjk.dc:`K`5;
-    .bjk.res:flip `round`player`name`handle`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance!(();();();();();();();();`long$();();();();();());
+    .bjk.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
     .bjk.tab:([]round:1 1 1;player:1 1.01 2;name:`p1`p1`p2;handle:0 0 1i;cards:(`8`3;`8`10;`9`7);cnt:11 18 16i;dealer:3#enlist`K`5`Q;dealerCnt:25 25 25i;bet:10 10 20;return:20 20 40f;profit:3#0n;split:110b;double:000b;insurance:5 0 0f;out:000b;wait:000b;turn:000b);
     .bjk.chips:(0 1i)!100 100f;
     .bjk.recordRound[];
