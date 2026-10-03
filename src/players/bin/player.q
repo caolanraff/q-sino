@@ -39,7 +39,7 @@ hist:{.plr.dispatch[`hist;x]};                                                  
       .log.error"Unknown player, options - ",.util.clist .plr.pt;
       exit 1;                                                                                      / quit
     ];
-    .utl.require hsym`$"src/client/lib/",string[.plr.player],".q";
+    .utl.require hsym`$"src/players/lib/",string[.plr.player],".q";
   ];
   .plr.h:@[hopen;.plr.server;{-1"Sorry, no tables currently available: ",x;exit 1}];               / connect, or exit
   neg[.plr.h](`buyin;.plr.buyin);                                                                  / buy in; async, so it reaches the server before my first bet

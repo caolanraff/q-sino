@@ -190,7 +190,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .z.ts:{.bjk.betTimer[];.bjk.insureTimer[];.bjk.turnTimer[];.bjk.chipsTimer[]};                     / run the bet, insurance, turn and buy-in clocks
 
-.bjk.libs:` sv'`:src/server/lib,'`messaging.q`deck.q`deal.q`actions.q;                             / server libraries, loaded at init
+.bjk.libs:` sv'`:src/house/lib,'`messaging.q`deck.q`deal.q`actions.q;                              / server libraries, loaded at init
 .bjk.loadLibs:{.utl.require each .bjk.libs};
 
 .bjk.init:{                                                                                        / start the server

@@ -1,13 +1,13 @@
 .tst.desc["avgPlayer2 help: ace handling"]{
   should["A,9,5 is a hittable soft 15, not a bust"]{
-    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer2.q;
+    .utl.load each`:src/players/lib/strategy.q`:src/players/lib/avgPlayer2.q;
     .stg.help[`A`9`5`2] musteq`H;
   };
  };
 
 .tst.desc["avgPlayer2 .stg.getBet"]{
   before{
-    .utl.load each`:src/client/lib/strategy.q`:src/client/lib/avgPlayer2.q;
+    .utl.load each`:src/players/lib/strategy.q`:src/players/lib/avgPlayer2.q;
     .stg.mh:5i;
   };
   should["bets its own previous hand's profit, ignoring other players' rows"]{

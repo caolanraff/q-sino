@@ -1,5 +1,8 @@
-.tst.desc["basicCardCounter .stg.getBet"]{
-  before{.utl.load each`:src/client/lib/strategy.q`:src/client/lib/basicCardCounter.q};
+.tst.desc["perfectCardCounter"]{
+  before{.utl.load each`:src/players/lib/strategy.q`:src/players/lib/perfectCardCounter.q};
+  should["switches the point-count system to perfect on load"]{
+    .stg.countDict mustmatch`2`3`4`5`6`7`8`9`10`J`Q`K`A!4 5 6 9 6 4 1 -2 -8 -8 -8 -8 -3;
+  };
   should["bets the table minimum below a true count of 2"]{
     .stg.trueCount:1;
     .stg.getBet[] musteq 10;
@@ -19,8 +22,5 @@
   should["bets the max 80 once the true count reaches 5 or more"]{
     .stg.trueCount:5;
     .stg.getBet[] musteq 80;
-  };
-  should["uses the default Hi-Lo point-count system"]{
-    .stg.countDict mustmatch`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 1 1 1 0 0 0 -1 -1 -1 -1 -1;
   };
  };

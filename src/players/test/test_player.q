@@ -1,8 +1,8 @@
-.utl.load`:src/client/bin/player.q;
+.utl.load`:src/players/bin/player.q;
 
 .tst.desc["player allow-list matches the players in lib/"]{
   should["every player strategy in lib/ is listed, spelled correctly, in player.q's .plr.pt"]{
-    onDisk:asc`$-2_/:string key[`:src/client/lib]except`strategy.q;                              / strip ".q"
+    onDisk:asc`$-2_/:string key[`:src/players/lib]except`strategy.q;                              / strip ".q"
     asc[.plr.pt] mustmatch onDisk;
   };
  };
@@ -43,7 +43,7 @@
 
 .tst.desc[".plr.stake manual"]{
   should["keeps the state the server pushes"]{
-    .utl.load`:src/client/bin/player.q;
+    .utl.load`:src/players/bin/player.q;
     .plr.stake`tab`me`chips`bought!(();7i;1000f;1000f);
     .plr.state[`chips] musteq 1000f;
     };

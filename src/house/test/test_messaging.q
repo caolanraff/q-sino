@@ -1,4 +1,4 @@
-.utl.load`:src/server/lib/messaging.q;
+.utl.load`:src/house/lib/messaging.q;
 
 .tst.desc[".bjk.display"]{
   should["prints a string message as-is, with no timestamp or level"]{
