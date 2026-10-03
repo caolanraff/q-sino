@@ -15,7 +15,7 @@
     :0b;                                                                                           / refuse
   ];
   if[21<first exec cnt from .bjk.tab where turn;                                                   / hand already bust
-    m:"Too late, the game's already over. Please wait until next hand ",string .z.u;               / the notice
+    m:"Too late, your hand is bust - please wait for the next hand";                               / the notice
     .bjk.pubMsg[m;.z.w];                                                                           / tell them
     :0b;                                                                                           / refuse
   ];
@@ -40,7 +40,7 @@
   p:exec first player from .bjk.tab where not out,not wait;                                        / first hand neither out nor waiting
   update turn:1b from`.bjk.tab where player=p;                                                     / give it the turn
   if[not any exec turn from .bjk.tab;                                                              / nobody left to play
-    .bjk.pubMsg["Everyone has played their hand, now it's the dealers turn";key .bjk.cp];          / announce it
+    .bjk.pubMsg["Everyone has played their hand, now it's the dealer's turn";key .bjk.cp];         / announce it
     :.bjk.dealer[];                                                                                / dealer's turn
   ];
   h:first exec handle from .bjk.tab where turn;                                                    / handle on turn
@@ -71,7 +71,8 @@ stick:{                                                                         
   c:.bjk.getCard[];                                                                                / draw
   update cards:(cards,'c)from`.bjk.tab where player=p;                                             / add it to the hand
   total:.bjk.handCount first exec cards from .bjk.tab where player=p;                              / new total
-  .bjk.pubMsg[string[.z.u]," hits and gets a ",string[c],", count now ",string total;key .bjk.cp]; / announce it
+  m:string[.z.u]," hits and gets ",.bjk.aCard[c],", count now ",string total;                      / the announcement
+  .bjk.pubMsg[m;key .bjk.cp];                                                                      / announce it
   update cnt:total from`.bjk.tab where player=p;                                                   / record the total
  };
 

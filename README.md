@@ -89,9 +89,9 @@ Please place your bets via the stake[] function, $10 to $500; your chips: $1000.
 q)stake[20]
 ~~~~~~~~~~~~ Hand 1 ~~~~~~~~~~~~
   Your card is 2
-  Dealers first card is J
+  Dealer's first card is J
   Your card is 6
-  Dealers second card is dealt face down
+  Dealer's second card is dealt face down
   Your hand is 2,6 (8)
   It's alice_7's turn: 2,6 (8)
   You have 30 seconds per move
@@ -102,10 +102,10 @@ Hit or stick?
 q)stick[]
   alice has decided to stick
   It's bob_8's turn: 6,4 (10)
-  bob hits and gets a A, count now 21
+  bob hits and gets an A, count now 21
   bob is on 21
   bob has decided to stick
-  Everyone has played their hand, now it's the dealers turn
+  Everyone has played their hand, now it's the dealer's turn
   Dealer has J,Q, hand count 20
   alice_7 loses $20.00 (12 against the dealer's 20)
   bob_8 wins $10.00 (21 against the dealer's 20)
@@ -118,9 +118,9 @@ Bob's client plays its hands itself, doubling on soft 18 against a 5 and on
 ```
 ~~~~~~~~~~~~ Hand 3 ~~~~~~~~~~~~
   Your card is 9
-  Dealers first card is 10
+  Dealer's first card is 10
   Your card is 2
-  Dealers second card is dealt face down
+  Dealer's second card is dealt face down
   Your hand is 9,2 (11)
   It's bob_8's turn: 9,2 (11)
   You have 30 seconds per move
@@ -128,12 +128,12 @@ Hit or stick?
   Bet doubled by bob
   bob hits and gets a 9, count now 20
   bob has decided to stick
-  Everyone has played their hand, now it's the dealers turn
+  Everyone has played their hand, now it's the dealer's turn
   Dealer has 10,3, hand count 13
-  Dealers gets a A
-  Dealers hand count is now 14
-  Dealers gets a 9
-  Dealers hand count is now 23
+  Dealer gets an A
+  Dealer's hand count is now 14
+  Dealer gets a 9
+  Dealer's hand count is now 23
   bob_8 wins $20.00 (the dealer busts with 23)
 ~~~~~~~~~~~~ Game over ~~~~~~~~~~~~
 
@@ -151,7 +151,7 @@ The server logs every bet, card and result, with the table after each hand:
 2026.10.03 03:09:15.190146000 INFO alice bets $20
 2026.10.03 03:09:15.190403000 INFO All players have placed their bet - time to deal
 ...
-2026.10.03 03:09:19.217234000 INFO Hand stats;
+2026.10.03 03:09:19.217234000 INFO Hand stats:
 round player name    handle cards cnt dealer dealerCnt bet return profit split double insurance out wait turn
 -------------------------------------------------------------------------------------------------------------
 1     1      alice_7 7      2 6 4 12  J Q    20        20  0             0     0      0         1   0    0

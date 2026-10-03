@@ -126,6 +126,15 @@
   };
  };
 
+.tst.desc[".bjk.aCard"]{
+  should["puts an before an ace or an 8, and a before every other card"]{
+    .bjk.aCard[`A] mustmatch "an A";
+    .bjk.aCard[`8] mustmatch "an 8";
+    .bjk.aCard[`K] mustmatch "a K";
+    .bjk.aCard[`10] mustmatch "a 10";
+  };
+ };
+
 .tst.desc[".bjk.isBJ"]{
   should["is true only for a two-card 21"]{
     .bjk.isBJ[`A`K] musteq 1b;
