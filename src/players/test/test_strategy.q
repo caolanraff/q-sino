@@ -121,6 +121,25 @@
   };
  };
 
+.tst.desc[".stg.betSpread"]{
+  before{.utl.load`:src/players/lib/strategy.q};
+  should["steps up a bet per Hi-Lo point from a true count of 2, capped at the last bet"]{
+    .stg.trueCount:1.9;
+    .stg.betSpread[10 25 40 60 80] musteq 10;
+    .stg.trueCount:2f;
+    .stg.betSpread[10 25 40 60 80] musteq 25;
+    .stg.trueCount:9f;
+    .stg.betSpread[10 25 40 60 80] musteq 80;
+  };
+  should["divides the true count by .stg.countScale first"]{
+    .stg.countScale:6f;
+    .stg.trueCount:11.9;
+    .stg.betSpread[10 25 40 60 80] musteq 10;
+    .stg.trueCount:12f;
+    .stg.betSpread[10 25 40 60 80] musteq 25;
+  };
+ };
+
 .tst.desc[".stg.tableBet"]{
   before{.utl.load`:src/players/lib/strategy.q;.stg.rules:`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;.stg.chips:1000f};
   should["keeps a bet inside the table limits"]{

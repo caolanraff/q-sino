@@ -44,6 +44,7 @@
   ACE:`H`H`H`H`H`H`SP`S`S`SP);
 
 .stg.countDict:.crd.hiLo;                                                                          / count system; a strategy may replace it
+.stg.countScale:1f;                                                                                / count points per Hi-Lo point; a strategy may replace it
 
 .stg.count:{                                                                                       / update the true count from every card seen
   seen:.crd.cardsSeen[.stg.res],.crd.cardsSeen .stg.tab;                                           / cards seen this shoe
@@ -84,7 +85,7 @@
  };
 
 .stg.hitBelow17:{[cards]$[17>sum .stg.values[-1_cards];`H;`S]};                                    / [cards] hit under 17, else stick
-.stg.betSpread:{[bets]bets 0|4&-1+floor .stg.trueCount};                                           / [bets] pick a bet by true count
+.stg.betSpread:{[bets]bets 0|4&-1+floor .stg.trueCount%.stg.countScale};                           / [bets] pick a bet by true count, in Hi-Lo points
 
 .stg.decide:{[cards;hands;afford]                                                                  / [cards;hands;afford] the play, playing a pair as a hard total at the split cap or when I can't cover another bet
   r:.stg.help cards;                                                                               / chart play
