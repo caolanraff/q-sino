@@ -45,7 +45,7 @@ if[1<count paths;
     -1 each 1_lns;
     @[hdel;hsym `$f;{}];
     }[root;flags] each paths;
-  exit `int$not ok;
+  exit "i"$not ok;
   ];
 
 / worker mode: relay the real result to the file named by QSINO_TEST_RESULT
@@ -62,5 +62,5 @@ if[count resultFile;
   (hsym `$resultFile) 0: ($[.tst.app.passed;"PASS";"FAIL"];
     "For ",string[count .tst.app.specs]," specifications, ",string[.tst.app.expectationsRan]," expectations were run.";
     string[.tst.app.expectationsPassed]," passed, ",string[.tst.app.expectationsFailed]," failed.  ",string[.tst.app.expectationsErrored]," errors.");
-  exit `int$not .tst.app.passed;
+  exit "i"$not .tst.app.passed;
   ];
