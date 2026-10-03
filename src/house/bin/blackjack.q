@@ -30,16 +30,16 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());                                                  / each player's bet for the next hand
 
 .bjk.intro:{                                                                                       / help text sent to each new player
-  show"Welcome to Qsino Blackjack!";
-  show"Functions;";
-  show" stake     - How much you want to bet. Default is no bet";
-  show" hit       - Gives you another card";
-  show" stick     - Stay with your current hand";
-  show" split     - Split your hand";
-  show" double    - Double your hand.";
-  show" insure    - Take insurance when the dealer shows an ace";
-  show" buyin     - Buy chips, at least $100 (do this before you bet)";
-  show" hist      - Hand results so far";
+  -1("Welcome to q-sino blackjack!";
+    "Commands:";
+    "  stake[bet]      - bet on the next hand";
+    "  hit[]           - take another card";
+    "  stick[]         - stick with your hand";
+    "  double[]        - double your bet and take one more card";
+    "  split[]         - split a pair into two hands";
+    "  insure[amount]  - insure against a dealer blackjack when they show an ace";
+    "  buyin[amount]   - buy chips, at least $100 (do this before you bet)";
+    "  hist[]          - results of every hand so far");
  };
 
 hist:{.bjk.hist,.bjk.res};                                                                         / every hand result so far
@@ -203,7 +203,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.loadLibs[];
   .z.pg:.bjk.pg;                                                                                   / validate sync messages
   .z.ps:.bjk.ps;                                                                                   / validate async messages
-  .log.info"Welcome to Qsino Blackjack!";
+  .log.info"Welcome to q-sino blackjack!";
   .bjk.buildDeck[];                                                                                / build the shoe
   .bjk.shuffle[];                                                                                  / shuffle it
  };

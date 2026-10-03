@@ -73,19 +73,19 @@ stake:{[bet]                                                                    
 
 .bjk.dealUpCard:{                                                                                  / deal the dealer's up-card
   c:.bjk.getCard[];                                                                                / draw
-  .bjk.pubMsg["Dealers first card is ",string c;key .bjk.cp];                                      / announce it
+  .bjk.pubMsg["Dealer's first card is ",string c;key .bjk.cp];                                     / announce it
   update dealer:c,dealerCnt:"I"$string .crd.cardDict c from`.bjk.tab;                              / show it on every hand
   .bjk.dc:enlist c;                                                                                / start the dealer's hand
  };
 
 .bjk.dealHoleCard:{                                                                                / deal the dealer's hole card
   .bjk.dc,:.bjk.getCard[];                                                                         / add it to the dealer's hand
-  .bjk.pubMsg["Dealers second card is dealt face down";key .bjk.cp];                               / announce it, face down
+  .bjk.pubMsg["Dealer's second card is dealt face down";key .bjk.cp];                              / announce it, face down
  };
 
 .bjk.deal0:{                                                                                       / deal the opening cards
   if[0=count .bjk.tab;:.log.info"No players at the table"];                                        / nobody to deal to
-  if[78>count .bjk.deck;.log.info"Deck needs reshuffled";.bjk.buildDeck[];.bjk.shuffle[]];         / reshuffle when under 78 cards
+  if[78>count .bjk.deck;.log.info"Deck needs reshuffling";.bjk.buildDeck[];.bjk.shuffle[]];        / reshuffle when under 78 cards
   .bjk.newRound[];                                                                                 / new round
   .bjk.dealCard each select from .bjk.tab where 0=count each cards;                                / each player's first card
   .bjk.dealUpCard[];                                                                               / dealer's up-card
@@ -181,11 +181,11 @@ stake:{[bet]                                                                    
 
 .bjk.dealerHit:{[s]                                                                                / [state] draw one dealer card; state is (cards;total)
   c:.bjk.getCard[];                                                                                / draw
-  .bjk.pubMsg["Dealers gets a ",string c;key .bjk.cp];                                             / announce it
+  .bjk.pubMsg["Dealer gets ",.bjk.aCard c;key .bjk.cp];                                            / announce it
   update dealer:(dealer,'c)from`.bjk.tab;                                                          / add it to every row's dealer hand
   hand:first[s],c;                                                                                 / dealer's new hand
   total:.bjk.handCount hand;                                                                       / its total
-  .bjk.pubMsg["Dealers hand count is now ",string total;key .bjk.cp];                              / announce it
+  .bjk.pubMsg["Dealer's hand count is now ",string total;key .bjk.cp];                             / announce it
   update dealerCnt:total from`.bjk.tab;                                                            / show it on every hand
   :(hand;total);                                                                                   / new state
  };
@@ -240,7 +240,7 @@ stake:{[bet]                                                                    
  };
 
 .bjk.recordRound:{                                                                                 / record the round's results
-  .log.info"Hand stats;\n",.Q.s .bjk.tab;
+  .log.info"Hand stats:\n",.Q.s .bjk.tab;
   if[.bjk.wwch;update dealer:enlist each dealer from`.bjk.tab];                                    / dealer has only the up-card: make it a list
   r:delete out,wait,turn from .bjk.tab;                                                            / the round's hands, without the turn state
   r:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
