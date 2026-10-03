@@ -12,8 +12,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
-.bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
-.bjk.bought:(`int$())!`float$();                                                                   / handle to the chips they've bought in total
+.bjk.chips:.bjk.bought:(`int$())!`float$();                                                        / each player's chips, and what they've bought in total
 .bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
 .bjk.timeout:0D00:00:30;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running

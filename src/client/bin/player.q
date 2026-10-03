@@ -5,10 +5,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .plr.pt,:`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;        / and card counters
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;                                                   / strategy chart code to server action
 
-/ manual play: just keep the pushed state, as the server's prompts say what to do; a strategy replaces these
-.plr.stake:{.plr.state:x};
-.plr.play:{.plr.state:x};
-.plr.insure:{.plr.state:x};
+.plr.stake:.plr.play:.plr.insure:{.plr.state:x};                                                   / manual play: keep the pushed state; a strategy replaces these
 .plr.shuffle:{-1"Deck reshuffled"};                                                                / note a reshuffle; a loaded strategy replaces it
 
 .plr.state:()!();                                                                                  / the last state the server pushed; none until I've bought in

@@ -956,8 +956,7 @@
   before{
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.hd:1b;
-    .bjk.chips:(`int$())!`float$();
-    .bjk.bought:(`int$())!`float$();
+    .bjk.chips:.bjk.bought:(`int$())!`float$();
     .tst.seated:();
     `.bjk.sitIn mock {.tst.seated,:x};
   };
