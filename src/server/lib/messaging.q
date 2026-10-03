@@ -7,7 +7,10 @@
 .bjk.pubPrompt:{.log.info x;.bjk.prompt[x]each y};                                                 / log a prompt or banner and send it to each handle
 .bjk.banner:{"~~~~~~~~~~~~ ",x," ~~~~~~~~~~~~"};                                                   / a heading, e.g. .bjk.banner"Game over"
 .bjk.excFunc:{[f;arg;h]@[neg first h;(f;arg);{.log.warn"Couldn't send a trigger: ",x}]};           / [function;argument;handle] call a function on a client, logging a failure
-.bjk.clientState:{[h]`tab`res`me`rules`chips!(.bjk.tab;.bjk.res;h;.bjk.rules;.bjk.chips h)};       / [handle] game state pushed to a client, with their chips
+.bjk.clientState:{[h]                                                                              / [handle] game state pushed to a client
+  k:`tab`res`me`rules`chips`bought;                                                                / what they get
+  :k!(.bjk.tab;.bjk.res;h;.bjk.rules;.bjk.chips h;.bjk.bought h);                                  / with their own chips and buy-ins
+ };
 .bjk.trigger:{[f;h].bjk.excFunc[f;.bjk.clientState h;h]};                                          / [function;handle] call a client's handler with its game state
 .bjk.user:{`$string[.z.u],"_",string .z.w};                                                        / player name: username_handle
 .bjk.isPit:{.z.u~`pitboss};                                                                        / is the caller the pitboss

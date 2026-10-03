@@ -128,12 +128,12 @@ insure:{[amt]                                                                   
   if[amt>.bjk.available .z.w;.bjk.sendMsg["You can't afford that much insurance";.z.w];:()];       / no more than they have left
   m:$[amt=0;" declines insurance";" insures for $",string amt];                                    / their answer
   .bjk.pubMsg[string[.z.u],m;key .bjk.cp];                                                         / announce it
-  update insurance:`float$amt from`.bjk.tab where handle=.z.w;                                     / record it
+  update insurance:"f"$amt from`.bjk.tab where handle=.z.w;                                        / record it
   .bjk.closeInsuranceIfDone[];                                                                     / close insurance if everyone has answered
  };
 
 .bjk.split0:{[p]                                                                                   / [player] split a hand into two rows; returns the new row's player number
-  update player:`float$player from`.bjk.tab;                                                       / player numbers to floats, to fit split hands between them
+  update player:"f"$player from`.bjk.tab;                                                          / player numbers to floats, to fit split hands between them
   q:.01+exec max player from .bjk.tab where handle=.z.w;                                           / new hand's number, just after the caller's last
   `.bjk.tab upsert update player:q,turn:0b from select from .bjk.tab where player=p;               / copy the hand
   update cards:1#'cards from`.bjk.tab where player in(p;q);                                        / one card each

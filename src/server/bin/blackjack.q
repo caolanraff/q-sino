@@ -12,8 +12,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
-.bjk.chips:(`int$())!`float$();                                                                    / each player's chips, once they've bought in
-.bjk.chipsDue:(`int$())!`timestamp$();                                                             / players who need chips, and when they must have bought them by
+.bjk.chips:.bjk.bought:("i"$())!"f"$();                                                            / each player's chips, and what they've bought in total
+.bjk.chipsDue:("i"$())!"p"$();                                                                     / players who need chips, and when they must have bought them by
 .bjk.timeout:0D00:00:30;                                                                           / time allowed to bet, insure or act
 .bjk.betDeadline:0Np;                                                                              / betting clock, null when not running
 .bjk.insuring:0b;                                                                                  / insurance window open
@@ -107,6 +107,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   .bjk.users:.bjk.users _ h;                                                                       / drop their username
   .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
   .bjk.chips:.bjk.chips _ h;                                                                       / drop their chips
+  .bjk.bought:.bjk.bought _ h;                                                                     / and what they bought
   .bjk.chipsDue:.bjk.chipsDue _ h;                                                                 / drop any buy-in deadline
   delete from`.bjk.tab where handle=h;                                                             / drop their hands
   delete from`.bjk.stake where handle=h;                                                           / drop their bet

@@ -4,6 +4,7 @@
   firstBuy:null .bjk.chips h;                                                                      / their first buy-in: they've just sat down
   .log.info string[.bjk.users h],$[firstBuy;" joins the table with $";" buys $"],string["j"$amt]," in chips";
   .bjk.chips[h]:amt+0^.bjk.chips h;                                                                / add them
+  .bjk.bought[h]:amt+0^.bjk.bought h;                                                              / and to what they've bought
   m:"You have $",.Q.f[2;.bjk.chips h]," in chips";                                                 / their chips
   .bjk.sendMsg[m,$[firstBuy;", please use buyin[amount] if you want more";""];h];                  / tell the player, with how to top up on joining
  };

@@ -921,7 +921,7 @@
  };
 
 .tst.desc["stake[] chips"]{
-  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.stake:([name:();handle:()]bet:`long$())};
+  before{.bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;.bjk.hd:1b;.bjk.stake:([name:();handle:()]bet:"j"$())};
   should["refuses a bet bigger than the player's chips"]{
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
@@ -956,7 +956,7 @@
   before{
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.hd:1b;
-    .bjk.chips:(`int$())!`float$();
+    .bjk.chips:.bjk.bought:("i"$())!"f"$();
     .tst.seated:();
     `.bjk.sitIn mock {.tst.seated,:x};
   };
@@ -972,6 +972,7 @@
     .bjk.chips[0i] musteq 500f;
     .tst.logged mustmatch("alice joins the table with $300 in chips";"alice buys $200 in chips");
     .tst.msgs mustmatch("You have $300.00 in chips, please use buyin[amount] if you want more";"You have $500.00 in chips");
+    .bjk.bought[0i] musteq 500f;
   };
   should["clears the player's deadline to buy in"]{
     `.bjk.sendMsg mock {[x;y]};
@@ -1034,8 +1035,8 @@
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
     .bjk.hd:1b;
-    .bjk.chips:(`int$())!`float$();
-    .bjk.stake:([name:();handle:()]bet:`long$());
+    .bjk.chips:("i"$())!"f"$();
+    .bjk.stake:([name:();handle:()]bet:"j"$());
     stake[50];
     count[.bjk.stake] musteq 0;
     (0i in key .bjk.chips) musteq 0b;

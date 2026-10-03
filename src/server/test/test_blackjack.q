@@ -88,7 +88,7 @@
     .tst.startCalls:0;
     `.bjk.isBanned mock {0b};
     `.bjk.start mock {.tst.startCalls+:1};
-    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.chipsDue:("i"$())!"p"$();
   };
   should["registers a player and starts their buy-in clock, without seating them or asking for bets"]{
     .bjk.cp:()!(); .bjk.pit:0Ni;
@@ -654,7 +654,7 @@
     `.bjk.isPit mock {0b};
     `.bjk.sendMsg mock {[x;y]};
     .bjk.cp:()!();
-    .bjk.chips:(`int$())!`float$();
+    .bjk.chips:("i"$())!"f"$();
     .bjk.regConn[42i];
     (42i in key .bjk.chips) musteq 0b;
     .bjk.buyIn[42i;500f];
@@ -683,7 +683,7 @@
     .tst.msgs:();
     `.bjk.prompt mock {[x;y].tst.msgs,:enlist x};
     .bjk.chips:enlist[7i]!enlist 8f;
-    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.chipsDue:("i"$())!"p"$();
     .bjk.timeout:0D00:00:15;
     .bjk.betPrompt 7i;
     .tst.msgs mustmatch enlist"You're out of chips: buyin[amount] within 15 seconds, or you'll be asked to leave";
@@ -695,6 +695,10 @@
   should["pushes the player their own chips"]{
     .bjk.chips:(5 6i)!250 80f;
     .bjk.clientState[6i][`chips] musteq 80f;
+  };
+  should["pushes the player what they've bought in total"]{
+    .bjk.bought:5 6i!1000 300f;
+    .bjk.clientState[6i][`bought] musteq 300f;
   };
  };
 
@@ -730,8 +734,8 @@
     .tst.msgs:();
     `.bjk.prompt mock {[x;y].tst.msgs,:enlist x};
     .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
-    .bjk.chips:(`int$())!`float$();
-    .bjk.chipsDue:(`int$())!`timestamp$();
+    .bjk.chips:("i"$())!"f"$();
+    .bjk.chipsDue:("i"$())!"p"$();
     .bjk.timeout:0D00:00:15;
     .bjk.betPrompt 7i;
     .tst.msgs mustmatch enlist"Please buy some chips: buyin[amount] within 15 seconds, or you'll be asked to leave";
@@ -791,7 +795,7 @@
     .tst.msgs:();
     `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
     .bjk.timeout:0D00:00:15;
-    .bjk.chips:(`int$())!`float$();
+    .bjk.chips:("i"$())!"f"$();
     due:.z.p+0D00:00:02;
     .bjk.chipsDue:enlist[7i]!enlist due;
     .bjk.chipsWindow 7i;
