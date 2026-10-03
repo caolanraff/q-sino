@@ -4,11 +4,11 @@ players connect to it and play by hand or with an automated strategy, and
 an optional pitboss process watches the table for card counters.
 
 ## Layout
-- `src/server/bin/blackjack.q` - the dealer and game engine. Listens on port `5555` by default; loads the rest of the game from `src/server/lib/`.
-- `src/server/bin/pitboss.q` - card-counting detection. Connects to the server and listens on port `5556` by default.
-- `src/client/bin/player.q` - the player client, for both manual and automated play.
-- `src/client/lib/strategy.q` - shared basic-strategy charts, card counting and the auto-play logic used by every strategy.
-- `src/client/lib/*.q` (the rest) - one file per strategy (see [Strategies](#strategies)).
+- `src/house/bin/blackjack.q` - the dealer and game engine. Listens on port `5555` by default; loads the rest of the game from `src/house/lib/`.
+- `src/house/bin/pitboss.q` - card-counting detection. Connects to the server and listens on port `5556` by default.
+- `src/players/bin/player.q` - the player client, for both manual and automated play.
+- `src/players/lib/strategy.q` - shared basic-strategy charts, card counting and the auto-play logic used by every strategy.
+- `src/players/lib/*.q` (the rest) - one file per strategy (see [Strategies](#strategies)).
 - `src/common/` - code every process shares, loaded with `.utl.require"common"`: logging (`.log.info`/`.log.warn`/`.log.error`), card values and the card-counting systems, and console settings.
 - `src/*/test/` - qspec specs; `test/run.q` runs them.
 
@@ -16,9 +16,9 @@ an optional pitboss process watches the table for card counters.
 Run everything from the repo root. Start the server first:
 
 ```bash
-q src/server/bin/blackjack.q                     # port 5555, random shuffle
-q src/server/bin/blackjack.q -p 6000 --seed 42   # port 6000, repeatable shuffle
-q src/server/bin/blackjack.q --pitboss 1         # the pitboss may eject suspected card counters
+q src/house/bin/blackjack.q                     # port 5555, random shuffle
+q src/house/bin/blackjack.q -p 6000 --seed 42   # port 6000, repeatable shuffle
+q src/house/bin/blackjack.q --pitboss 1         # the pitboss may eject suspected card counters
 ```
 
 `-p` (q's own listening-port flag) defaults to `5555`.
@@ -26,18 +26,18 @@ q src/server/bin/blackjack.q --pitboss 1         # the pitboss may eject suspect
 Optionally start the pitboss once the server is up:
 
 ```bash
-q src/server/bin/pitboss.q                                  # port 5556, server on localhost:5555
-q src/server/bin/pitboss.q -p 6001 --server localhost:6000
+q src/house/bin/pitboss.q                                  # port 5556, server on localhost:5555
+q src/house/bin/pitboss.q -p 6001 --server localhost:6000
 ```
 
 Then connect one `player.q` per player, mixing manual and automated players
 freely:
 
 ```bash
-q src/client/bin/player.q                                # manual - you play by hand
-q src/client/bin/player.q --player basicCardCounter       # automated - plays 1000 hands, then leaves
-q src/client/bin/player.q --player avgPlayer1 --hands 100  # automated - plays 100 hands, then leaves
-q src/client/bin/player.q --server otherhost:6000          # a server on another machine or port
+q src/players/bin/player.q                                # manual - you play by hand
+q src/players/bin/player.q --player basicCardCounter       # automated - plays 1000 hands, then leaves
+q src/players/bin/player.q --player avgPlayer1 --hands 100  # automated - plays 100 hands, then leaves
+q src/players/bin/player.q --server otherhost:6000          # a server on another machine or port
 ```
 
 `--server` is the server's `host:port`, `localhost:5555` by default.
@@ -148,7 +148,7 @@ were all flagged within 50 rounds, and the other three never were.
 
 ## Tests
 ```bash
-q test/run.q src/common/test src/server/test src/client/test -q
+q test/run.q src/common/test src/house/test src/players/test -q
 ```
 
 No test starts a real server or client: each entry script only opens ports

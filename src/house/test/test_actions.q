@@ -1,4 +1,4 @@
-.utl.load`:src/server/bin/blackjack.q;
+.utl.load`:src/house/bin/blackjack.q;
 .utl.load each .bjk.libs;
 
 .tst.desc["checks[]"]{

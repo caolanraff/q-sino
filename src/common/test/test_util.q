@@ -6,9 +6,9 @@
     .tst.init:{.tst.runs+:1};
   };
   should["calls init when the named file is the process's entry script, however it was launched"]{
-    `.util.script mock {`$"src/server/bin/blackjack.q"};
+    `.util.script mock {`$"src/house/bin/blackjack.q"};
     .util.run[`blackjack.q;`.tst.init];
-    `.util.script mock {`$"/abs/path/src/server/bin/blackjack.q"};
+    `.util.script mock {`$"/abs/path/src/house/bin/blackjack.q"};
     .util.run[`blackjack.q;`.tst.init];
     `.util.script mock {`blackjack.q};
     .util.run[`blackjack.q;`.tst.init];

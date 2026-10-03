@@ -11,7 +11,7 @@ root:first system "dirname $(dirname $(realpath ",(1_string hsym .z.f),"))";
 / blackjack.q and player.q both define root-scope stake/hit/
 / stick/double/split/shuffle/buildDeck/hist with different meanings; a single
 / spec.q run loads every given test path's dependencies into one process, so
-/ passing both src/server/test and src/client/test together would let
+/ passing both src/house/test and src/players/test together would let
 / whichever bin file loads second silently clobber the other's. Each given
 / path therefore gets its own q subprocess instead.
 / A parent q process can't reliably read a q child's real exit code back
