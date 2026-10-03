@@ -6,24 +6,24 @@
   should["scales the true count down to Hi-Lo points"]{
     .stg.countScale musteq 1.6;
   };
-  should["bets the table minimum below 2 Hi-Lo points"]{
-    .stg.trueCount:1.6*1.9;
+  should["bets the table minimum below a true count of 3.2"]{
+    .stg.trueCount:3.1;
     .stg.getBet[] musteq 10;
   };
-  should["bets 25 from 2 Hi-Lo points up to (not including) 3"]{
-    .stg.trueCount:1.6*2;
+  should["bets 25 from a true count of 3.2 up to (not including) 4.8"]{
+    .stg.trueCount:3.2;
     .stg.getBet[] musteq 25;
   };
-  should["bets 40 from 3 Hi-Lo points up to (not including) 4"]{
-    .stg.trueCount:1.6*3;
+  should["bets 40 from a true count of 4.8 up to (not including) 6.4"]{
+    .stg.trueCount:4.8;
     .stg.getBet[] musteq 40;
   };
-  should["bets 60 from 4 Hi-Lo points up to (not including) 5"]{
-    .stg.trueCount:1.6*4;
+  should["bets 60 from a true count of 6.4 up to (not including) 8"]{
+    .stg.trueCount:6.4;
     .stg.getBet[] musteq 60;
   };
-  should["bets the max 80 once the count reaches 5 Hi-Lo points or more"]{
-    .stg.trueCount:1.6*5;
+  should["bets the max 80 once the true count reaches 8 or more"]{
+    .stg.trueCount:8f;
     .stg.getBet[] musteq 80;
   };
  };

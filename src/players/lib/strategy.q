@@ -85,7 +85,7 @@
  };
 
 .stg.hitBelow17:{[cards]$[17>sum .stg.values[-1_cards];`H;`S]};                                    / [cards] hit under 17, else stick
-.stg.betSpread:{[bets]bets 0|4&-1+floor .stg.trueCount%.stg.countScale};                           / [bets] pick a bet by true count, in Hi-Lo points
+.stg.betSpread:{[bets]bets sum .stg.trueCount>=.stg.countScale*2 3 4 5};                           / [bets] step up a bet at each of 2-5 Hi-Lo points of true count
 
 .stg.decide:{[cards;hands;afford]                                                                  / [cards;hands;afford] the play, playing a pair as a hard total at the split cap or when I can't cover another bet
   r:.stg.help cards;                                                                               / chart play
