@@ -34,8 +34,8 @@ Then connect one `player.q` per player, mixing manual and automated players
 freely:
 
 ```bash
-q src/players/bin/player.q                                # manual - you play by hand
-q src/players/bin/player.q --player basicCardCounter       # automated - plays 1000 hands, then leaves
+q src/players/bin/player.q                                  # manual - you play by hand
+q src/players/bin/player.q --player basicCardCounter        # automated - plays 1000 hands, then leaves
 q src/players/bin/player.q --player avgPlayer1 --hands 100  # automated - plays 100 hands, then leaves
 q src/players/bin/player.q --server otherhost:6000          # a server on another machine or port
 ```
@@ -68,6 +68,97 @@ error in that session.
 
 These commands are all a player can run on the server: any other query or
 code sent to it is refused and logged.
+
+### Example game
+Two players at one table: `alice` playing by hand, and `bob` counting cards
+for 3 hands. You play under your login name unless `--server` ends with one:
+
+```bash
+q src/house/bin/blackjack.q --seed 42
+q src/players/bin/player.q --server localhost:5555:alice
+q src/players/bin/player.q --server localhost:5555:bob --player basicCardCounter --hands 3
+```
+
+Alice's console, with what she types after `q)`. Each seat is shown as
+`<name>_<handle>`:
+
+```
+  You have $1000.00 in chips, please use buyin[amount] if you want more
+Please place your bets via the stake[] function, $10 to $500; your chips: $1000.00
+  Betting closes in 30 seconds
+q)stake[20]
+~~~~~~~~~~~~ Hand 1 ~~~~~~~~~~~~
+  Your card is 2
+  Dealers first card is J
+  Your card is 6
+  Dealers second card is dealt face down
+  Your hand is 2,6 (8)
+  It's alice_7's turn: 2,6 (8)
+  You have 30 seconds per move
+Hit or stick?
+q)hit[]
+  alice hits and gets a 4, count now 12
+Hit or stick?
+q)stick[]
+  alice has decided to stick
+  It's bob_8's turn: 6,4 (10)
+  bob hits and gets a A, count now 21
+  bob is on 21
+  bob has decided to stick
+  Everyone has played their hand, now it's the dealers turn
+  Dealer has J,Q, hand count 20
+  alice_7 loses $20.00 (12 against the dealer's 20)
+  bob_8 wins $10.00 (21 against the dealer's 20)
+~~~~~~~~~~~~ Game over ~~~~~~~~~~~~
+```
+
+Bob's client plays its hands itself, doubling on soft 18 against a 5 and on
+11 against a 10, then leaves:
+
+```
+~~~~~~~~~~~~ Hand 3 ~~~~~~~~~~~~
+  Your card is 9
+  Dealers first card is 10
+  Your card is 2
+  Dealers second card is dealt face down
+  Your hand is 9,2 (11)
+  It's bob_8's turn: 9,2 (11)
+  You have 30 seconds per move
+Hit or stick?
+  Bet doubled by bob
+  bob hits and gets a 9, count now 20
+  bob has decided to stick
+  Everyone has played their hand, now it's the dealers turn
+  Dealer has 10,3, hand count 13
+  Dealers gets a A
+  Dealers hand count is now 14
+  Dealers gets a 9
+  Dealers hand count is now 23
+  bob_8 wins $20.00 (the dealer busts with 23)
+~~~~~~~~~~~~ Game over ~~~~~~~~~~~~
+
+Please place your bets via the stake[] function, $10 to $500; your chips: $1050.00
+Played 3 hands
+Thanks for playing q-sino blackjack! You leave with $1050.00 in chips, up $50.00
+```
+
+The server logs every bet, card and result, with the table after each hand:
+
+```
+2026.10.03 03:09:12.336635000 INFO alice joins the table with $1000 in chips
+2026.10.03 03:09:13.385114000 INFO bob joins the table with $1000 in chips
+2026.10.03 03:09:13.385732000 INFO bob bets $10
+2026.10.03 03:09:15.190146000 INFO alice bets $20
+2026.10.03 03:09:15.190403000 INFO All players have placed their bet - time to deal
+...
+2026.10.03 03:09:19.217234000 INFO Hand stats;
+round player name    handle cards cnt dealer dealerCnt bet return profit split double insurance out wait turn
+-------------------------------------------------------------------------------------------------------------
+1     1      alice_7 7      2 6 4 12  J Q    20        20  0             0     0      0         1   0    0
+1     2      bob_8   8      6 4 A 21  J Q    20        10  20            0     0      0         1   0    0
+...
+2026.10.03 03:09:22.225730000 INFO alice_7 has left the table, net winnings this session -$20.00, leaving with $980.00 in chips
+```
 
 ## Table rules
 Standard Las Vegas Strip rules:
