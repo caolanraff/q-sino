@@ -2,7 +2,7 @@
 
 .crd.hiLo:`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 1 1 1 0 0 0 -1 -1 -1 -1 -1;                              / Hi-Lo count per card
 .crd.omega:`2`3`4`5`6`7`8`9`10`J`Q`K`A!1 1 2 2 2 1 0 -1 -2 -2 -2 -2 0;                             / Omega II count per card
-.crd.perfect:`2`3`4`5`6`7`8`9`10`J`Q`K`A!4 5 6 9 6 4 1 -2 -8 -8 -8 -8 -3;                          / perfect (weighted) count per card
+.crd.perfect:`2`3`4`5`6`7`8`9`10`J`Q`K`A!4 5 6 9 6 4 1 -2 -7 -7 -7 -7 -5;                          / perfect (weighted) count per card
 
 .crd.cardsSeen:{[t]                                                                                / [table] every card dealt in a tab or res table
   c:raze[t`cards],raze value exec{x first idesc count each x}dealer by round from t;               / dealer's hand once per round; a forfeit row has only the up-card

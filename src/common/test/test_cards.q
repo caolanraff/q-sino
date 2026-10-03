@@ -17,6 +17,13 @@
   };
  };
 
+.tst.desc[".crd.hiLo, .crd.omega and .crd.perfect"]{
+  should["each count a full deck to zero, so the count starts and ends a shoe at zero"]{
+    deck:raze 4#enlist key .crd.cardDict;
+    (sum each(.crd.hiLo;.crd.omega;.crd.perfect)@\:deck) mustmatch 0 0 0;
+  };
+ };
+
 .tst.desc[".crd.trueCount"]{
   should["divides the running count by the decks left in the shoe"]{
     .crd.trueCount[.crd.hiLo;`K`5`2`3`4`10`8;312] musteq 2%(312-7)%52;
@@ -24,6 +31,6 @@
   should["scores the same cards differently under each count"]{
     seen:`5`5`6`K;
     .crd.trueCount[.crd.omega;seen;104] musteq 4%(104-4)%52;
-    .crd.trueCount[.crd.perfect;seen;104] musteq 16%(104-4)%52;
+    .crd.trueCount[.crd.perfect;seen;104] musteq 17%(104-4)%52;
   };
  };
