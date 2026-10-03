@@ -131,12 +131,17 @@
     .stg.trueCount:9f;
     .stg.betSpread[10 25 40 60 80] musteq 80;
   };
-  should["divides the true count by .stg.countScale first"]{
+  should["scales the thresholds by .stg.countScale"]{
     .stg.countScale:6f;
     .stg.trueCount:11.9;
     .stg.betSpread[10 25 40 60 80] musteq 10;
     .stg.trueCount:12f;
     .stg.betSpread[10 25 40 60 80] musteq 25;
+  };
+  should["steps up on a true count that lands on a scaled threshold, though it isn't exact in binary"]{
+    .stg.countScale:1.6;
+    .stg.trueCount:12%130%52;
+    .stg.betSpread[10 25 40 60 80] musteq 40;
   };
  };
 
