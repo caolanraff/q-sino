@@ -15,7 +15,7 @@
     .stg.getBet[] mustmatch 15;
   };
   should["falls back to 10 after a losing or push hand"]{
-    .stg.res:([]round:1 2;handle:5 5i;name:`bob_5`bob_5;profit:15 -10f);
+    .stg.res:([]round:1 2;handle:5i;name:`bob_5;profit:15 -10f);
     .stg.getBet[] musteq 10;
   };
   should["bets 10 before any hand has been played, when the pushed results are still untyped"]{

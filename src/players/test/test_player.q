@@ -28,7 +28,7 @@
     .plr.goodbye[] mustmatch "Thanks for playing q-sino blackjack!";
     };
   should["says what the player leaves with, and their return"]{
-    t:([]handle:7 8i;bet:2#0N;insurance:2#0n);
+    t:([]handle:7 8i;bet:0N;insurance:0n);
     .plr.state:`tab`me`chips`bought!(t;7i;1020f;1000f);
     .plr.goodbye[] mustmatch "Thanks for playing q-sino blackjack! You leave with $1020.00 in chips, up $20.00";
     .plr.state:`tab`me`chips`bought!(t;7i;950f;1100f);

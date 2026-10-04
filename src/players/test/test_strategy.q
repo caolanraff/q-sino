@@ -31,8 +31,8 @@
 .tst.desc[".stg.count"]{
   before{.utl.load`:src/players/lib/strategy.q};
   should["counts the dealer's cards once per round, not once per player row"]{
-    .stg.res:([]round:1 1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
-    .stg.tab:([]round:0N 0N;cards:(();());dealer:``);
+    .stg.res:([]round:1;cards:(`K`5;`2`3`4);dealer:(`10`8;`10`8));
+    .stg.tab:([]round:0N;cards:(();());dealer:``);
     .stg.rules:`maxSplitHands`deckCnt!4 6;
     .stg.count[];
     .stg.trueCount musteq 2%(312-7)%52;                                                            / basic: K5 234 = +3, dealer 10 8 once = -1; 7 cards seen
@@ -70,8 +70,8 @@
 .tst.desc[".stg.recv"]{
   before{.utl.load`:src/players/lib/strategy.q};
   should["takes the table, results, this client's handle and the table rules from the state the server pushed"]{
-    t:([]round:enlist 2;cards:enlist`K`5;dealer:enlist`9);
-    r:([]round:enlist 1;cards:enlist`9`8;dealer:enlist`10`7);
+    t:([]round:2;cards:enlist`K`5;dealer:`9);
+    r:([]round:1;cards:enlist`9`8;dealer:enlist`10`7);
     .stg.recv[`tab`res`me`rules`chips!(t;r;7i;`maxSplitHands`deckCnt!4 6;800f)];
     .stg.tab mustmatch t;
     .stg.res mustmatch r;
@@ -79,7 +79,7 @@
     .stg.rules mustmatch`maxSplitHands`deckCnt!4 6;
   };
   should["uses the pushed split cap and deck count, not fixed ones"]{
-    .stg.recv[`tab`res`me`rules`chips!(([]round:"j"$();cards:();dealer:());([]round:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2;800f)];
+    .stg.recv[`tab`res`me`rules`chips!(([]round:"j"$();cards:();dealer:());([]round:1;cards:enlist`K`5;dealer:enlist`10`8);7i;`maxSplitHands`deckCnt!2 2;800f)];
     .stg.decide[`8`8`10;2;1b] musteq`H;
     .stg.count[];
     .stg.trueCount musteq -1%(104-4)%52;
@@ -92,7 +92,7 @@
     .stg.mh:7i;
   };
   should["never insures by default"]{
-    .stg.tab:([]handle:enlist 7i;bet:enlist 20);
+    .stg.tab:([]handle:enlist 7i;bet:20);
     .stg.trueCount:10f;
     .stg.insureAmount[] musteq 0f;
   };
@@ -217,7 +217,7 @@
     .plr.h:0i;
     .plr.toth:1000;
     .stg.handsPlayed:0;
-    t:([]round:0#0;cards:();dealer:0#`);
+    t:([]round:0;cards:();dealer:`);
     .plr.stake`tab`res`me`rules`chips!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;8f);
     .tst.left mustmatch enlist"Out of chips";
     count[.tst.staked] musteq 0;
