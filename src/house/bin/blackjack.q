@@ -117,6 +117,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
   if[not .bjk.hd;.bjk.forfeit h];                                                                  / forfeit a hand in progress
   .bjk.logLeaver h;
   hadTurn:$[.bjk.hd;0b;h in exec handle from .bjk.tab where turn];                                 / was it their turn
+  if[not null .bjk.pit;.bjk.excFunc[`.pit.left;.bjk.uids h;.bjk.pit]];                             / tell the pitboss, which can then forget them
   .bjk.unseat h;                                                                                   / remove them
   if[.bjk.insuring;:.bjk.closeInsuranceIfDone[]];                                                  / insurance may now be settled
   if[.bjk.hd;:.bjk.dealIfReady[]];                                                                 / everyone left may now have bet

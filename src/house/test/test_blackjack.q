@@ -821,3 +821,28 @@
     count[.tst.msgs] musteq 0;
   };
  };
+
+.tst.desc[".bjk.leave pitboss"]{
+  before{
+    `.bjk.logLeaver mock {};
+    `.bjk.dealIfReady mock {};
+    .tst.sent:();
+    `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
+    .bjk.hd:1b;
+    .bjk.insuring:0b;
+    .bjk.cp:enlist[5i]!enlist`alice_5;
+    .bjk.uids:enlist[5i]!enlist .tst.uid 5;
+    .bjk.tab:0#.bjk.tab;
+    .bjk.stake:0#.bjk.stake;
+  };
+  should["tells the pitboss the leaver's id, so it can forget them"]{
+    .bjk.pit:9i;
+    .bjk.leave 5i;
+    .tst.sent mustmatch enlist(`.pit.left;.tst.uid 5;9i);
+  };
+  should["tells no one when no pitboss is connected"]{
+    .bjk.pit:0Ni;
+    .bjk.leave 5i;
+    count[.tst.sent] musteq 0;
+  };
+ };
