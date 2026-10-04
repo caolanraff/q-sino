@@ -29,10 +29,9 @@
 
 .bjk.giveTurn:{[h]                                                                                 / [handle] give a player the turn
   d:first select name,cards from .bjk.tab where turn;                                              / the hand on turn
-  .bjk.pubMsg["It's ",string[d`name],"'s turn: ",.bjk.showHand hand:d`cards;key .bjk.cp];          / tell the table whose turn, with their hand
+  .bjk.pubMsg["It's ",string[d`name],"'s turn: ",.bjk.showHand d`cards;key .bjk.cp];               / tell the table whose turn, with their hand
   .bjk.sendMsg["You have ",string["j"$.bjk.timeout%0D00:00:01]," seconds per move";h];             / tell them the time per move
-  pair:(2=count hand)&1=count distinct .crd.cardDict hand;                                         / two cards of the same value can split
-  .bjk.prompt[$[pair;"Hit, stick or split?";"Hit or stick?"];h];                                   / what they can do
+  .bjk.playPrompt h;                                                                               / what they can do
   .bjk.promptPlay h;                                                                               / prompt them
  };
 
@@ -64,6 +63,7 @@ stick:{                                                                         
   if[not any exec turn from .bjk.tab;:()];                                                         / nobody on turn
   n:first exec name from .bjk.tab where turn;                                                      / who's on turn
   .bjk.pubMsg[string[n]," took too long - sticking";key .bjk.cp];                                  / announce it
+  update forced:1b from`.bjk.tab where turn;                                                       / the clock stuck it, not the player
   .bjk.stickHand[];                                                                                / stick
  };
 
@@ -88,7 +88,7 @@ stick:{                                                                         
     :.bjk.nextTurn[];                                                                              / next hand
   ];
   if[.bjk.double;:stick[]];                                                                        / a doubled hand gets one card
-  .bjk.prompt["Hit or stick?";d`handle];                                                           / ask for the next play
+  .bjk.playPrompt d`handle;                                                                        / ask for the next play
   .bjk.promptPlay d`handle;                                                                        / prompt them
  };
 
@@ -155,17 +155,24 @@ insure:{[amt]                                                                   
 
 .bjk.refuseSplit:{.bjk.sendMsg[x," ",string .z.u;.z.w];0b};                                        / tell the caller why they can't split, and refuse
 
-.bjk.canSplit:{                                                                                    / can the hand on turn split
+.bjk.splitRefusal:{[h]                                                                             / [handle] why the hand on turn can't split, or "" if it can
   c:first exec cards from .bjk.tab where turn;                                                     / its cards
-  if[2<>count c;:.bjk.refuseSplit"You can only split your first two cards"];                       / two cards only
-  if[1<count distinct .crd.cardDict c;:.bjk.refuseSplit"You can't split this hand"];               / same value only
-  if[.bjk.available[.z.w]<first exec bet from .bjk.tab where turn;                                 / the new hand needs as much again
-    :.bjk.refuseSplit"You can't afford to split";                                                  / refuse
+  if[2<>count c;:"You can only split your first two cards"];                                       / two cards only
+  if[1<count distinct .crd.cardDict c;:"You can't split this hand"];                               / same value only
+  if[.bjk.available[h]<first exec bet from .bjk.tab where turn;:"You can't afford to split"];      / the new hand needs as much again
+  if[.bjk.rules[`maxSplitHands]<=count select from .bjk.tab where handle=h;                        / already at maxSplitHands hands
+    :"You can't split more than ",string[.bjk.rules[`maxSplitHands]-1]," times";                   / refuse
   ];
-  if[.bjk.rules[`maxSplitHands]<=count select from .bjk.tab where handle=.z.w;                     / already at maxSplitHands hands
-    :.bjk.refuseSplit"You can't split more than ",string[.bjk.rules[`maxSplitHands]-1]," times";   / refuse
-  ];
+  :"";                                                                                             / they can split
+ };
+
+.bjk.canSplit:{                                                                                    / can the caller split the hand on turn
+  if[count r:.bjk.splitRefusal .z.w;:.bjk.refuseSplit r];                                          / tell them why not
   :1b;                                                                                             / they can split
+ };
+
+.bjk.playPrompt:{[h]                                                                               / [handle] ask the player on turn to play, offering a split only if it would be allowed
+  .bjk.prompt[$[count .bjk.splitRefusal h;"Hit or stick?";"Hit, stick or split?"];h];              / what they can do
  };
 
 split:{                                                                                            / split the hand on turn

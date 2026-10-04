@@ -69,13 +69,15 @@
 
 .tst.desc[".stg.recv"]{
   before{.utl.load`:src/players/lib/strategy.q};
-  should["takes the table, results, this client's handle and the table rules from the state the server pushed"]{
+  should["takes the table, results, this client's handle and id and the table rules from the state the server pushed"]{
     t:([]round:2;cards:enlist`K`5;dealer:`9);
     r:([]round:1;cards:enlist`9`8;dealer:enlist`10`7);
-    .stg.recv[`tab`res`me`rules`chips!(t;r;7i;`maxSplitHands`deckCnt!4 6;800f)];
+    u:"G"$"00000000-0000-0000-0000-000000000007";
+    .stg.recv[`tab`res`me`uid`rules`chips!(t;r;7i;u;`maxSplitHands`deckCnt!4 6;800f)];
     .stg.tab mustmatch t;
     .stg.res mustmatch r;
     .stg.mh musteq 7i;
+    .stg.uid mustmatch u;
     .stg.rules mustmatch`maxSplitHands`deckCnt!4 6;
   };
   should["uses the pushed split cap and deck count, not fixed ones"]{

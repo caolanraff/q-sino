@@ -152,10 +152,10 @@ The server logs every bet, card and result, with the table after each hand:
 2026.10.03 03:09:15.190403000 INFO All players have placed their bet - time to deal
 ...
 2026.10.03 03:09:19.217234000 INFO Hand stats:
-round player name    handle cards cnt dealer dealerCnt bet return profit split double insurance out wait turn
--------------------------------------------------------------------------------------------------------------
-1     1      alice_7 7      2 6 4 12  J Q    20        20  0             0     0      0         1   0    0
-1     2      bob_8   8      6 4 A 21  J Q    20        10  20            0     0      0         1   0    0
+round player name    handle uid                                  cards cnt dealer dealerCnt bet return profit split double insurance forced out wait turn
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+1     1      alice_7 7      3f9c2a1e-8b7d-4c6a-9e2f-1a2b3c4d5e6f 2 6 4 12  J Q    20        20  0             0     0      0         0      1   0    0
+1     2      bob_8   8      a4d1e7b2-5c3f-4e8a-b6d9-0f1e2d3c4b5a 6 4 A 21  J Q    20        10  20            0     0      0         0      1   0    0
 ...
 2026.10.03 03:09:22.225730000 INFO alice_7 has left the table, net winnings this session -$20.00, leaving with $980.00 in chips
 ```
@@ -229,6 +229,11 @@ held for 5 rounds in a row (one round over the line can be chance):
   this catches a counter who flat-bets.
 
 The pitboss then logs a warning and asks the server to eject them.
+It tracks each connection by an id the server gives it, not by name or
+handle, so a player who leaves and a newcomer the server gives the same handle
+(and so the same name) are never confused. It can start at any point in a
+shoe: the first results it receives cover the shoe so far, and it scores
+every round in them.
 The server only does so when it was started with `--pitboss 1`:
 the player is told "The pitboss has asked you to leave the table", their hand
 is forfeited if one is in play, and they're disconnected. Their username is

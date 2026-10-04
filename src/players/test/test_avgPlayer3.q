@@ -8,7 +8,7 @@
 .tst.desc["avgPlayer3 .stg.getBet"]{
   before{.utl.load each`:src/players/lib/strategy.q`:src/players/lib/avgPlayer3.q};
   should["bets 10 before any hand has been played, when the pushed results are still untyped"]{
-    .stg.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$());
+    .stg.res:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();uid:"g"$();cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();double:"b"$();insurance:"f"$();forced:"b"$());
     .stg.getBet[] musteq 10;
   };
   should["bets 20 after every 5th round"]{

@@ -8,8 +8,8 @@
 .bjk.banner:{"~~~~~~~~~~~~ ",x," ~~~~~~~~~~~~"};                                                   / a heading, e.g. .bjk.banner"Game over"
 .bjk.excFunc:{[f;arg;h]@[neg first h;(f;arg);{.log.warn"Couldn't send a trigger: ",x}]};           / [function;argument;handle] call a function on a client, logging a failure
 .bjk.clientState:{[h]                                                                              / [handle] game state pushed to a client
-  k:`tab`res`me`rules`chips`bought;                                                                / what they get
-  :k!(.bjk.tab;.bjk.res;h;.bjk.rules;.bjk.chips h;.bjk.bought h);                                  / with their own chips and buy-ins
+  k:`tab`res`me`uid`rules`chips`bought;                                                            / what they get
+  :k!(.bjk.tab;.bjk.res;h;.bjk.uids h;.bjk.rules;.bjk.chips h;.bjk.bought h);                      / with their own id, chips and buy-ins
  };
 .bjk.trigger:{[f;h].bjk.excFunc[f;.bjk.clientState h;h]};                                          / [function;handle] call a client's handler with its game state
 .bjk.user:{`$string[.z.u],"_",string .z.w};                                                        / player name: username_handle
@@ -19,5 +19,5 @@
   if[.bjk.isPit[];:.bjk.pit:h];                                                                    / record the pitboss handle; it does not sit
   .bjk.cp[h]:.bjk.user[];                                                                          / name them
   .bjk.users[h]:.z.u;                                                                              / their username
-  .bjk.joined[h]:.bjk.rnd;                                                                         / round they joined
+  .bjk.uids[h]:rand 0Ng;                                                                           / a connection id, unlike the handle never reused
  };

@@ -362,6 +362,22 @@
     (exec first turn from .bjk.tab where player=1.01) musteq 0b;
     (exec first cards from .bjk.tab where player=2) mustmatch`9`7;
   };
+  should["offers another split when a split hand is dealt a second card of the same value"]{
+    `.bjk.pubMsg mock {[x;y]};
+    `.bjk.sendMsg mock {[x;y]};
+    `.bjk.excFunc mock {[x;y;z]};
+    .tst.msgs:();
+    `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
+    .tst.cardseq:`8`4;
+    `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.double:0b;
+    .bjk.tab:([]round:1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16i;dealer:`5;dealerCnt:5i;bet:10f;return:0n;profit:0n;split:0b;double:0b;insurance:0f);
+    .bjk.tab:update out:0b,wait:0b,turn:10b from .bjk.tab;
+    .bjk.cp:0 1i!`p1`p2;
+    split[];
+    .tst.msgs mustmatch enlist("Hit, stick or split?";0i);
+  };
  };
 
 .tst.desc["split[] out of turn"]{
@@ -411,9 +427,43 @@
     `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
     `.bjk.promptPlay mock {};
     `.bjk.pubMsg mock {[x;y]};
-    .bjk.tab:([]name:`alice`bob;handle:7 8i;cards:(`9`7;`K`Q);turn:01b);
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.chips:7 8i!2#1000f;
+    .bjk.tab:([]name:`alice`bob;handle:7 8i;cards:(`9`7;`K`Q);bet:10;insurance:0f;turn:01b);
     .bjk.giveTurn 8i;
     .tst.msgs mustmatch enlist("Hit, stick or split?";8i);
+  };
+ };
+
+.tst.desc[".bjk.playPrompt"]{
+  before{
+    .tst.msgs:();
+    `.bjk.prompt mock {.tst.msgs,:enlist(x;y)};
+    `.bjk.sendMsg mock {[x;y]};
+    .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;
+    .bjk.chips:7 8i!2#1000f;
+  };
+  should["offers a split on a pair the player can split"]{
+    .bjk.tab:([]player:1 2f;name:`alice`bob;handle:7 8i;cards:(`9`7;`8`8);bet:10;insurance:0f;turn:01b);
+    .bjk.playPrompt 8i;
+    .tst.msgs mustmatch enlist("Hit, stick or split?";8i);
+  };
+  should["doesn't offer a split on a hand that isn't a pair"]{
+    .bjk.tab:([]player:1 2f;name:`alice`bob;handle:7 8i;cards:(`9`7;`8`7);bet:10;insurance:0f;turn:01b);
+    .bjk.playPrompt 8i;
+    .tst.msgs mustmatch enlist("Hit or stick?";8i);
+  };
+  should["doesn't offer a split the player can't afford"]{
+    .bjk.chips:7 8i!1000 15f;
+    .bjk.tab:([]player:1 2f;name:`alice`bob;handle:7 8i;cards:(`9`7;`8`8);bet:10;insurance:0f;turn:01b);
+    .bjk.playPrompt 8i;
+    .tst.msgs mustmatch enlist("Hit or stick?";8i);
+  };
+  should["doesn't offer a split once the player has as many hands as the table allows"]{
+    .bjk.rules[`maxSplitHands]:2;
+    .bjk.tab:([]player:1 1.01;name:`bob;handle:8i;cards:(`8`8;`8`3);bet:10;insurance:0f;turn:10b);
+    .bjk.playPrompt 8i;
+    .tst.msgs mustmatch enlist("Hit or stick?";8i);
   };
  };
 
@@ -443,6 +493,7 @@
     .bjk.turnTimer[];
     (exec wait from .bjk.tab) musteq 01b;
     (exec turn from .bjk.tab) musteq 00b;
+    (exec forced from .bjk.tab) musteq 01b;
     .tst.msgs mustmatch enlist"p2 took too long - sticking";
     .bjk.turnDeadline musteq 0Np;
   };

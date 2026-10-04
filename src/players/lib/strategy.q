@@ -55,6 +55,7 @@
   .stg.tab:s`tab;                                                                                  / the table
   .stg.res:s`res;                                                                                  / this shoe's results
   .stg.mh:s`me;                                                                                    / my handle
+  .stg.uid:s`uid;                                                                                  / my connection id, which a later player on my handle won't share
   .stg.rules:s`rules;                                                                              / table rules
   .stg.chips:$[null s`chips;"f"$.plr.buyin;s`chips];                                               / my chips; my buy-in until the server has it
   .plr.state:s;                                                                                    / kept for the parting line
