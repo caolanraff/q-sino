@@ -122,6 +122,11 @@ insure:{[amt]                                                                   
     .bjk.sendMsg["You've no hand waiting on insurance";.z.w];                                      / tell them
     :();                                                                                           / refuse
   ];
+  if[not type[amt]in -5 -6 -7 -8 -9h;                                                              / not a number, e.g. insure[]
+    m:"Insure an amount up to half your bet, e.g. insure[5], or insure[0] to decline";             / how to answer
+    .bjk.sendMsg[m;.z.w];                                                                          / tell them
+    :();                                                                                           / refuse
+  ];
   if[any(null amt;amt<0;amt>0.5*first exec bet from .bjk.tab where handle=.z.w);                   / 0 to half the bet
     .bjk.sendMsg["Insurance is between 0 and half your bet";.z.w];                                 / tell them
     :();                                                                                           / refuse

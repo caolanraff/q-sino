@@ -818,6 +818,17 @@
     (exec first null insurance from .bjk.tab where handle=0i) musteq 1b;
     .bjk.insuring:0b;
   };
+  should["asks for an amount when called without one, e.g. insure[]"]{
+    `.bjk.sendMsg mock {[x;y].tst.msgs,:enlist x};
+    .tst.msgs:();
+    .bjk.insuring:1b;
+    .bjk.tab:([]round:1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`9`7;`10`8);cnt:16 18i;dealer:`A;dealerCnt:11i;bet:10;return:0n;profit:0n;split:0b;double:0b;insurance:0n);
+    insure[];
+    insure[`];
+    .tst.msgs mustmatch 2#enlist"Insure an amount up to half your bet, e.g. insure[5], or insure[0] to decline";
+    (exec first null insurance from .bjk.tab where handle=0i) musteq 1b;
+    .bjk.insuring:0b;
+  };
   should["refuses a second answer"]{
     `.bjk.sendMsg mock {[x;y]};
     .bjk.insuring:1b;
