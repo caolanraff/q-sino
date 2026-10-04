@@ -35,5 +35,4 @@
 .bjk.isSoft:{[c].bjk.handCount[c]>sum["I"$string .crd.cardDict c]-10*sum c=`A};                    / [cards] an ace still counts as 11
 .bjk.showHand:{[c].util.clist[c]," (",$[.bjk.isSoft c;"soft ";""],string[.bjk.handCount c],")"};   / [cards] a hand and its count, e.g. "A,6 (soft 17)"
 .bjk.aCard:{[c]$[c in`A`8;"an ";"a "],string c};                                                   / [card] the card with its article, e.g. "an A"
-.bjk.isBJ:{[c](2=count c)&21=.bjk.handCount c};                                                    / [cards] two-card 21; callers exclude split hands, whose 21 isn't a natural
 

@@ -8,11 +8,11 @@
     asc[.crd.cardsSeen t] mustmatch asc `K`5`2`3`4`10`8`A`9`6`6`7`K;
   };
   should["takes the longest dealer hand in a round, since a forfeit row only holds the up-card"]{
-    t:([]round:3 3;cards:(`K`6;`9`10);dealer:(enlist`9;`9`8));
+    t:([]round:3;cards:(`K`6;`9`10);dealer:(enlist`9;`9`8));
     asc[.crd.cardsSeen t] mustmatch asc `K`6`9`10`9`8;
   };
   should["ignores seats with no cards dealt yet"]{
-    t:([]round:0N 0N;cards:(();());dealer:``);
+    t:([]round:0N;cards:(();());dealer:``);
     count[.crd.cardsSeen t] musteq 0;
   };
  };
@@ -32,5 +32,15 @@
     seen:`5`5`6`K;
     .crd.trueCount[.crd.omega;seen;104] musteq 4%(104-4)%52;
     .crd.trueCount[.crd.perfect;seen;104] musteq 17%(104-4)%52;
+  };
+ };
+
+.tst.desc[".crd.isBJ"]{
+  should["is true only for a two-card 21"]{
+    .crd.isBJ[`A`K] musteq 1b;
+    .crd.isBJ[`10`A] musteq 1b;
+    .crd.isBJ[`7`7`7] musteq 0b;
+    .crd.isBJ[`A`9] musteq 0b;
+    .crd.isBJ[`A`A] musteq 0b;
   };
  };

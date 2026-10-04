@@ -96,7 +96,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
     two:{sum"I"$string .crd.cardDict 2#x}each cards,
     soft:{`A in 2#x}each cards,
     theCount:basic_cnt,
-    dealerBJ:{(2=count x)&21=sum"I"$string .crd.cardDict x}each dealer
+    dealerBJ:.crd.isBJ each dealer
     from t;
   :update doubleTell:double&(two within 18 20)&not soft&((two=18)&up within 2 6)|(two=19)&up=6,    / flag tells: doubling 18-20 (but not soft 18 v 2-6 or soft 19 v 6), splitting tens, sticking on two-card 15/16 that's soft or v 7+ (unless a dealer blackjack ended the hand), insuring
     splitTell:split&(first each cards)in`10`J`Q`K,

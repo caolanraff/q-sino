@@ -9,4 +9,6 @@
   :c where not null c;                                                                             / drop empty card slots
  };
 
+.crd.isBJ:{[c](2=count c)&21=sum"I"$string .crd.cardDict c};                                       / [cards] two-card 21; callers exclude split hands, whose 21 isn't a natural
+
 .crd.trueCount:{[pts;seen;shoe]sum[pts seen]%(shoe-count seen)%52};                                / [points;seen;shoe] running count per deck left, e.g. .crd.trueCount[.crd.hiLo;`2`5`K;312]
