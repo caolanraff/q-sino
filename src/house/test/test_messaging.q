@@ -99,9 +99,10 @@
  };
 
 .tst.desc[".bjk.trigger"]{
-  should["sends the client its table, the shoe's results and its own handle with the trigger"]{
+  should["sends the client its table, the shoe's results and its own handle and id with the trigger"]{
     .tst.sent:();
     `.bjk.excFunc mock {.tst.sent,:enlist(x;y;z)};
+    .bjk.uids:enlist[7i]!enlist"G"$"00000000-0000-0000-0000-000000000007";
     .bjk.tab:([]round:3;player:1f;handle:7i;cards:enlist`K`5);
     .bjk.res:([]round:1 2;handle:7i;profit:10 -10f);
     .bjk.rules:`maxSplitHands`deckCnt!4 6;
@@ -111,6 +112,7 @@
     .tst.sent[0;1;`tab] mustmatch .bjk.tab;
     .tst.sent[0;1;`res] mustmatch .bjk.res;
     .tst.sent[0;1;`me] musteq 7i;
+    .tst.sent[0;1;`uid] mustmatch"G"$"00000000-0000-0000-0000-000000000007";
     .tst.sent[0;1;`rules] mustmatch`maxSplitHands`deckCnt!4 6;
   };
  };

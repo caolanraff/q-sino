@@ -23,10 +23,10 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .bjk.cp:()!();                                                                                     / handle to player name
 .bjk.users:("i"$())!`$();                                                                          / handle to connecting username
 .bjk.banned:`$();                                                                                  / usernames banned this session
-.bjk.joined:("i"$())!"j"$();                                                                       / round each handle joined; kdb reuses handle numbers
-.bjk.res:.bjk.tab:.bjk.hist:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();cards:();        / hands in play, this shoe's results, earlier shoes' results
-  cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();split:"b"$();
-  double:"b"$();insurance:"f"$());
+.bjk.uids:("i"$())!"g"$();                                                                         / handle to connection id; kdb reuses handle numbers
+.bjk.res:.bjk.tab:.bjk.hist:([]round:"j"$();player:"j"$();name:`$();handle:"i"$();uid:"g"$();      / hands in play, this shoe's results, earlier shoes' results
+  cards:();cnt:"i"$();dealer:();dealerCnt:"i"$();bet:"j"$();return:"f"$();profit:"f"$();
+  split:"b"$();double:"b"$();insurance:"f"$();forced:"b"$());
 .bjk.stake:([name:`$();handle:"i"$()]bet:"j"$());                                                  / each player's bet for the next hand
 
 .bjk.intro:{                                                                                       / help text sent to each new player
@@ -78,7 +78,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.seat:{                                                                                        / reseat everyone who has bought in, keeping their bets
   p:.bjk.buyers[];                                                                                 / who's playing
   .bjk.tab:0#.bjk.tab;                                                                             / clear the table
-  `.bjk.tab upsert([]player:1+til count p;name:.bjk.cp p;handle:p);                                / one row per player
+  `.bjk.tab upsert([]player:1+til count p;name:.bjk.cp p;handle:p;uid:.bjk.uids p);                / one row per player
   .bjk.tab:.bjk.tab lj .bjk.stake;                                                                 / attach their bets
  };
 
@@ -89,14 +89,14 @@ hist:{.bjk.hist,.bjk.res};                                                      
  };
 
 .bjk.forfeit:{[h]                                                                                  / [handle] record a leaver's unfinished hands as lost
-  t:update return:0f from(select from .bjk.tab where handle=h)where not out;                       / their hands still in play, returning nothing
+  t:update return:0f,forced:1b from(select from .bjk.tab where handle=h)where not out;             / their hands still in play, lost and not played out
   if[0=count t;:()];                                                                               / nothing in play
   t:update"j"$player,dealer:enlist each dealer,"f"$return from delete out,wait,turn from t;        / match the results schema
   upsert[`.bjk.res;update profit:(return-bet)-0f^insurance from t];                                / record them, losing bet and insurance
  };
 
 .bjk.logLeaver:{[h]                                                                                / [handle] log a leaver's net winnings
-  won:sum 0f,exec profit from hist[] where handle=h,round>.bjk.joined h;                           / net profit since they joined
+  won:sum 0f,exec profit from hist[] where uid=.bjk.uids h;                                        / net profit on this connection
   dlr:$[won<0;"-$";"$"],.Q.f[2;abs won];                                                           / net winnings as dollars, with the sign
   left:.Q.f[2;0^$[.bjk.hd;.bjk.chips;.bjk.available]h];                                            / chips they leave with; a hand in play is lost
   .log.info string[.bjk.cp h]," has left the table, net winnings this session ",dlr,", leaving with $",left," in chips";
@@ -105,7 +105,7 @@ hist:{.bjk.hist,.bjk.res};                                                      
 .bjk.unseat:{[h]                                                                                   / [handle] remove a player from the table
   .bjk.cp:.bjk.cp _ h;                                                                             / drop the connection
   .bjk.users:.bjk.users _ h;                                                                       / drop their username
-  .bjk.joined:.bjk.joined _ h;                                                                     / drop their join round
+  .bjk.uids:.bjk.uids _ h;                                                                         / drop their connection id
   .bjk.chips:.bjk.chips _ h;                                                                       / drop their chips
   .bjk.bought:.bjk.bought _ h;                                                                     / and what they bought
   .bjk.chipsDue:.bjk.chipsDue _ h;                                                                 / drop any buy-in deadline
@@ -169,8 +169,9 @@ hist:{.bjk.hist,.bjk.res};                                                      
 
 .bjk.chipsTimer:{.bjk.askToLeave each where .z.p>=.bjk.chipsDue};                                  / see off anyone past their buy-in deadline
 
-.bjk.eject:{[h]                                                                                    / [handle] remove a suspected card counter
-  if[not h in key .bjk.cp;:()];                                                                    / not seated
+.bjk.eject:{[u]                                                                                    / [uid] remove a suspected card counter
+  h:.bjk.uids?u;                                                                                   / their handle
+  if[not h in key .bjk.cp;:()];                                                                    / gone, even if a newcomer has their handle
   n:string .bjk.cp h;                                                                              / their name
   if[not .bjk.ejectCounters;                                                                       / only log unless ejecting is on
     :.log.info"The pitboss suspects ",n," of counting cards (run with --pitboss 1 to eject)";

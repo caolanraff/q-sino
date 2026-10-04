@@ -67,8 +67,8 @@ stake:{[bet]                                                                    
   .bjk.hd:.bjk.wwch:0b;                                                                            / hand in progress; dealer still to play
   .bjk.rnd+:1;                                                                                     / next round number
   .bjk.pubPrompt[.bjk.banner["Hand ",string .bjk.rnd];key .bjk.cp];                                / head the hand
-  update round:.bjk.rnd,cnt:0Ni,out:0b,wait:0b,turn:0b,split:0b,double:0b,insurance:0f             / reset every hand's state
-    from`.bjk.tab;
+  update round:.bjk.rnd,cnt:0Ni,out:0b,wait:0b,turn:0b,split:0b,double:0b,insurance:0f,            / reset every hand's state
+    forced:0b from`.bjk.tab;
  };
 
 .bjk.dealUpCard:{                                                                                  / deal the dealer's up-card

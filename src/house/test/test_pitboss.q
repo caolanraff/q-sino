@@ -1,7 +1,9 @@
 .utl.load`:src/house/bin/pitboss.q;
 
+.tst.uid:{"G"$"00000000-0000-0000-0000-",-12#"00000000000",string x};
+
 / .tst.pitRound[1;`K`5;`2`3`4;`10`8]
-.tst.pitRound:{[r;c1;c2;d]([]round:r,r;player:1 2;name:`a_5`b_6;handle:5 6i;cards:(c1;c2);cnt:0i;dealer:(d;d);dealerCnt:0i;bet:10 20;return:0f;profit:0f;split:0b;double:0b;insurance:0f)};
+.tst.pitRound:{[r;c1;c2;d]([]round:r,r;player:1 2;name:`a_5`b_6;handle:5 6i;uid:.tst.uid each 5 6;cards:(c1;c2);cnt:0i;dealer:(d;d);dealerCnt:0i;bet:10 20;return:0f;profit:0f;split:0b;double:0b;insurance:0f;forced:0b)};
 
 .tst.desc[".pit.count"]{
   should["gives the true count with each card seen counted once"]{
@@ -35,6 +37,18 @@
     .pit.gameover[`res`rnd!(r2;2)];
     (exec basic_cnt from .pit.res where round=1) musteq 0 0f;
     (exec basic_cnt from .pit.res where round=2) musteq 2 2*1%(312-7)%52;
+  };
+  should["counts every round it's sent at once, so joining mid-shoe scores the shoe so far"]{
+    `.pit.getPlayTrend mock {};
+    .pit.startCards:312;
+    .pit.window:100;
+    .pit.betTrend:0#.pit.betTrend;
+    .pit.bets:0#.pit.bets;
+    r:.tst.pitRound[1;`K`5;`2`3`4;`10`8],.tst.pitRound[2;`A`9;`6`6;`7`K];
+    .pit.gameover[`res`rnd!(r;2)];
+    (exec basic_cnt from .pit.res where round=1) musteq 0 0f;
+    (exec basic_cnt from .pit.res where round=2) musteq 2 2*1%(312-7)%52;
+    (exec bet from .pit.bets) musteq 10 20 10 20;
   };
   should["examines only the new round's hands, though the server re-sends the whole shoe"]{
     `.pit.getBetTrend mock {};
@@ -92,7 +106,7 @@
  };
 
 / .tst.pitPlays[(`A`7`2;`10`6);21 16i;(`7`K;`10`8);10b;00b]
-.tst.pitPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:`a_5;handle:5i;cards:c;cnt:n;dealer:d;double:dbl;split:spl;insurance:0f;basic_cnt:0.5*1+til count c)};
+.tst.pitPlays:{[c;n;d;dbl;spl]([]round:1+til count c;name:`a_5;uid:.tst.uid 5;cards:c;cnt:n;dealer:d;double:dbl;split:spl;insurance:0f;forced:0b;basic_cnt:0.5*1+til count c)};
 
 .tst.desc[".pit.getPlayTrend doubles"]{
   before{
@@ -136,6 +150,11 @@
   };
   should["leaves out a round the dealer's blackjack ended, where nobody got to play"]{
     .pit.res:.tst.pitPlays[(`10`6;`A`5);16 16i;(`A`K;`10`A);00b;00b];
+    .pit.getPlayTrend .pit.res;
+    count[.pit.stick] musteq 0;
+  };
+  should["leaves out a hand the turn clock stuck or a leaver forfeited, which the player didn't choose"]{
+    .pit.res:update forced:1b from .tst.pitPlays[(`10`6;`A`5);16 16i;(`10`8;`2`K);00b;00b];
     .pit.getPlayTrend .pit.res;
     count[.pit.stick] musteq 0;
   };
@@ -197,34 +216,40 @@
   should["adds the round's scored bets to each player's history"]{
     .pit.window:100;
     .pit.rnd:2;
-    .pit.res:([]round:1 2 2;name:`a_5`a_5`b_6;handle:5 5 6i;bet:10 20 30;basic_cnt:0 1 1f;omega_cnt:0 2 2f;perfect_cnt:0 3 3f;insurance:0f);
-    .pit.recordBets[];
-    .pit.bets mustmatch([]name:`a_5`b_6;handle:5 6i;bet:20 30;basic:1f;omega:2f;perfect:3f);
+    .pit.res:([]round:1 2 2;name:`a_5`a_5`b_6;uid:.tst.uid each 5 5 6;bet:10 20 30;basic_cnt:0 1 1f;omega_cnt:0 2 2f;perfect_cnt:0 3 3f;insurance:0f);
+    .pit.recordBets enlist 2;
+    .pit.bets mustmatch([]name:`a_5`b_6;uid:.tst.uid each 5 6;bet:20 30;basic:1f;omega:2f;perfect:3f);
+  };
+  should["keeps every round it's given, such as a whole shoe when the pitboss joins mid-shoe"]{
+    .pit.window:100;
+    .pit.res:([]round:1 2 3;name:`a_5;uid:.tst.uid 5;bet:10 20 30;basic_cnt:0 1 2f;omega_cnt:0f;perfect_cnt:0f;insurance:0f);
+    .pit.recordBets 1 2 3;
+    (exec bet from .pit.bets) mustmatch 10 20 30;
   };
   should["keeps only each player's latest window of hands"]{
     .pit.window:3;
-    .pit.res:([]round:1 2 3 4;name:`a_5;handle:5i;bet:10 20 30 40;basic_cnt:0f;omega_cnt:0f;perfect_cnt:0f;insurance:0f);
-    {.pit.rnd:x;.pit.recordBets[]}each 1 2 3 4;
+    .pit.res:([]round:1 2 3 4;name:`a_5;uid:.tst.uid 5;bet:10 20 30 40;basic_cnt:0f;omega_cnt:0f;perfect_cnt:0f;insurance:0f);
+    {.pit.recordBets enlist x}each 1 2 3 4;
     (exec bet from .pit.bets) mustmatch 20 30 40;
   };
  };
 
 .tst.desc[".pit.correlations"]{
   should["scores each player by whichever count their bets follow most closely"]{
-    .pit.bets:([]name:`a_5;handle:5i;bet:10 10 20 20 40 40;basic:0f;omega:0 1 0 1 0 1f;perfect:1 2 3 4 5 6f);
+    .pit.bets:([]name:`a_5;uid:.tst.uid 5;bet:10 10 20 20 40 40;basic:0f;omega:0 1 0 1 0 1f;perfect:1 2 3 4 5 6f);
     s:.pit.correlations[];
     (exec hands from s) musteq enlist 6;
     (exec score from s) musteq enlist 10 10 20 20 40 40f cor 1 2 3 4 5 6f;
   };
   should["keeps each count's correlation, so they can be charted"]{
-    .pit.bets:([]name:`a_5;handle:5i;bet:10 10 20 20 40 40;basic:0f;omega:0 1 0 1 0 1f;perfect:1 2 3 4 5 6f);
+    .pit.bets:([]name:`a_5;uid:.tst.uid 5;bet:10 10 20 20 40 40;basic:0f;omega:0 1 0 1 0 1f;perfect:1 2 3 4 5 6f);
     s:.pit.correlations[];
     (exec basic from s) musteq enlist 0f;
     (exec omega from s) musteq enlist 10 10 20 20 40 40f cor 0 1 0 1 0 1f;
     (exec perfect from s) musteq enlist 10 10 20 20 40 40f cor 1 2 3 4 5 6f;
   };
   should["scores a flat bettor 0, not null"]{
-    .pit.bets:([]name:`a_5;handle:5i;bet:20;basic:1 2 3f;omega:1 2 3f;perfect:1 2 3f);
+    .pit.bets:([]name:`a_5;uid:.tst.uid 5;bet:20;basic:1 2 3f;omega:1 2 3f;perfect:1 2 3f);
     (exec score from .pit.correlations[]) musteq enlist 0f;
   };
  };
@@ -233,35 +258,35 @@
   should["flags a player once they've enough hands and their bets follow the count closely enough"]{
     .pit.minHands:20;
     .pit.suspectCor:0.5;
-    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$())};
-    `.pit.ramps mock {([name:`$();handle:"i"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
-    `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25 25 10;score:0.6 0.3 0.9)};
+    `.pit.insurers mock {([name:`$();uid:"g"$()]insures:"j"$())};
+    `.pit.ramps mock {([name:`$();uid:"g"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
+    `.pit.correlations mock {([name:`a_5`b_6`c_7;uid:.tst.uid each 5 6 7]hands:25 25 10;score:0.6 0.3 0.9)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
  };
 
 .tst.desc[".pit.updateStreaks"]{
   should["counts the rounds in a row each player has been flagged, resetting anyone who isn't"]{
-    `.pit.correlations mock {([name:`a_5`b_6`c_7;handle:5 6 7i]hands:25;score:0.6 0.3 0.9)};
-    `.pit.flagged mock {([name:`a_5`c_7;handle:5 7i]hands:25;score:0.6 0.9)};
-    .pit.streak:`a_5`b_6!2 4;
+    `.pit.correlations mock {([name:`a_5`b_6`c_7;uid:.tst.uid each 5 6 7]hands:25;score:0.6 0.3 0.9)};
+    `.pit.flagged mock {([name:`a_5`c_7;uid:.tst.uid each 5 7]hands:25;score:0.6 0.9)};
+    .pit.streak:(.tst.uid each 5 6)!2 4;
     .pit.updateStreaks[];
-    .pit.streak mustmatch`a_5`b_6`c_7!3 0 1;
+    .pit.streak mustmatch(.tst.uid each 5 6 7)!3 0 1;
   };
   should["forgets a player who has no scores any more"]{
-    `.pit.correlations mock {([name:enlist`a_5;handle:5i]hands:enlist 25;score:0.6)};
-    `.pit.flagged mock {([name:enlist`a_5;handle:5i]hands:enlist 25;score:0.6)};
-    .pit.streak:`a_5`gone_9!1 7;
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 25;score:0.6)};
+    `.pit.flagged mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 25;score:0.6)};
+    .pit.streak:(.tst.uid each 5 9)!1 7;
     .pit.updateStreaks[];
-    .pit.streak mustmatch enlist[`a_5]!enlist 2;
+    .pit.streak mustmatch enlist[.tst.uid 5]!enlist 2;
   };
  };
 
 .tst.desc[".pit.suspects"]{
   should["only suspects a player who has stayed flagged for .pit.persist rounds in a row"]{
     .pit.persist:5;
-    `.pit.flagged mock {([name:`a_5`c_7;handle:5 7i]hands:25;score:0.6 0.9)};
-    .pit.streak:`a_5`c_7!5 4;
+    `.pit.flagged mock {([name:`a_5`c_7;uid:.tst.uid each 5 7]hands:25;score:0.6 0.9)};
+    .pit.streak:(.tst.uid each 5 7)!5 4;
     (exec name from .pit.suspects[]) mustmatch enlist`a_5;
   };
  };
@@ -274,21 +299,32 @@
     .tst.ejected:();
     `.bjk.eject mock {.tst.ejected,:x};
     `.log.warn mock {[x]};
-    .pit.bets:([]name:`a_5`b_6;handle:5 6i;bet:10 20;basic:0f;omega:0f;perfect:0f);
-    .pit.streak:`a_5`b_6!5 3;
-    .pit.insured:([]name:`a_5`b_6;handle:5 6i;basic:3 4f);
-    .pit.report`name`handle`hands`score`insures`ramp!(`a_5;5i;25;0.6;0N;2.5);
-    .tst.ejected mustmatch enlist 5i;
+    .pit.bets:([]name:`a_5`b_6;uid:.tst.uid each 5 6;bet:10 20;basic:0f;omega:0f;perfect:0f);
+    .pit.streak:(.tst.uid each 5 6)!5 3;
+    .pit.insured:([]name:`a_5`b_6;uid:.tst.uid each 5 6;basic:3 4f);
+    .pit.report`name`uid`hands`score`insures`ramp!(`a_5;.tst.uid 5;25;0.6;0N;2.5);
+    .tst.ejected mustmatch enlist .tst.uid 5;
     (exec name from .pit.insured) mustmatch enlist`b_6;
-    .pit.streak mustmatch enlist[`b_6]!enlist 3;
+    .pit.streak mustmatch enlist[.tst.uid 6]!enlist 3;
     (exec name from .pit.bets) mustmatch enlist`b_6;
+  };
+  should["keeps the history of a newcomer given the reported player's handle, and so their name"]{
+    `.bjk.eject mock {};
+    `.log.warn mock {[x]};
+    .pit.bets:([]name:`a_5`a_5;uid:.tst.uid each 5 15;bet:10 20;basic:0f;omega:0f;perfect:0f);
+    .pit.streak:(.tst.uid each 5 15)!5 1;
+    .pit.insured:([]name:`a_5`a_5;uid:.tst.uid each 5 15;basic:3 4f);
+    .pit.report`name`uid`hands`score`insures`ramp!(`a_5;.tst.uid 5;25;0.6;0N;2.5);
+    (exec uid from .pit.bets) mustmatch enlist .tst.uid 15;
+    (exec uid from .pit.insured) mustmatch enlist .tst.uid 15;
+    .pit.streak mustmatch enlist[.tst.uid 15]!enlist 1;
   };
   should["logs the suspicion with the evidence"]{
     .tst.logged:();
     `.log.warn mock {.tst.logged,:enlist x};
     `.bjk.eject mock {};
     .pit.bets:0#.pit.bets;
-    .pit.report`name`handle`hands`score`insures`ramp!(`a_5;5i;25;0.6;0N;2.5);
+    .pit.report`name`uid`hands`score`insures`ramp!(`a_5;.tst.uid 5;25;0.6;0N;2.5);
     .tst.logged mustlike"Suspected card counter: a_5 (bet/count correlation 0.60 over 25 hands; bets 2.5x as much at a good count; insured only at a high count 0 times)";
   };
  };
@@ -301,7 +337,7 @@
     `.pit.updateStreaks mock {};
     .tst.reported:();
     `.pit.report mock {.tst.reported,:enlist x`name};
-    `.pit.suspects mock {([]name:`a_5`c_7;handle:5 7i;hands:25 30;score:0.6 0.7)};
+    `.pit.suspects mock {([]name:`a_5`c_7;uid:.tst.uid each 5 7;hands:25 30;score:0.6 0.7)};
     .pit.res:([]round:enlist 1);
     .pit.getDetect enlist 1;
     .tst.reported mustmatch`a_5`c_7;
@@ -312,7 +348,7 @@
   should["adds each player's scores for the round, stamped with the time it was played"]{
     .pit.scores:0#.pit.scores;
     .pit.rnd:7;
-    `.pit.correlations mock {([name:`a_5`b_6;handle:5 6i]hands:20 25;basic:.1 .2;omega:.3 .4;perfect:.5 .6;score:.5 .6)};
+    `.pit.correlations mock {([name:`a_5`b_6;uid:.tst.uid each 5 6]hands:20 25;basic:.1 .2;omega:.3 .4;perfect:.5 .6;score:.5 .6)};
     t0:.z.p;
     .pit.recordScores[];
     (exec name from .pit.scores) mustmatch`a_5`b_6;
@@ -330,7 +366,7 @@
   should["charts each player's score under each count against the time it was played, with the suspicion line"]{
     .pit.suspectCor:0.5;
     t0:2026.10.01D12:00:00;
-    .pit.scores:([]time:t0,t0,t0+0D00:00:01;round:1 1 2;name:`a_5`b_6`a_5;handle:5 6 5i;hands:20 20 21;basic:.1 .2 .3;omega:.4 .5 .6;perfect:.7 .8 .9;score:.7 .8 .9);
+    .pit.scores:([]time:t0,t0,t0+0D00:00:01;round:1 1 2;name:`a_5`b_6`a_5;uid:.tst.uid each 5 6 5;hands:20 20 21;basic:.1 .2 .3;omega:.4 .5 .6;perfect:.7 .8 .9;score:.7 .8 .9);
     c:.pit.chart[];
     cols[c] mustmatch`time`a_5_basic`b_6_basic`a_5_omega`b_6_omega`a_5_perfect`b_6_perfect`alert;
     c[`time] mustmatch(t0;t0+0D00:00:01);
@@ -341,8 +377,8 @@
  };
 
 .tst.desc[".pit.betTrend"]{
-  should["has lowercase round, name and handle columns"]{
-    (3#cols .pit.betTrend)mustmatch`round`name`handle;
+  should["has lowercase round, name and uid columns"]{
+    (3#cols .pit.betTrend)mustmatch`round`name`uid;
   };
  };
 
@@ -352,16 +388,16 @@
     .pit.insured:0#.pit.insured;
     .pit.window:100;
     .pit.rnd:2;
-    .pit.res:([]round:2;name:`a_5`b_6;handle:5 6i;bet:10 20;basic_cnt:3.5 1f;omega_cnt:0f;perfect_cnt:0f;insurance:5 0f);
-    .pit.recordBets[];
-    .pit.insured mustmatch([]name:enlist`a_5;handle:5i;basic:3.5);
+    .pit.res:([]round:2;name:`a_5`b_6;uid:.tst.uid each 5 6;bet:10 20;basic_cnt:3.5 1f;omega_cnt:0f;perfect_cnt:0f;insurance:5 0f);
+    .pit.recordBets enlist 2;
+    .pit.insured mustmatch([]name:enlist`a_5;uid:.tst.uid 5;basic:3.5);
   };
  };
 
 .tst.desc[".pit.insurers"]{
   should["lists players who've only ever insured at a high count, with how often"]{
     .pit.insureCount:3;
-    .pit.insured:([]name:`a_5`a_5`b_6`b_6;handle:5 5 6 6i;basic:3 4.5 3 -1f);
+    .pit.insured:([]name:`a_5`a_5`b_6`b_6;uid:.tst.uid each 5 5 6 6;basic:3 4.5 3 -1f);
     s:0!.pit.insurers[];
     (exec name from s) mustmatch enlist`a_5;
     (exec insures from s) musteq enlist 2;
@@ -371,21 +407,21 @@
 .tst.desc[".pit.flagged insurance"]{
   before{
     .pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2;.pit.minRampHands:5;.pit.minRamp:1.5;
-    `.pit.ramps mock {([name:`$();handle:"i"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
+    `.pit.ramps mock {([name:`$();uid:"g"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
   };
   should["flags a player who only insures at a high count, even if their bets don't follow the count"]{
-    `.pit.correlations mock {([name:enlist`a_5;handle:5i]hands:enlist 25;score:0.1)};
-    `.pit.insurers mock {([name:enlist`a_5;handle:5i]insures:enlist 2;highOnly:1b)};
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 25;score:0.1)};
+    `.pit.insurers mock {([name:enlist`a_5;uid:.tst.uid 5]insures:enlist 2;highOnly:1b)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
   should["doesn't flag a player with too few high-count insurances"]{
-    `.pit.correlations mock {([name:enlist`a_5;handle:5i]hands:enlist 25;score:0.1)};
-    `.pit.insurers mock {([name:enlist`a_5;handle:5i]insures:enlist 1;highOnly:1b)};
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 25;score:0.1)};
+    `.pit.insurers mock {([name:enlist`a_5;uid:.tst.uid 5]insures:enlist 1;highOnly:1b)};
     count[.pit.flagged[]] musteq 0;
   };
   should["still flags on the bet/count correlation alone"]{
-    `.pit.correlations mock {([name:enlist`a_5;handle:5i]hands:enlist 25;score:0.6)};
-    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$();highOnly:"b"$())};
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 25;score:0.6)};
+    `.pit.insurers mock {([name:`$();uid:"g"$()]insures:"j"$();highOnly:"b"$())};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
  };
@@ -394,7 +430,7 @@
   should["compares each player's average bet at a good count with a bad one"]{
     .pit.goodCount:2;
     .pit.badCount:0;
-    .pit.bets:([]name:`a_5;handle:5i;bet:10 10 20 40 40 20;basic:-1 0 1 2 3 0.5;omega:0f;perfect:0f);
+    .pit.bets:([]name:`a_5;uid:.tst.uid 5;bet:10 10 20 40 40 20;basic:-1 0 1 2 3 0.5;omega:0f;perfect:0f);
     s:0!.pit.ramps[];
     (exec good from s) musteq enlist 2;
     (exec bad from s) musteq enlist 2;
@@ -405,19 +441,19 @@
 .tst.desc[".pit.flagged bet ramp"]{
   before{
     .pit.minHands:20;.pit.suspectCor:0.5;.pit.minInsures:2;.pit.minRampHands:5;.pit.minRamp:1.5;
-    `.pit.correlations mock {([name:enlist`a_5;handle:5i]hands:enlist 25;score:0.2)};
-    `.pit.insurers mock {([name:`$();handle:"i"$()]insures:"j"$())};
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 25;score:0.2)};
+    `.pit.insurers mock {([name:`$();uid:"g"$()]insures:"j"$())};
   };
   should["flags a player who bets clearly more at a good count, even if they've never insured"]{
-    `.pit.ramps mock {([name:enlist`a_5;handle:5i]good:enlist 6;bad:9;ramp:3f)};
+    `.pit.ramps mock {([name:enlist`a_5;uid:.tst.uid 5]good:enlist 6;bad:9;ramp:3f)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
   should["doesn't flag on too few bets at a good or a bad count"]{
-    `.pit.ramps mock {([name:enlist`a_5;handle:5i]good:enlist 4;bad:9;ramp:3f)};
+    `.pit.ramps mock {([name:enlist`a_5;uid:.tst.uid 5]good:enlist 4;bad:9;ramp:3f)};
     count[.pit.flagged[]] musteq 0;
   };
   should["doesn't flag a player whose bets barely change with the count"]{
-    `.pit.ramps mock {([name:enlist`a_5;handle:5i]good:enlist 6;bad:9;ramp:1.2)};
+    `.pit.ramps mock {([name:enlist`a_5;uid:.tst.uid 5]good:enlist 6;bad:9;ramp:1.2)};
     count[.pit.flagged[]] musteq 0;
   };
  };
