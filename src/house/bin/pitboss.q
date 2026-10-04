@@ -20,6 +20,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.minRamp:1.5;                                                                                  / how many times bigger a counter bets when the count is good
 .pit.scores:([]time:"p"$();round:"j"$();name:`$();uid:"g"$();hands:"j"$();                         / each round's correlation scores, for charting
   basic:"f"$();omega:"f"$();perfect:"f"$();score:"f"$());
+.pit.gone:"g"$();                                                                                  / players who have left, to forget once their last hands are in
 
 .pit.shoeSize:{[h]h"52*.bjk.rules`deckCnt"};                                                       / [handle] cards in a full shoe, from the server's rules
 
@@ -135,10 +136,20 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 
 .pit.shuffle:{.pit.res:0#.pit.res};                                                                / new shoe: forget the hands seen
 
+.pit.left:{.pit.gone,:x};                                                                          / a player has left: forget them after their last hands, e.g. a forfeit, arrive
+
+.pit.forget:{                                                                                      / forget players who have left: they can't be ejected, and only build up
+  delete from`.pit.bets where uid in .pit.gone;                                                    / their bets
+  delete from`.pit.insured where uid in .pit.gone;                                                 / their insurance record
+  .pit.streak:.pit.gone _ .pit.streak;                                                             / their streak
+  .pit.gone:0#.pit.gone;                                                                           / done
+ };
+
 .pit.getDetect:{[rs]                                                                               / [rounds] run detection on newly finished rounds
   .pit.getBetTrend rs;                                                                             / update bet trends with the new rounds
   .pit.recordScores[];                                                                             / keep this round's scores
   .pit.getPlayTrend select from .pit.res where round in rs;                                        / tells in the new rounds only; a finished round's never change
+  .pit.forget[];                                                                                   / forget players who have left
   .pit.updateStreaks[];                                                                            / update flag streaks
   .pit.report each .pit.suspects[];                                                                / report each suspect
  };

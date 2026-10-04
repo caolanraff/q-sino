@@ -468,3 +468,60 @@
     count[.pit.flagged[]] musteq 0;
   };
  };
+
+.tst.desc[".pit.forget"]{
+  before{
+    .pit.bets:([]name:`a_5`b_6;uid:.tst.uid each 5 6;bet:10 20;basic:0f;omega:0f;perfect:0f);
+    .pit.insured:([]name:`a_5`b_6;uid:.tst.uid each 5 6;basic:3 4f);
+    .pit.streak:(.tst.uid each 5 6)!3 4;
+    .pit.gone:"g"$();
+  };
+  should["forgets the bets, insurance and streak of players who have left, and no one else"]{
+    .pit.left .tst.uid 5;
+    .pit.forget[];
+    (exec uid from .pit.bets) mustmatch enlist .tst.uid 6;
+    (exec uid from .pit.insured) mustmatch enlist .tst.uid 6;
+    .pit.streak mustmatch enlist[.tst.uid 6]!enlist 4;
+    count[.pit.gone] musteq 0;
+  };
+  should["forgets nothing when no one has left"]{
+    .pit.forget[];
+    count[.pit.bets] musteq 2;
+    count[.pit.streak] musteq 2;
+  };
+ };
+
+.tst.desc[".pit.left"]{
+  should["forgets a leaver's hands that arrive after they've gone, like a forfeit"]{
+    `.pit.getPlayTrend mock {};
+    `.pit.report mock {};
+    .pit.startCards:312;
+    .pit.window:100;
+    .pit.res:([]round:"j"$());
+    .pit.betTrend:0#.pit.betTrend;
+    .pit.bets:0#.pit.bets;
+    .pit.insured:0#.pit.insured;
+    .pit.streak:("g"$())!"j"$();
+    .pit.gone:"g"$();
+    .pit.left .tst.uid 5;
+    .pit.gameover[`res`rnd!(.tst.pitRound[1;`K`5;`2`3`4;`10`8];1)];
+    (exec uid from .pit.bets) mustmatch enlist .tst.uid 6;
+    (key .pit.streak) mustmatch enlist .tst.uid 6;
+  };
+  should["doesn't report a suspect who has left"]{
+    .tst.reported:();
+    `.pit.report mock {.tst.reported,:enlist x`uid};
+    `.pit.getBetTrend mock {};
+    `.pit.recordScores mock {};
+    `.pit.getPlayTrend mock {};
+    .pit.persist:5;
+    .pit.res:([]round:enlist 1);
+    .pit.gone:"g"$();
+    .pit.bets:([]name:`a_5;uid:.tst.uid 5;bet:10*1+til 25;basic:1f*til 25;omega:0f;perfect:0f);
+    .pit.insured:0#.pit.insured;
+    .pit.streak:enlist[.tst.uid 5]!enlist 9;
+    .pit.left .tst.uid 5;
+    .pit.getDetect enlist 1;
+    count[.tst.reported] musteq 0;
+  };
+ };
