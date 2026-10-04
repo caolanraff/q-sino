@@ -184,6 +184,9 @@
   should["plays a pair as its hard total instead of splitting"]{
     .stg.decide[`8`8`10;1;0b] musteq`H;                                                            / 8,8 vs 10 as hard 16: hit
   };
+  should["hits a pair of aces it can't afford to split, as soft 12"]{
+    .stg.decide[`A`A`6;1;0b] musteq`H;
+  };
  };
 
 .tst.desc[".stg.tableBet chips"]{

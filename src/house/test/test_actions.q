@@ -189,7 +189,7 @@
   should["refuses to hit a split ace hand, which sticks on its one card"]{
     .tst.cardseq:`5`A`10;                                                                          / hand 1 gets 5 (A,5), hand 2 gets A (A,A); the 10 must never be drawn
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
-    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`9;`9);dealerCnt:9 9i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`9;`9);dealerCnt:9 9i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:2#0f);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.cp:0 1i!`p1`p2;
     .bjk.double:0b;
@@ -261,13 +261,24 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.excFunc mock {[x;y;z]};
     `.bjk.getCard mock {`2};
-    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:2#0f);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
     split[];
     count[.bjk.tab] musteq 3;
     asc[exec cnt from .bjk.tab where player in 1 1.01] musteq 13 13i;
     (exec cards from .bjk.tab where player=1) mustmatch enlist`A`2;
+  };
+  should["keeps a hand's insurance on the first hand only, so it isn't charged twice"]{
+    `.bjk.pubMsg mock {[x;y]};
+    `.bjk.excFunc mock {[x;y;z]};
+    `.bjk.hit1 mock {};
+    `.bjk.getCard mock {`2};
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`A;`A);dealerCnt:11 11i;bet:100 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:50 0f);
+    .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
+    .bjk.cp:0 1i!`p1`p2;
+    split[];
+    (exec insurance from .bjk.tab where handle=0i) mustmatch 50 0f;
   };
   should["refuses to split a hand of more than two cards, even if every card matches"]{
     `.bjk.sendMsg mock {[x;y]};
@@ -295,7 +306,7 @@
     `.bjk.pubMsg mock {[x;y]};
     `.bjk.excFunc mock {[x;y;z]};
     `.bjk.getCard mock {`3};
-    .bjk.tab:([]round:1 1 1;player:1.01 1.02 2;name:`p1`p1`p2;handle:0 0 1i;cards:(`8`8;`8`3;`9`7);cnt:16 11 16i;dealer:3#`5;dealerCnt:3#5i;bet:3#10f;return:3#0n;profit:3#0n;split:110b;double:000b);
+    .bjk.tab:([]round:1 1 1;player:1.01 1.02 2;name:`p1`p1`p2;handle:0 0 1i;cards:(`8`8;`8`3;`9`7);cnt:16 11 16i;dealer:3#`5;dealerCnt:3#5i;bet:3#10f;return:3#0n;profit:3#0n;split:110b;double:000b;insurance:3#0f);
     .bjk.tab:update out:000b,wait:000b,turn:100b from .bjk.tab;
     .bjk.cp:0 1i!`p1`p2;
     split[];
@@ -308,7 +319,7 @@
     `.bjk.excFunc mock {.tst.excFuncCalls,:enlist(x;z)};
     .tst.cardseq:`K`7;
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
-    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`A`A;`9`7);cnt:12 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:2#0f);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.cp:0 1i!`p1`p2;
     split[];
@@ -324,7 +335,7 @@
     `.bjk.getCard mock {`9};
     .tst.dealerCalls:0;
     `.bjk.dealer mock {.tst.dealerCalls+:1};
-    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`A;cnt:enlist 12i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b);
+    .bjk.tab:([]round:enlist 1;player:enlist 1f;name:enlist`p1;handle:enlist 0i;cards:enlist`A`A;cnt:enlist 12i;dealer:enlist`5;dealerCnt:enlist 5i;bet:enlist 10f;return:enlist 0n;profit:enlist 0n;split:enlist 0b;double:enlist 0b;insurance:enlist 0f);
     .bjk.tab:update out:enlist 0b,wait:enlist 0b,turn:enlist 1b from .bjk.tab;
     .bjk.cp:enlist[0i]!enlist`p1;
     split[];
@@ -337,7 +348,7 @@
     `.bjk.excFunc mock {[x;y;z]};
     .tst.cardseq:`3`4;
     `.bjk.getCard mock {c:first .tst.cardseq;.tst.cardseq:1_.tst.cardseq;c};
-    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b);
+    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:(`8`8;`9`7);cnt:16 16i;dealer:(`5;`5);dealerCnt:5 5i;bet:10 10f;return:0n 0n;profit:0n 0n;split:00b;double:00b;insurance:2#0f);
     .bjk.tab:update out:00b,wait:00b,turn:10b from .bjk.tab;
     .bjk.cp:0 1i!`p1`p2;
     split[];

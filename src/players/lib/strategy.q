@@ -19,17 +19,17 @@
   TEN:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S;
   ACE:`H`H`H`H`H`H`H`H`D`H`H`H`H`H`S`S`S`S`S);
 
-.stg.soft:([hTotal:13+til 9]                                                                       / soft totals, A2 (13) to A10 (21); DS = double if allowed, else stick
-  TWO:`H`H`H`H`H`DS`S`S`S;
-  THREE:`H`H`H`H`D`DS`S`S`S;
-  FOUR:`H`H`D`D`D`DS`S`S`S;
-  FIVE:`D`D`D`D`D`DS`S`S`S;
-  SIX:`D`D`D`D`D`DS`DS`S`S;
-  SEVEN:`H`H`H`H`H`S`S`S`S;
-  EIGHT:`H`H`H`H`H`S`S`S`S;
-  NINE:`H`H`H`H`H`H`S`S`S;
-  TEN:`H`H`H`H`H`H`S`S`S;
-  ACE:`H`H`H`H`H`H`S`S`S);
+.stg.soft:([hTotal:12+til 10]                                                                      / soft totals, AA (12) to A10 (21); DS = double if allowed, else stick
+  TWO:`H`H`H`H`H`H`DS`S`S`S;
+  THREE:`H`H`H`H`H`D`DS`S`S`S;
+  FOUR:`H`H`H`D`D`D`DS`S`S`S;
+  FIVE:`H`D`D`D`D`D`DS`S`S`S;
+  SIX:`H`D`D`D`D`D`DS`DS`S`S;
+  SEVEN:`H`H`H`H`H`H`S`S`S`S;
+  EIGHT:`H`H`H`H`H`H`S`S`S`S;
+  NINE:`H`H`H`H`H`H`H`S`S`S;
+  TEN:`H`H`H`H`H`H`H`S`S`S;
+  ACE:`H`H`H`H`H`H`H`S`S`S);
 
 .stg.pair:([hTotal:2+til 10]                                                                       / pairs, by card value; 11 is aces
   TWO:`SP`SP`H`D`SP`SP`SP`SP`S`SP;
@@ -68,10 +68,13 @@
 
 .stg.lookup:{[t;k;dc]first?[t;enlist(=;`hTotal;k);();first .stg.dealerDict dc]};                   / [table;total;dealer] chart cell for a hand total against the dealer's card
 
+.stg.totalPlay:{[v;dc]                                                                             / [values;dealer] chart play for a hand by its total, soft or hard
+  :.stg.lookup[$[11 in v;.stg.soft;.stg.hard];sum v;dc];                                           / soft while an ace counts 11
+ };
+
 .stg.chartPlay:{[v;dc]                                                                             / [values;dealer] chart play for a hand
-  if[any 11 in v;:.stg.lookup[.stg.soft;sum v;dc]];                                                / soft: an ace counts 11
   if[(v[0]~v 1)&3>count v;:.stg.lookup[.stg.pair;v 1;dc]];                                         / a two-card pair
-  :.stg.lookup[.stg.hard;sum v;dc];                                                                / otherwise hard
+  :.stg.totalPlay[v;dc];                                                                           / otherwise by its total
  };
 
 .stg.help:{[cards]                                                                                 / [cards] chart play for a hand; the last card is the dealer's
@@ -87,10 +90,10 @@
 .stg.hitBelow17:{[cards]$[17>sum .stg.values[-1_cards];`H;`S]};                                    / [cards] hit under 17, else stick
 .stg.betSpread:{[bets]bets sum .stg.trueCount>=.stg.countScale*2 3 4 5};                           / [bets] step up a bet at each of 2-5 Hi-Lo points of true count
 
-.stg.decide:{[cards;hands;afford]                                                                  / [cards;hands;afford] the play, playing a pair as a hard total at the split cap or when I can't cover another bet
+.stg.decide:{[cards;hands;afford]                                                                  / [cards;hands;afford] the play, playing a pair by its total at the split cap or when I can't cover another bet
   r:.stg.help cards;                                                                               / chart play
   if[(r=`SP)&(hands>=.stg.rules`maxSplitHands)|not afford;                                         / split, but at the cap or short of money
-    r:.stg.lookup[.stg.hard;sum"I"$string .crd.cardDict[-1_cards];.crd.cardDict last cards];       / play the pair as a hard total
+    r:.stg.totalPlay[.stg.values -1_cards;.crd.cardDict last cards];                               / play the pair by its total; A,A is soft 12
   ];
   if[(r=`D)&not afford;                                                                            / double, but short of money
     r:$[`DS=.stg.chartPlay[.stg.values -1_cards;.crd.cardDict -1#cards];`S;`H];                    / stick where the chart says double-else-stick, else hit

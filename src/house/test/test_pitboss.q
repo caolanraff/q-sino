@@ -134,6 +134,11 @@
     .pit.getPlayTrend .pit.res;
     count[.pit.stick] musteq 0;
   };
+  should["leaves out a round the dealer's blackjack ended, where nobody got to play"]{
+    .pit.res:.tst.pitPlays[(`10`6;`A`5);16 16i;(`A`K;`10`A);00b;00b];
+    .pit.getPlayTrend .pit.res;
+    count[.pit.stick] musteq 0;
+  };
  };
 
 .tst.desc[".pit.getPlayTrend splits"]{
