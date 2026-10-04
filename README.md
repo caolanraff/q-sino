@@ -251,6 +251,20 @@ No test starts a real server or client: each entry script only opens ports
 and connections when it's run directly, so the specs load the files and call
 their functions.
 
+The replay test plays a fixed game end to end: it starts a real server with
+`--seed 42`, plays 1000 hands with one seat per strategy (and the pitboss
+watching, without ejecting), and compares every hand and a per-strategy
+summary with the golden copy in `test/replay/golden/`:
+
+```bash
+q test/replay/replay.q -q                # exit 1, with the first difference, if the game changed
+q test/replay/replay.q --update 1 -q     # make this game the new golden copy
+```
+
+A change that doesn't alter how anyone plays, or how many random numbers the
+server draws, leaves the game exactly the same. When a change does, update the
+golden copy in the same PR and explain the difference there.
+
 ## License
 
 [MIT](LICENSE). The vendored code under `vendor/` keeps its own licenses.
