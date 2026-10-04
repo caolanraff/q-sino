@@ -1,11 +1,12 @@
 .bjk.buildDeck:{[n]                                                                                / [decks] build a new shoe; null for the table's deck count
   dc:$[null n;.bjk.rules`deckCnt;n];                                                               / number of decks
-  .bjk.deck:(-52*dc)?raze dc#enlist .bjk.deckTemplate;                                             / every card, in random order
+  .bjk.deck:raze dc#enlist .bjk.deckTemplate;                                                      / every card, in order; .bjk.shuffle mixes them
  };
 
 .bjk.shuffle:{                                                                                     / reshuffle and start a new shoe
   if[not .bjk.hd;.log.info"Please wait until the hand is over before requesting a reshuffle";:()]; / not mid-hand
   .log.info"Shuffling the deck";
+  system"S ",string .bjk.seed+.bjk.shuffleCnt;                                                     / seed each shoe from the table seed: nothing else drawn changes the cards
   .bjk.deck:neg[count .bjk.deck]?.bjk.deck;                                                        / reorder the cards left
   .bjk.hist,:.bjk.res;                                                                             / archive this shoe's results
   .bjk.res:0#.bjk.res;                                                                             / clear them
@@ -14,10 +15,9 @@
   .bjk.excFunc[`.plr.shuffle;`]each key .bjk.cp;                                                   / tell every player
  };
 
-.bjk.getCard:{                                                                                     / draw a random card from the shoe
-  i:rand count .bjk.deck;                                                                          / pick a position
-  c:.bjk.deck i;                                                                                   / the card there
-  .bjk.deck:.bjk.deck _ i;                                                                         / remove it from the shoe
+.bjk.getCard:{                                                                                     / deal the top card of the shoe
+  c:first .bjk.deck;                                                                               / the top card
+  .bjk.deck:1_.bjk.deck;                                                                           / take it off the shoe
   :c;                                                                                              / return it
  };
 

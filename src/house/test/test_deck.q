@@ -40,6 +40,26 @@
     count[.bjk.res] musteq 0;
     .bjk.shuffleCnt musteq 1;
   };
+  should["shuffles a shoe the same way for the same seed and shoe number, whatever else was drawn"]{
+    `.bjk.excFunc mock {[x;y;z]};
+    .bjk.hd:1b;
+    .bjk.hist:.bjk.res:0#([]round:enlist 1);
+    .bjk.pit:0Ni;
+    .bjk.cp:()!();
+    .bjk.seed:42i;
+    .bjk.shuffleCnt:3;
+    .bjk.buildDeck[];
+    .bjk.shuffle[];
+    .tst.first:.bjk.deck;
+    10?100;
+    .bjk.shuffleCnt:3;
+    .bjk.buildDeck[];
+    .bjk.shuffle[];
+    .bjk.deck mustmatch .tst.first;
+    .bjk.buildDeck[];
+    .bjk.shuffle[];
+    (.bjk.deck~.tst.first) musteq 0b;
+  };
   should["unconditionally notifies every connected client's .plr.shuffle"]{
     .tst.excCalls:();
     `.bjk.excFunc mock {.tst.excCalls,:enlist(x;z)};
@@ -82,14 +102,10 @@
  };
 
 .tst.desc[".bjk.getCard"]{
-  should["draws a card from the deck and removes exactly one instance of it"]{
-    .bjk.deck:`A`A`K`Q`Q`Q;
-    .tst.origDeck:.bjk.deck;
-    .tst.c:.bjk.getCard[];
-    (.tst.c in .tst.origDeck) musteq 1b;
-    count[.bjk.deck] musteq -1+count .tst.origDeck;
-    sum[.bjk.deck=.tst.c] musteq -1+sum .tst.origDeck=.tst.c;
-    sum[.bjk.deck<>.tst.c] musteq sum .tst.origDeck<>.tst.c;
+  should["deals the top card and takes it off the shoe"]{
+    .bjk.deck:`K`A`Q`Q;
+    .bjk.getCard[] musteq`K;
+    .bjk.deck mustmatch`A`Q`Q;
   };
  };
 
