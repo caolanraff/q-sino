@@ -348,6 +348,7 @@
   should["adds each player's scores for the round, stamped with the time it was played"]{
     .pit.scores:0#.pit.scores;
     .pit.rnd:7;
+    .pit.res:([]round:7;uid:.tst.uid each 5 6);
     `.pit.correlations mock {([name:`a_5`b_6;uid:.tst.uid each 5 6]hands:20 25;basic:.1 .2;omega:.3 .4;perfect:.5 .6;score:.5 .6)};
     t0:.z.p;
     .pit.recordScores[];
@@ -355,6 +356,16 @@
     (exec round from .pit.scores) mustmatch 7 7;
     (exec perfect from .pit.scores) mustmatch .5 .6;
     (all (exec time from .pit.scores) within t0,.z.p) musteq 1b;
+  };
+  should["leaves out a player who has left, so the chart shows the newcomer given their handle and name"]{
+    .pit.scores:0#.pit.scores;
+    .pit.suspectCor:0.5;
+    .pit.rnd:7;
+    .pit.res:([]round:6 7;uid:.tst.uid each 5 15);
+    `.pit.correlations mock {([name:`a_5`a_5;uid:.tst.uid each 5 15]hands:20 25;basic:.1 .2;omega:.3 .4;perfect:.5 .6;score:.5 .6)};
+    .pit.recordScores[];
+    (exec uid from .pit.scores) mustmatch enlist .tst.uid 15;
+    .pit.chart[][`a_5_perfect] mustmatch enlist .6;
   };
  };
 
