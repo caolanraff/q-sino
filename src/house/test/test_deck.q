@@ -98,7 +98,7 @@
     `.bjk.sendMsg mock {[x;y]};
     .tst.getCardCalls:0;
     `.bjk.getCard mock {.tst.getCardCalls+:1;`7};
-    .bjk.tab:([]round:1 1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:2#0Ni;dealer:2#`;dealerCnt:2#0Ni;bet:10 10;return:2#0n;profit:2#0n;split:00b;double:00b);
+    .bjk.tab:([]round:1;player:1 2f;name:`p1`p2;handle:0 1i;cards:2#enlist();cnt:0Ni;dealer:`;dealerCnt:0Ni;bet:10;return:0n;profit:0n;split:0b;double:0b);
     .bjk.dealCard first select from .bjk.tab where player=1;
     .tst.getCardCalls musteq 1;
     (exec first cards from .bjk.tab where player=1) mustmatch enlist`7;
@@ -132,15 +132,6 @@
     .bjk.aCard[`8] mustmatch "an 8";
     .bjk.aCard[`K] mustmatch "a K";
     .bjk.aCard[`10] mustmatch "a 10";
-  };
- };
-
-.tst.desc[".bjk.isBJ"]{
-  should["is true only for a two-card 21"]{
-    .bjk.isBJ[`A`K] musteq 1b;
-    .bjk.isBJ[`10`A] musteq 1b;
-    .bjk.isBJ[`7`7`7] musteq 0b;
-    .bjk.isBJ[`A`9] musteq 0b;
   };
  };
 

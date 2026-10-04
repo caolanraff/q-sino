@@ -97,7 +97,7 @@ stake:{[bet]                                                                    
  };
 
 .bjk.settleDeal:{                                                                                  / peek for a dealer blackjack, else show each hand
-  if[.bjk.isBJ .bjk.dc;:.bjk.dealerPeek[]];                                                        / a dealer blackjack ends the hand before anyone acts
+  if[.crd.isBJ .bjk.dc;:.bjk.dealerPeek[]];                                                        / a dealer blackjack ends the hand before anyone acts
   .bjk.deal1 each exec handle from .bjk.tab;                                                       / show each player their hand
  };
 
@@ -211,8 +211,8 @@ stake:{[bet]                                                                    
 .bjk.dealer1:{[p]                                                                                  / [player] settle a hand against the dealer
   d:first select from .bjk.tab where player=p;                                                     / the hand
   s:.bjk.settleHand[p;d];                                                                          / settle it with a reason and return
-  dBJ:.bjk.isBJ d`dealer;                                                                          / dealer blackjack
-  pBJ:not[d`split]&.bjk.isBJ d`cards;                                                              / player blackjack; not on a split hand
+  dBJ:.crd.isBJ d`dealer;                                                                          / dealer blackjack
+  pBJ:not[d`split]&.crd.isBJ d`cards;                                                              / player blackjack; not on a split hand
   totals:(c:string d`cnt)," against the dealer's ",dc:string .bjk.dealerCount;                     / e.g. "20 against the dealer's 18"
   if[d[`cnt]>21;:s["bust with ",c;0f]];                                                            / player bust
   if[dBJ&pBJ;:s["blackjack against the dealer's blackjack";"f"$d`bet]];                            / both blackjack: push
@@ -243,7 +243,7 @@ stake:{[bet]                                                                    
   .log.info"Hand stats:\n",.Q.s .bjk.tab;
   if[.bjk.wwch;update dealer:enlist each dealer from`.bjk.tab];                                    / dealer has only the up-card: make it a list
   r:delete out,wait,turn from .bjk.tab;                                                            / the round's hands, without the turn state
-  r:update"j"$player,profit:(return-bet)+(-1 2f .bjk.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
+  r:update"j"$player,profit:(return-bet)+(-1 2f .crd.isBJ .bjk.dc)*0f^insurance from r;            / profit; insurance pays 2:1 on a dealer blackjack, else is lost
   `.bjk.res upsert r;                                                                              / add to results
   .bjk.chips+:exec sum profit by handle from r;                                                    / settle each player's chips
  };

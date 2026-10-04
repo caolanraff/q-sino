@@ -92,14 +92,15 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
  };
 
 .pit.handFacts:{[t]                                                                                / [table] flag tells: plays 6-deck H17 basic strategy wouldn't make
-  t:update up:"I"$string .crd.cardDict first each dealer,                                          / add each hand's up-card value, two-card total, softness and count
+  t:update up:"I"$string .crd.cardDict first each dealer,                                          / add each hand's up-card value, two-card total, softness, count and dealer blackjack
     two:{sum"I"$string .crd.cardDict 2#x}each cards,
     soft:{`A in 2#x}each cards,
-    theCount:basic_cnt
+    theCount:basic_cnt,
+    dealerBJ:.crd.isBJ each dealer
     from t;
-  :update doubleTell:double&(two within 18 20)&not soft&((two=18)&up within 2 6)|(two=19)&up=6,    / flag tells: doubling 18-20 (but not soft 18 v 2-6 or soft 19 v 6), splitting tens, sticking on two-card 15/16 that's soft or v 7+, insuring
+  :update doubleTell:double&(two within 18 20)&not soft&((two=18)&up within 2 6)|(two=19)&up=6,    / flag tells: doubling 18-20 (but not soft 18 v 2-6 or soft 19 v 6), splitting tens, sticking on two-card 15/16 that's soft or v 7+ (unless a dealer blackjack ended the hand), insuring
     splitTell:split&(first each cards)in`10`J`Q`K,
-    stickTell:(2=count each cards)&(cnt in 15 16)&(not split&`A=first each cards)&soft|up>=7,
+    stickTell:not[dealerBJ]&(2=count each cards)&(cnt in 15 16)&(not split&`A=first each cards)&soft|up>=7,
     insureTell:insurance>0
     from t;
  };

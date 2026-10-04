@@ -136,7 +136,7 @@ insure:{[amt]                                                                   
 .bjk.split0:{[p]                                                                                   / [player] split a hand into two rows; returns the new row's player number
   update player:"f"$player from`.bjk.tab;                                                          / player numbers to floats, to fit split hands between them
   q:.01+exec max player from .bjk.tab where handle=.z.w;                                           / new hand's number, just after the caller's last
-  `.bjk.tab upsert update player:q,turn:0b from select from .bjk.tab where player=p;               / copy the hand
+  `.bjk.tab upsert update player:q,turn:0b,insurance:0f from select from .bjk.tab where player=p;  / copy the hand; its insurance stays with the first
   update cards:1#'cards from`.bjk.tab where player in(p;q);                                        / one card each
   `player xasc`.bjk.tab;                                                                           / keep hands in play order
   :q;                                                                                              / new hand's number
