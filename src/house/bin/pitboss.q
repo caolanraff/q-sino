@@ -54,8 +54,10 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   :update score:basic|omega|perfect from s;                                                        / the best of them
  };
 
-.pit.recordScores:{                                                                                / keep this round's scores
-  .pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from 0!.pit.correlations[];       / stamped with the time and round
+.pit.recordScores:{                                                                                / keep the scores of this round's players
+  u:exec distinct uid from .pit.res where round=.pit.rnd;                                          / this round's players
+  s:select from 0!.pit.correlations[]where uid in u;                                               / their scores; a player who's left, maybe on the same handle, adds none
+  .pit.scores,:`time`round xcols update time:.z.p,round:.pit.rnd from s;                           / stamped with the time and round
  };
 
 .pit.insurers:{                                                                                    / players who've only insured at a high count; basic strategy never insures
