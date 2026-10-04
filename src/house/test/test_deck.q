@@ -16,6 +16,9 @@
  };
 
 .tst.desc[".bjk.shuffle"]{
+  before{
+    .bjk.seed:42i;
+  };
   should["refuses to reshuffle before the hand is done"]{
     .bjk.hd:0b;
     .bjk.deck:`A`K`Q;
@@ -46,7 +49,6 @@
     .bjk.hist:.bjk.res:0#([]round:enlist 1);
     .bjk.pit:0Ni;
     .bjk.cp:()!();
-    .bjk.seed:42i;
     .bjk.shuffleCnt:3;
     .bjk.buildDeck[];
     .bjk.shuffle[];

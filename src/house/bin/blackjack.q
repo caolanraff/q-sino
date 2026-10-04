@@ -10,7 +10,6 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 
 .bjk.deckTemplate:raze 4#enlist key .crd.cardDict;                                                 / one 52-card deck
 .bjk.shuffleCnt:0;                                                                                 / shuffles so far
-.bjk.seed:-314159i;                                                                                / random seed, with each shoe shuffled from it; q's default until init
 .bjk.hitSoft17:1b;                                                                                 / dealer hits soft 17
 .bjk.rules:`maxSplitHands`deckCnt`minBet`maxBet`minBuyIn!4 6 10 500 100;                           / table rules, pushed to clients
 .bjk.chips:.bjk.bought:("i"$())!"f"$();                                                            / each player's chips, and what they've bought in total

@@ -1,0 +1,10 @@
+seat                        rounds hands staked net    won lost doubles splits insured flagged firstFlag why                
+----------------------------------------------------------------------------------------------------------------------------
+avgPlayer1                  440    440   8790   -1000  165 224  0       0      0                         "Out of chips"     
+avgPlayer2                  832    832   8631   -993   323 435  0       0      0                         "Out of chips"     
+avgPlayer3                  588    588   7040   -1000  227 310  0       0      0                         "Out of chips"     
+basicCardCounter            534    541   8712   -999.5 210 299  47      13     4       9       55        "Out of chips"     
+omegaCardCounter            1000   1030  20075  -842.5 437 499  112     57     0       26      24        "Played 1000 hands"
+perfectCardCounter          674    687   11835  -1000  274 349  68      25     0       15      24        "Out of chips"     
+smallSpreadBasicCardCounter 1000   1031  13500  -335   439 492  93      59     8       20      24        "Played 1000 hands"
+
