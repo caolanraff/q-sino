@@ -78,9 +78,9 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .rep.report:.pit.report;                                                                           / the pitboss's report
 .pit.report:{.rep.flags,:([]round:enlist .pit.rnd;name:enlist x`name);.rep.report x};              / note each report too
 
-.rep.table:{[r]                                                                                    / [results] the compared columns, with hands as text
+.rep.table:{[r]                                                                                    / [results] the compared columns, with players by strategy and hands as text
   t:(.rep.cols inter cols r)#r;                                                                    / the columns every version has
-  :update" "sv'string cards," "sv'string dealer from t;                                            / cards as text, e.g. "K 5"
+  :update name:.rep.strategy name," "sv'string cards," "sv'string dealer from t;                   / handles vary by run; cards as text, e.g. "K 5"
  };
 
 .rep.strategy:{`$first each"_"vs'string x};                                                        / strategy from a player name, e.g. avgPlayer1_7
@@ -101,13 +101,13 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
   i:first where not(n#old,n#enlist"")~'n#new,n#enlist"";                                           / first line that differs, padding the shorter
   c:string count each(old;new);                                                                    / line counts
   m:f,": ",c[0]," lines before, ",c[1]," now; first difference on line ",string 1+i;               / what changed
-  :(m;"  was: ",old i;"  now: ",new i);                                                            / with both versions of that line                                                            / with both versions of it
+  :(m;"  was: ",old i;"  now: ",new i);                                                            / with both versions of that line
  };
 
 .rep.finish:{                                                                                      / write this run, compare it with the golden copy, stop the server
   system"t 0";
   r:.rep.pit"hist[]";                                                                              / every hand played
-  out:(`hands.csv;`summary.csv)!(csv 0:.rep.table r;csv 0:.rep.summary r);                   / this run
+  out:(`hands.csv;`summary.csv)!(csv 0:.rep.table r;csv 0:.rep.summary r);                         / this run
   {hsym[`$.rep.dir,"out/",string x]0:y}'[key out;value out];                                       / save it
   d:raze .rep.diff'[string key out;value out];                                                     / differences from the golden copy
   neg[.rep.pit]"exit 0";                                                                           / stop the server
