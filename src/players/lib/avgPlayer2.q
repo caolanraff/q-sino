@@ -2,16 +2,18 @@
 
 .stg.wins:0;                                                                                       / wins in a row
 
-.stg.help:{[cards]                                                                                 / [cards] rules of thumb, not the chart; the last card is the dealer's
+.stg.help:{[cards]                                                                                 / [cards] afraid to bust: stick on any 12 or more; the last card is the dealer's
   c:-1_cards;                                                                                      / my cards
-  if[(2=count c)&(c[0]~c 1)&first[c]in`8`A;:`SP];                                                  / always split aces and 8s
+  if[c~`A`A;:`SP];                                                                                 / split aces, the one split everyone knows
   v:.stg.values c;                                                                                 / their values
-  d:"I"$string .crd.cardDict last cards;                                                           / the dealer's card value, ace 11
-  if[11 in v;:$[18>sum v;`H;`S]];                                                                  / soft: hit to 17, never double
-  if[(2=count v)&(sum[v]in 10 11)&d<10;:`D];                                                       / double 10 or 11 unless the dealer shows a 10 or ace
-  if[12>sum v;:`H];                                                                                / can't bust: hit
-  if[16<sum v;:`S];                                                                                / 17 or more: stick
-  :$[d<7;`S;`H];                                                                                   / 12-16: stick if the dealer shows a bust card, else hit
+  if[11 in v;:$[17>sum v;`H;`S]];                                                                  / soft: stick from 17
+  if[(2=count v)&11=sum v;:`D];                                                                    / double 11, the one double everyone knows
+  :$[12>sum v;`H;`S];                                                                              / hit only while a card can't bust me
+ };
+
+.stg.insureAmount:{                                                                                / insure a 20 or a blackjack, to protect it
+  t:select cards,bet from .stg.tab where handle=.stg.mh;                                           / my hand
+  :$[20<=sum .stg.values first t`cards;0.5*first t`bet;0f];                                        / half the bet on 20 or more
  };
 
 .stg.getBet:{                                                                                      / press a win: add it to the bet, pocketing the third in a row; else $10

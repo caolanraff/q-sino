@@ -8,7 +8,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.bets:([]name:`$();uid:"g"$();bet:"j"$();basic:"f"$();omega:"f"$();perfect:"f"$());            / each player's recent bets, with the counts when they bet
 .pit.window:100;                                                                                   / bets kept per player
 .pit.minHands:20;                                                                                  / bets needed before judging a player
-.pit.suspectCor:0.5;                                                                               / correlation that marks a counter
+.pit.suspectCor:0.65;                                                                              / correlation that marks a counter; progression bettors reach about 0.5 by chance
 .pit.persist:5;                                                                                    / rounds in a row a player must stay flagged
 .pit.streak:("g"$())!"j"$();                                                                       / player id to rounds flagged in a row
 .pit.insured:([]name:`$();uid:"g"$();basic:"f"$());                                                / each player's insured hands, with the Hi-Lo count when they bet

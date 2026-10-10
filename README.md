@@ -175,14 +175,15 @@ Standard Las Vegas Strip rules:
 - You have 30 seconds per move on your turn; a hand that isn't played in time sticks.
 
 ## Strategies
-Pass one of these to `--player`. The average players go up in skill, from
-almost none to nearly basic strategy; the counters play basic strategy exactly.
+Pass one of these to `--player`. The average players are ordinary people at the
+table, each knowing a little more than the last; none of them plays basic
+strategy or counts. The counters play basic strategy exactly.
 
 | Strategy | Play | Betting |
 |---|---|---|
 | `avgPlayer1` | Knows almost no strategy: hits below 17, never doubles, splits or insures | Flat $20. |
-| `avgPlayer2` | Rules of thumb: splits aces and 8s, doubles 10 or 11 against 2-9, sticks on 12-16 against 2-6, hits soft hands to 17 | Presses a win (adds it to the bet), keeping the third in a row and starting again at $10; $10 after a loss. |
-| `avgPlayer3` | Basic strategy with common mistakes: never doubles soft hands or 9, hits 11 against an ace, sticks on 16 against a 10, doesn't split 2s, 3s, 4s or 6s, takes even money | Chases losses: $10 more after each, up to $50; $10 after a win. |
+| `avgPlayer2` | Afraid to bust: sticks on any hard 12 or more and on soft 17, doubles only 11, splits only aces, insures a 20 or a blackjack | Presses a win (adds it to the bet), keeping the third in a row and starting again at $10; $10 after a loss. |
+| `avgPlayer3` | Rules of thumb: splits aces and 8s, doubles 10 or 11 against 2-9, sticks on 12-16 against 2-6 (and on 16 against a 10), hits soft hands to 17, takes even money | Chases losses: $10 more after each, up to $50; $10 after a win. |
 | `basicCardCounter` | Basic strategy | $10-$80 on the Hi-Lo true count; insures at a true count of 3+. |
 | `smallSpreadBasicCardCounter` | Basic strategy | Like `basicCardCounter`, but $10-$30. |
 | `omegaCardCounter` | Basic strategy | $10-$80 on the Omega II true count. |
@@ -215,12 +216,14 @@ h".pit.chart[]"     / suspicion scores over time, ready to chart
 `.pit.chart[]` gives one row per round, keyed by the `time` it was played, with
 a column per player and count (e.g. `alice_8_perfect`) holding that player's
 score: how closely their last 100 bets followed that count, from -1 to 1. An
-`alert` column holds the suspicion threshold (0.5) to draw as a line.
+`alert` column holds the suspicion threshold (0.65) to draw as a line.
 
 A player becomes a **suspected card counter** once any of these signs has
 held for 5 rounds in a row (one round over the line can be chance):
 - **Bets follow the count** - over their last 100 hands (at least 20), their
-  bets correlate with one of the three counts at 0.5 or more.
+  bets correlate with one of the three counts at 0.65 or more. Bets that
+  rise and fall with wins and losses can correlate with the count by chance,
+  up to about 0.5.
 - **Bets jump when the count is good** - their average bet at a Hi-Lo true
   count of +2 or more is at least 2.5 times their average at 0 or below, with
   at least 10 hands at each. This still sees a counter who jumps their bet in

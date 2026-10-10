@@ -485,6 +485,22 @@
   };
  };
 
+.tst.desc[".pit.flagged bet correlation defaults"]{
+  before{
+    .utl.load`:src/house/bin/pitboss.q;
+    `.pit.insurers mock {([name:`$();uid:"g"$()]insures:"j"$())};
+    `.pit.ramps mock {([name:`$();uid:"g"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
+  };
+  should["doesn't flag bets that follow the count only as far as wins and losses do"]{
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 40;score:0.5)};
+    count[.pit.flagged[]] musteq 0;
+  };
+  should["flags bets that follow the count closely"]{
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 40;score:0.8)};
+    (exec name from .pit.flagged[]) mustmatch enlist`a_5;
+  };
+ };
+
 .tst.desc[".pit.forget"]{
   before{
     .pit.bets:([]name:`a_5`b_6;uid:.tst.uid each 5 6;bet:10 20;basic:0f;omega:0f;perfect:0f);

@@ -1,39 +1,41 @@
 .tst.desc["avgPlayer3 .stg.help"]{
   before{.utl.load each`:src/players/lib/strategy.q`:src/players/lib/avgPlayer3.q};
-  should["never doubles a soft hand"]{
-    .stg.help[`A`6`4] musteq`H;
-    .stg.help[`A`7`3] musteq`S;
-    .stg.help[`A`8`6] musteq`S;
-  };
-  should["never doubles 9, and hits 11 against an ace"]{
-    .stg.help[`5`4`4] musteq`H;
-    .stg.help[`6`5`A] musteq`H;
-  };
-  should["sticks on 16 against a 10"]{
-    .stg.help[`10`6`10] musteq`S;
-    .stg.help[`9`7`K] musteq`S;
-  };
-  should["plays 2s, 3s, 4s and 6s by their total instead of splitting"]{
-    .stg.help[`2`2`5] musteq`H;
-    .stg.help[`3`3`4] musteq`H;
-    .stg.help[`4`4`5] musteq`H;
-    .stg.help[`6`6`4] musteq`S;
-    .stg.help[`6`6`8] musteq`H;
-  };
-  should["otherwise plays basic strategy"]{
-    .stg.help[`A`A`10] musteq`SP;
+  should["splits aces and 8s, and plays other pairs by their total"]{
+    .stg.help[`A`A`6] musteq`SP;
     .stg.help[`8`8`10] musteq`SP;
-    .stg.help[`9`9`6] musteq`SP;
-    .stg.help[`6`5`6] musteq`D;
-    .stg.help[`10`2`2] musteq`H;
-    .stg.help[`10`6`9] musteq`H;
-    .stg.help[`A`7`9] musteq`H;
+    .stg.help[`9`9`6] musteq`S;
+    .stg.help[`2`2`6] musteq`H;
   };
-  should["leaves the basic strategy chart alone for the next strategy loaded"]{
-    .utl.load`:src/players/lib/strategy.q;
-    .stg.help[`A`6`4] musteq`D;
-    .stg.help[`10`6`10] musteq`H;
-    .stg.help[`2`2`5] musteq`SP;
+  should["doubles a two-card 10 or 11 unless the dealer shows a 10 or an ace"]{
+    .stg.help[`5`6`9] musteq`D;
+    .stg.help[`6`4`2] musteq`D;
+    .stg.help[`6`4`K] musteq`H;
+    .stg.help[`6`5`A] musteq`H;
+    .stg.help[`2`3`5`6] musteq`H;
+  };
+  should["sticks on 12 to 16 against 2 to 6, and hits it against 7 or more"]{
+    .stg.help[`10`2`2] musteq`S;
+    .stg.help[`10`6`6] musteq`S;
+    .stg.help[`10`6`7] musteq`H;
+    .stg.help[`10`2`A] musteq`H;
+  };
+  should["hits a soft hand to 17 and sticks from 18, never doubling"]{
+    .stg.help[`A`6`5] musteq`H;
+    .stg.help[`A`7`3] musteq`S;
+    .stg.help[`A`7`9] musteq`S;
+  };
+  should["counts an ace as 1 where 11 would bust"]{
+    .stg.help[`A`9`5`2] musteq`S;
+    .stg.help[`A`9`5`7] musteq`H;
+  };
+  should["sticks on 16 against a 10, but not on 15 or against a 9"]{
+    .stg.help[`10`6`K] musteq`S;
+    .stg.help[`9`7`10] musteq`S;
+    .stg.help[`10`5`10] musteq`H;
+    .stg.help[`10`6`9] musteq`H;
+  };
+  should["sticks on 17 or more"]{
+    .stg.help[`10`7`A] musteq`S;
   };
  };
 

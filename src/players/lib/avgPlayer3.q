@@ -1,12 +1,19 @@
 .utl.require`:src/players/lib/strategy.q;
 
-.stg.soft:{x^(`D`DS!`H`S)x}each .stg.soft;                                                         / basic strategy, but never doubles a soft hand
-update THREE:`H,FOUR:`H,FIVE:`H,SIX:`H from`.stg.hard where hTotal=9;                              / never doubles 9
-update ACE:`H from`.stg.hard where hTotal=11;                                                      / hits 11 against an ace
-update TEN:`S from`.stg.hard where hTotal=16;                                                      / sticks on 16 against a 10
-.stg.pair,:update hTotal:hTotal div 2 from select from .stg.hard where hTotal in 4 6 8 12;         / never splits 2s, 3s, 4s or 6s: plays them by total
+.stg.help:{[cards]                                                                                 / [cards] rules of thumb, not the chart; the last card is the dealer's
+  c:-1_cards;                                                                                      / my cards
+  if[(2=count c)&(c[0]~c 1)&first[c]in`8`A;:`SP];                                                  / always split aces and 8s
+  v:.stg.values c;                                                                                 / their values
+  d:"I"$string .crd.cardDict last cards;                                                           / the dealer's card value, ace 11
+  if[11 in v;:$[18>sum v;`H;`S]];                                                                  / soft: hit to 17, never double
+  if[(2=count v)&(sum[v]in 10 11)&d<10;:`D];                                                       / double 10 or 11 unless the dealer shows a 10 or ace
+  if[12>sum v;:`H];                                                                                / can't bust: hit
+  if[16<sum v;:`S];                                                                                / 17 or more: stick
+  if[(16=sum v)&d=10;:`S];                                                                         / 16 against a 10: the dealer has 20 anyway, so stick
+  :$[d<7;`S;`H];                                                                                   / 12-16: stick if the dealer shows a bust card, else hit
+ };
 
-.stg.insureAmount:{                                                                                / takes even money on a blackjack, else no insurance
+.stg.insureAmount:{                                                                                / take even money on a blackjack, else no insurance
   t:select cards,bet from .stg.tab where handle=.stg.mh;                                           / my hand
   :$[.crd.isBJ first t`cards;0.5*first t`bet;0f];                                                  / half the bet on a blackjack
  };
