@@ -222,9 +222,11 @@ held for 5 rounds in a row (one round over the line can be chance):
 - **Bets follow the count** - over their last 100 hands (at least 20), their
   bets correlate with one of the three counts at 0.5 or more.
 - **Bets jump when the count is good** - their average bet at a Hi-Lo true
-  count of +2 or more is at least 1.5 times their average at 0 or below, with
-  at least 5 hands at each. This still sees a counter who jumps their bet in
-  steps or adds random bets as cover, which weakens the correlation.
+  count of +2 or more is at least 2.5 times their average at 0 or below, with
+  at least 10 hands at each. This still sees a counter who jumps their bet in
+  steps or adds random bets as cover, which weakens the correlation. The bar
+  sits above the 2 times a player who presses their wins reaches, as wins come
+  more often at a good count.
 - **Insurance only at a high count** - they've insured at least twice, only
   ever at a Hi-Lo true count of +3 or more. Basic strategy never insures, so
   this catches a counter who flat-bets.

@@ -1,8 +1,8 @@
 seat,rounds,hands,staked,net,won,lost,doubles,splits,insured,flagged,firstFlag,why
 avgPlayer1,849,849,16980,-1000,354,424,0,0,0,,,Out of chips
-avgPlayer2,1000,1010,19629,159.5,457,455,55,20,0,2,624,Played 1000 hands
-avgPlayer3,1000,1016,21460,40,446,482,65,32,4,1,423,Played 1000 hands
-basicCardCounter,1000,1026,18900,-477.5,448,486,107,51,8,27,33,Played 1000 hands
-omegaCardCounter,1000,1038,19405,1247.5,468,484,101,72,0,25,32,Played 1000 hands
-perfectCardCounter,497,509,10220,-1000,222,250,68,24,0,12,32,Out of chips
-smallSpreadBasicCardCounter,1000,1034,13850,607.5,473,477,118,65,8,20,33,Played 1000 hands
+avgPlayer2,1000,1010,19629,159.5,457,455,55,20,0,,,Played 1000 hands
+avgPlayer3,1000,1016,21460,40,446,482,65,32,4,,,Played 1000 hands
+basicCardCounter,1000,1026,18900,-477.5,448,486,107,51,8,16,33,Played 1000 hands
+omegaCardCounter,1000,1038,19405,1247.5,468,484,101,72,0,15,32,Played 1000 hands
+perfectCardCounter,497,509,10220,-1000,222,250,68,24,0,6,32,Out of chips
+smallSpreadBasicCardCounter,1000,1034,13850,607.5,473,477,118,65,8,10,33,Played 1000 hands

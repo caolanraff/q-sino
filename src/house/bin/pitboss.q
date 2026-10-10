@@ -16,8 +16,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.minInsures:2;                                                                                 / insured hands, all at a high count, that mark a counter
 .pit.goodCount:2;                                                                                  / Hi-Lo true count from which the deck favours the player
 .pit.badCount:0;                                                                                   / Hi-Lo true count at or below which it doesn't
-.pit.minRampHands:5;                                                                               / bets needed at each before comparing them
-.pit.minRamp:1.5;                                                                                  / how many times bigger a counter bets when the count is good
+.pit.minRampHands:10;                                                                              / bets needed at each before comparing them
+.pit.minRamp:2.5;                                                                                  / how many times bigger a counter bets when the count is good; one who presses wins gets near 2
 .pit.scores:([]time:"p"$();round:"j"$();name:`$();uid:"g"$();hands:"j"$();                         / each round's correlation scores, for charting
   basic:"f"$();omega:"f"$();perfect:"f"$();score:"f"$());
 .pit.gone:"g"$();                                                                                  / players who have left, to forget once their last hands are in
