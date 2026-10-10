@@ -177,13 +177,16 @@ Standard Las Vegas Strip rules:
 ## Strategies
 Pass one of these to `--player`. The average players are ordinary people at the
 table, each knowing a little more than the last; none of them plays basic
-strategy or counts. The counters play basic strategy exactly.
+strategy or counts. `basicStrategy` plays the chart exactly but doesn't count,
+so it shows what knowing the chart is worth on its own. The counters play the
+same chart and bet by the count.
 
 | Strategy | Play | Betting |
 |---|---|---|
 | `avgPlayer1` | Knows almost no strategy: hits below 17, never doubles, splits or insures | Flat $20. |
 | `avgPlayer2` | Afraid to bust: sticks on any hard 12 or more and on soft 17, doubles only 11, splits only aces, insures a 20 or a blackjack | Presses a win (adds it to the bet), keeping the third in a row and starting again at $10; $10 after a loss. |
 | `avgPlayer3` | Rules of thumb: splits aces and 8s, doubles 10 or 11 against 2-9, sticks on 12-16 against 2-6 (and on 16 against a 10), hits soft hands to 17, takes even money | Chases losses: $10 more after each, up to $50; $10 after a win. |
+| `basicStrategy` | Basic strategy | Flat $10; never insures. |
 | `basicCardCounter` | Basic strategy | $10-$80 on the Hi-Lo true count; insures at a true count of 3+. |
 | `smallSpreadBasicCardCounter` | Basic strategy | Like `basicCardCounter`, but $10-$30. |
 | `omegaCardCounter` | Basic strategy | $10-$80 on the Omega II true count. |
