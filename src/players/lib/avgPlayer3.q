@@ -1,14 +1,11 @@
 .utl.require`:src/players/lib/strategy.q;
 
 .stg.help:{[cards]                                                                                 / [cards] rules of thumb, not the chart; the last card is the dealer's
-  c:-1_cards;                                                                                      / my cards
-  if[(2=count c)&(c[0]~c 1)&first[c]in`8`A;:`SP];                                                  / always split aces and 8s
-  d:"I"$string .crd.cardDict last cards;                                                           / the dealer's card value, ace 11
+  if[(2=count c)&(c[0]~c 1)&first[c:-1_cards]in`8`A;:`SP];                                         / always split aces and 8s
   if[11 in v:.stg.values c;:$[18>sum v;`H;`S]];                                                    / soft: hit to 17, never double
-  if[(2=count v)&(sum[v]in 10 11)&d<10;:`D];                                                       / double 10 or 11 unless the dealer shows a 10 or ace
+  if[(2=count v)&(sum[v]in 10 11)&10>d:"I"$string .crd.cardDict last cards;:`D];                   / double 10 or 11 unless the dealer shows a 10 or ace (11)
   if[12>sum v;:`H];                                                                                / can't bust: hit
-  if[16<sum v;:`S];                                                                                / 17 or more: stick
-  if[(16=sum v)&d=10;:`S];                                                                         / 16 against a 10: the dealer has 20 anyway, so stick
+  if[(16<sum v)|(16=sum v)&d=10;:`S];                                                              / 17 or more, or 16 against a 10 (the dealer has 20 anyway): stick
   :$[d<7;`S;`H];                                                                                   / 12-16: stick if the dealer shows a bust card, else hit
  };
 
