@@ -393,15 +393,43 @@
   };
  };
 
+.tst.desc[".pit.shown"]{
+  should["is every player's first two cards and the dealer's up-card"]{
+    t:([]round:3;player:1 2;cards:(`K`5`9;`2`3);dealer:(`A`6`10;`A`6`10));
+    .pit.shown[t] mustmatch`K`5`2`3`A;
+  };
+  should["takes a split pair from the first card of each of the first two hands"]{
+    t:([]round:3;player:1 1.01 1.02 2;cards:(`8`3;`8`K`2;`8`9;`4`4);dealer:4#enlist`A`6);
+    .pit.shown[t] mustmatch`8`8`4`4`A;
+  };
+  should["counts a forfeited hand's cards once, without empty slots"]{
+    t:([]round:3;player:1 2;cards:(enlist`K;`2`3);dealer:(enlist`A;`A`6));
+    .pit.shown[t] mustmatch`K`2`3`A;
+  };
+ };
+
+.tst.desc[".pit.countAtInsure"]{
+  should["counts earlier hands and the cards on show, not the cards drawn after"]{
+    .pit.startCards:312;
+    r1:([]round:1;player:enlist 1;cards:enlist`K`5;dealer:enlist`10`8);
+    r2:([]round:2;player:1 2;cards:(`2`3`Q;`4`5);dealer:2#enlist`A`9`J);
+    .pit.res:r1,r2;
+    .pit.countAtInsure[2] musteq 2%(312-9)%52;                                                       / earlier K 5 10 8 = -1; on show 2 3 4 5 A = +3
+  };
+ };
+
 .tst.desc[".pit.recordBets insurance"]{
-  should["records each insured hand with the Hi-Lo count it was bet at"]{
+  should["records each insured hand with the Hi-Lo count when insurance was offered, not when it was bet"]{
     .pit.bets:0#.pit.bets;
     .pit.insured:0#.pit.insured;
     .pit.window:100;
     .pit.rnd:2;
-    .pit.res:([]round:2;name:`a_5`b_6;uid:.tst.uid each 5 6;bet:10 20;basic_cnt:3.5 1f;omega_cnt:0f;perfect_cnt:0f;insurance:5 0f);
+    .pit.startCards:312;
+    r1:([]round:1;player:enlist 1;name:`a_5;uid:.tst.uid 5;cards:enlist`K`5;dealer:enlist`10`8;bet:10;basic_cnt:0f;omega_cnt:0f;perfect_cnt:0f;insurance:0f);
+    r2:([]round:2;player:1 2;name:`a_5`b_6;uid:.tst.uid each 5 6;cards:(`2`3;`4`5);dealer:2#enlist`A`9;bet:10 20;basic_cnt:-0.5;omega_cnt:0f;perfect_cnt:0f;insurance:5 0f);
+    .pit.res:r1,r2;
     .pit.recordBets enlist 2;
-    .pit.insured mustmatch([]name:enlist`a_5;uid:.tst.uid 5;basic:3.5);
+    .pit.insured mustmatch([]name:enlist`a_5;uid:.tst.uid 5;basic:2%(312-9)%52);
   };
  };
 
@@ -497,6 +525,22 @@
   };
   should["flags bets that follow the count closely"]{
     `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 40;score:0.8)};
+    (exec name from .pit.flagged[]) mustmatch enlist`a_5;
+  };
+ };
+
+.tst.desc[".pit.flagged insurance defaults"]{
+  before{
+    .utl.load`:src/house/bin/pitboss.q;
+    `.pit.correlations mock {([name:enlist`a_5;uid:.tst.uid 5]hands:enlist 40;score:0.3)};
+    `.pit.ramps mock {([name:`$();uid:"g"$()]good:"j"$();bad:"j"$();ramp:"f"$())};
+  };
+  should["doesn't flag a player whose first few insurances happen to come at a high count"]{
+    `.pit.insurers mock {([name:enlist`a_5;uid:.tst.uid 5]insures:enlist 3)};
+    count[.pit.flagged[]] musteq 0;
+  };
+  should["flags a player who keeps insuring only at a high count"]{
+    `.pit.insurers mock {([name:enlist`a_5;uid:.tst.uid 5]insures:enlist 4)};
     (exec name from .pit.flagged[]) mustmatch enlist`a_5;
   };
  };

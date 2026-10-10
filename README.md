@@ -233,9 +233,11 @@ held for 5 rounds in a row (one round over the line can be chance):
   steps or adds random bets as cover, which weakens the correlation. The bar
   sits above the 2 times a player who presses their wins reaches, as wins come
   more often at a good count.
-- **Insurance only at a high count** - they've insured at least twice, only
-  ever at a Hi-Lo true count of +3 or more. Basic strategy never insures, so
-  this catches a counter who flat-bets.
+- **Insurance only at a high count** - they've insured at least 4 times, only
+  ever at a Hi-Lo true count of +3 or more when insurance was offered (counting
+  the cards on the table then, as a player would). Basic strategy never
+  insures, so this catches a counter who flat-bets. Players who insure a good
+  hand can be at a high count 2 or 3 times in a row by chance.
 
 The pitboss then logs a warning and asks the server to eject them.
 It tracks each connection by an id the server gives it, not by name or
