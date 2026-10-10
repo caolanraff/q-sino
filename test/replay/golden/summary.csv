@@ -1,8 +1,9 @@
 seat,rounds,hands,staked,net,won,lost,doubles,splits,insured,flagged,firstFlag,why
-avgPlayer1,510,510,10200,-1000,204,261,0,0,0,,,Out of chips
-avgPlayer2,1000,1006,18355,-695,431,509,55,12,13,,,Played 1000 hands
-avgPlayer3,1000,1012,21000,715,448,480,54,24,3,,,Played 1000 hands
-basicCardCounter,1000,1029,17700,1615,476,455,114,55,6,15,142,Played 1000 hands
-omegaCardCounter,1000,1030,20570,-527.5,442,506,126,55,0,13,142,Played 1000 hands
-perfectCardCounter,1000,1029,19565,780,442,499,126,56,0,15,140,Played 1000 hands
-smallSpreadBasicCardCounter,1000,1027,13230,-330,432,509,111,54,6,4,242,Played 1000 hands
+avgPlayer1,293,293,5860,-1000,100,157,0,0,0,,,Out of chips
+avgPlayer2,400,400,6804,-991.5,160,218,14,0,6,,,Out of chips
+avgPlayer3,1000,1008,20860,910,469,469,66,16,3,,,Played 1000 hands
+basicCardCounter,960,982,18211,-999.5,418,479,100,43,7,13,23,Out of chips
+basicStrategy,1000,1028,11480,-485,430,522,120,52,0,,,Played 1000 hands
+omegaCardCounter,1000,1022,21280,670,422,489,95,41,0,17,39,Played 1000 hands
+perfectCardCounter,1000,1025,21165,-230,439,493,128,49,0,13,23,Played 1000 hands
+smallSpreadBasicCardCounter,1000,1036,13790,512.5,456,492,103,66,10,7,23,Played 1000 hands

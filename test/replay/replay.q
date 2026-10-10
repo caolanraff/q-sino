@@ -3,7 +3,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .utl.require`:src/players/bin/player.q;
 .utl.require`:src/house/bin/pitboss.q;
 
-.rep.seats:`avgPlayer1`avgPlayer2`avgPlayer3`basicCardCounter;                                     / one seat per strategy, in seat order
+.rep.seats:`avgPlayer1`avgPlayer2`avgPlayer3`basicStrategy`basicCardCounter;                       / one seat per strategy, in seat order
 .rep.seats,:`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;                      / and the other counters
 .rep.cols:`round`name`cards`cnt`dealer`dealerCnt`bet`return`profit`split`double`insurance;         / results columns compared
 .rep.dir:"test/replay/";                                                                           / golden copies under golden/, this run under out/

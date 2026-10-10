@@ -1,7 +1,7 @@
 if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .utl.require"common";
 
-.plr.pt:`avgPlayer1`avgPlayer2`avgPlayer3;                                                         / valid --player strategies: average players
+.plr.pt:`avgPlayer1`avgPlayer2`avgPlayer3`basicStrategy;                                           / valid --player strategies: average players, basic strategy
 .plr.pt,:`basicCardCounter`smallSpreadBasicCardCounter`omegaCardCounter`perfectCardCounter;        / and card counters
 .plr.handDict:`H`S`D`SP!`hit`stick`double`split;                                                   / strategy chart code to server action
 
