@@ -8,7 +8,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.bets:([]name:`$();uid:"g"$();bet:"j"$();basic:"f"$();omega:"f"$();perfect:"f"$());            / each player's recent bets, with the counts when they bet
 .pit.window:100;                                                                                   / bets kept per player
 .pit.minHands:20;                                                                                  / bets needed before judging a player
-.pit.suspectCor:0.5;                                                                               / correlation that marks a counter
+.pit.suspectCor:0.65;                                                                              / correlation that marks a counter; progression bettors reach about 0.5 by chance
 .pit.persist:5;                                                                                    / rounds in a row a player must stay flagged
 .pit.streak:("g"$())!"j"$();                                                                       / player id to rounds flagged in a row
 .pit.insured:([]name:`$();uid:"g"$();basic:"f"$());                                                / each player's insured hands, with the Hi-Lo count when they bet
@@ -16,8 +16,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.minInsures:2;                                                                                 / insured hands, all at a high count, that mark a counter
 .pit.goodCount:2;                                                                                  / Hi-Lo true count from which the deck favours the player
 .pit.badCount:0;                                                                                   / Hi-Lo true count at or below which it doesn't
-.pit.minRampHands:5;                                                                               / bets needed at each before comparing them
-.pit.minRamp:1.5;                                                                                  / how many times bigger a counter bets when the count is good
+.pit.minRampHands:10;                                                                              / bets needed at each before comparing them
+.pit.minRamp:2.5;                                                                                  / how many times bigger a counter bets when the count is good; one who presses wins gets near 2
 .pit.scores:([]time:"p"$();round:"j"$();name:`$();uid:"g"$();hands:"j"$();                         / each round's correlation scores, for charting
   basic:"f"$();omega:"f"$();perfect:"f"$();score:"f"$());
 .pit.gone:"g"$();                                                                                  / players who have left, to forget once their last hands are in
