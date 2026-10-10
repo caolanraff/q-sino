@@ -2,8 +2,8 @@ seat,rounds,hands,staked,net,won,lost,doubles,splits,insured,flagged,firstFlag,w
 avgPlayer1,293,293,5860,-1000,100,157,0,0,0,,,Out of chips
 avgPlayer2,400,400,6804,-991.5,160,218,14,0,6,,,Out of chips
 avgPlayer3,1000,1008,20860,910,469,469,66,16,3,,,Played 1000 hands
-basicCardCounter,960,982,18211,-999.5,418,479,100,43,7,13,23,Out of chips
+basicCardCounter,960,982,18211,-999.5,418,479,100,43,7,12,40,Out of chips
 basicStrategy,1000,1028,11480,-485,430,522,120,52,0,,,Played 1000 hands
 omegaCardCounter,1000,1022,21280,670,422,489,95,41,0,17,39,Played 1000 hands
 perfectCardCounter,1000,1025,21165,-230,439,493,128,49,0,13,23,Played 1000 hands
-smallSpreadBasicCardCounter,1000,1036,13790,512.5,456,492,103,66,10,7,23,Played 1000 hands
+smallSpreadBasicCardCounter,1000,1036,13790,512.5,456,492,103,66,10,6,24,Played 1000 hands

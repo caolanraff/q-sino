@@ -13,7 +13,7 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.streak:("g"$())!"j"$();                                                                       / player id to rounds flagged in a row
 .pit.insured:([]name:`$();uid:"g"$();basic:"f"$());                                                / each player's insured hands, with the Hi-Lo count when they bet
 .pit.insureCount:3;                                                                                / Hi-Lo true count where a counter starts insuring
-.pit.minInsures:2;                                                                                 / insured hands, all at a high count, that mark a counter
+.pit.minInsures:4;                                                                                 / insured hands, all at a high count, that mark a counter; 2 or 3 can be chance
 .pit.goodCount:2;                                                                                  / Hi-Lo true count from which the deck favours the player
 .pit.badCount:0;                                                                                   / Hi-Lo true count at or below which it doesn't
 .pit.minRampHands:10;                                                                              / bets needed at each before comparing them
@@ -32,6 +32,20 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
     perfect_cnt:.pit.count[.crd.perfect;past] from .pit.res where round=r;
  };
 
+.pit.firstTwo:{$[1<count x;first each 2 sublist x;2 sublist first x]};                             / a player's first two cards from their hands; split, the first of each of two
+
+.pit.shown:{[t]                                                                                    / [hands] a round's cards on show when insurance is offered
+  h:exec cards by floor player from`player xasc t;                                                 / each player's hands, split ones in order
+  c:raze[.pit.firstTwo each value h],first first t`dealer;                                         / their first two cards, and the dealer's ace
+  :c where not null c;                                                                             / without empty slots
+ };
+
+.pit.countAtInsure:{[r]                                                                            / [round] the Hi-Lo true count when insurance was offered, as a player saw it
+  past:.crd.cardsSeen select from .pit.res where round<r;                                          / earlier hands this shoe
+  now:.pit.shown select from .pit.res where round=r;                                               / and this round's cards on show
+  :.crd.trueCount[.crd.hiLo;past,now;.pit.startCards];                                             / their true count
+ };
+
 .pit.getBetTrend:{[rs]                                                                             / [rounds] update each player's bet/count correlation with new rounds
   .pit.countRound each rs;                                                                         / the counts each new round was bet at
   tab:0!select basic_cor:0f^bet cor basic_cnt,basic_cov:bet cov basic_cnt,                         / bet vs each system's count, per player; cor is 0 when either doesn't vary
@@ -45,7 +59,8 @@ if[not`utl in key`;system"l vendor/qutil/bootstrap.q";.utl.QPATH:`:vendor`:src];
 .pit.recordBets:{[rs]                                                                              / [rounds] keep each player's recent bets with the counts
   .pit.bets,:select name,uid,"j"$bet,basic:basic_cnt,omega:omega_cnt,perfect:perfect_cnt           / the new rounds' bets
     from .pit.res where round in rs;
-  .pit.insured,:select name,uid,basic:basic_cnt from .pit.res where round in rs,insurance>0;       / the new rounds' insured hands
+  t:select name,uid,round from .pit.res where round in rs,insurance>0;                             / the new rounds' insured hands
+  .pit.insured,:select name,uid,basic:"f"$.pit.countAtInsure each round from t;                    / with the count they were insured at, not bet at
   delete from`.pit.bets where .pit.window<=({reverse til count x};i)fby uid;                       / keep each player's last .pit.window bets; one shoe is too short to judge
  };
 
