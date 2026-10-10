@@ -236,3 +236,34 @@
     .stg.chips musteq 420f;
   };
  };
+
+.tst.desc[".stg.lastResult"]{
+  before{.utl.load`:src/players/lib/strategy.q};
+  should["is what its chips gained or lost since its last bet"]{
+    .stg.lastChips:1000f;
+    .stg.chips:1030f;
+    .stg.lastResult[] musteq 30f;
+    .stg.chips:960f;
+    .stg.lastResult[] musteq -40f;
+  };
+  should["is 0 before its first bet"]{
+    .stg.lastChips:0n;
+    .stg.chips:1000f;
+    .stg.lastResult[] musteq 0f;
+  };
+ };
+
+.tst.desc[".plr.stake remembers its bet"]{
+  should["keeps the bet it staked and its chips when it staked it"]{
+    .utl.load each`:src/players/lib/strategy.q`:src/players/lib/avgPlayer1.q;
+    `stake mock {};
+    `.stg.getBet mock {800};
+    .plr.h:0i;
+    .plr.toth:1000;
+    .stg.handsPlayed:0;
+    t:([]round:"j"$();cards:();dealer:());
+    .plr.stake`tab`res`me`rules`chips!(t;t;0i;`maxSplitHands`deckCnt`minBet`maxBet!4 6 10 500;640f);
+    .stg.lastBet musteq 500;
+    .stg.lastChips musteq 640f;
+  };
+ };

@@ -175,13 +175,14 @@ Standard Las Vegas Strip rules:
 - You have 30 seconds per move on your turn; a hand that isn't played in time sticks.
 
 ## Strategies
-Pass one of these to `--player`:
+Pass one of these to `--player`. The average players go up in skill, from
+almost none to nearly basic strategy; the counters play basic strategy exactly.
 
 | Strategy | Play | Betting |
 |---|---|---|
-| `avgPlayer1` | Hits below 17 | Flat $20. |
-| `avgPlayer2` | Hits below 17 | Bets the previous hand's profit, or $10 if it didn't win. |
-| `avgPlayer3` | Hits below 17 | $20 after every 5th round, $10 otherwise. |
+| `avgPlayer1` | Knows almost no strategy: hits below 17, never doubles, splits or insures | Flat $20. |
+| `avgPlayer2` | Rules of thumb: splits aces and 8s, doubles 10 or 11 against 2-9, sticks on 12-16 against 2-6, hits soft hands to 17 | Presses a win (adds it to the bet), keeping the third in a row and starting again at $10; $10 after a loss. |
+| `avgPlayer3` | Basic strategy with common mistakes: never doubles soft hands or 9, hits 11 against an ace, sticks on 16 against a 10, doesn't split 2s, 3s, 4s or 6s, takes even money | Chases losses: $10 more after each, up to $50; $10 after a win. |
 | `basicCardCounter` | Basic strategy | $10-$80 on the Hi-Lo true count; insures at a true count of 3+. |
 | `smallSpreadBasicCardCounter` | Basic strategy | Like `basicCardCounter`, but $10-$30. |
 | `omegaCardCounter` | Basic strategy | $10-$80 on the Omega II true count. |

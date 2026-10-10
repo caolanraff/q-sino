@@ -3,6 +3,8 @@
 .stg.trueCount:0f;                                                                                 / current true count
 .stg.insureAt:0w;                                                                                  / true count to insure at; never by default
 .stg.handsPlayed:0;                                                                                / hands played so far
+.stg.lastBet:0;                                                                                    / my last bet; none yet
+.stg.lastChips:0n;                                                                                 / my chips when I made it
 
 .stg.dealerDict:`2`3`4`5`6`7`8`9`11!`TWO`THREE`FOUR`FIVE`SIX`SEVEN`EIGHT`NINE`ACE;                 / dealer card to chart column
 .stg.dealerDict,:`10`J`Q`K!`TEN;                                                                   / tens
@@ -90,6 +92,7 @@
 
 .stg.hitBelow17:{[cards]$[17>sum .stg.values[-1_cards];`H;`S]};                                    / [cards] hit under 17, else stick
 .stg.betSpread:{[bets]bets sum .stg.trueCount>=.stg.countScale*2 3 4 5};                           / [bets] step up a bet at each of 2-5 Hi-Lo points of true count
+.stg.lastResult:{0f^.stg.chips-.stg.lastChips};                                                    / what I won or lost on my last bet, insurance included; 0 before my first
 
 .stg.decide:{[cards;hands;afford]                                                                  / [cards;hands;afford] the play, playing a pair by its total at the split cap or when I can't cover another bet
   r:.stg.help cards;                                                                               / chart play
@@ -118,7 +121,8 @@
     :.plr.leave"Played ",n;                                                                        / leave
   ];
   .stg.count[];                                                                                    / update the true count
-  neg[.plr.h](`stake;.stg.tableBet .stg.getBet[]);                                                 / bet within the table limits and my chips
+  neg[.plr.h](`stake;.stg.lastBet:.stg.tableBet .stg.getBet[]);                                    / bet within the table limits and my chips, and remember it
+  .stg.lastChips:.stg.chips;                                                                       / with my chips, to see what it won
  };
 
 .plr.insure:{[s]                                                                                   / [state] insure by the count; replaces player.q's prompt
