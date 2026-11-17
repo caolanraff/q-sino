@@ -1,0 +1,29 @@
+# Optional: not a required check.
+name: tests (optional)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: tests (optional)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: pq
+        uses: peachq-org/setup-peachq@v1.0.0
+        with:
+          version: 0.92.20261116
+          add-to-path: true
+          args: -classic
+      - shell: bash
+        run: |
+          q test/run.q src/common/test src/house/test src/players/test -q | tee out.txt
+          echo "**peachq ${{ steps.pq.outputs.version }}:** $(grep -h ' passed, ' out.txt | awk '{p+=$1;f+=$3} END {print p" passed, "f" failed"}')" >> "$GITHUB_STEP_SUMMARY"
